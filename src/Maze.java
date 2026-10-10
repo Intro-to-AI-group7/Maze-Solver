@@ -10,13 +10,22 @@ import java.util.Random;
 /**
  * Core maze model storing occupancy, neighbor links, and start/goal nodes.
  *
- * <p>The maze uses a rectangular grid of {@link Node} objects. Traversable
+ * <p>The maze uses a rectangular grid of {@code Node} objects. Traversable
  * cells contain a Node reference and blocked cells are {@code null}. Neighbor
- * links represent valid movement between adjacent traversable cells.
+ * links represent geometric adjacency between traversable cells, while each
+ * direction has a movement cost. Enabled movement costs are positive integers
+ * from {@link #MIN_MOVEMENT_COST} through {@link #MAX_MOVEMENT_COST}; zero is
+ * reserved for disabled or non-existent movement. Direction order is always
+ * {@code [NORTH, EAST, SOUTH, WEST]}.
  *
  * <p>Example import format for {@link #importFromFile(String)} is:
  * row count, column count, {@code start: row,col}, {@code end: row,col},
  * then one layout row per maze row using {@code 1} (path) and {@code 0} (wall).
+ * An optional {@code WEIGHTS} section may follow the layout. It contains one
+ * comma-separated four-value row for every grid coordinate in row-major order.
+ * Values use {@code [N,E,S,W]} order; {@code 0} means no permitted movement
+ * and positive integer values are movement costs. If the section is absent, adjacent
+ * traversable cells default to cost {@code 1}.
  * Example:
  * @code
  * 4
@@ -43,10 +52,19 @@ import java.util.Random;
  */
 public class Maze {
 
+    /** Minimum allowed positive movement cost. */
+    public static final int MIN_MOVEMENT_COST = 1;
+
+    /** Maximum allowed movement cost for all maps and generated mazes. */
+    public static final int MAX_MOVEMENT_COST = 100;
+
+    /** Cost value reserved for a disabled or non-existent movement direction. */
+    public static final int DISABLED_MOVEMENT_COST = 0;
+
     /**
      * Cardinal directions used for indexing node neighbors.
      */
-    public static enum Dir {
+    public enum Dir {
         NORTH(0), EAST(1), SOUTH(2), WEST(3);
         private final int idx;
 
@@ -55,14 +73,18 @@ public class Maze {
          *
          * @param idx index used in a node's neighbor array
          */
-        Dir(int idx) { this.idx = idx; }
+        Dir(int idx) {
+            this.idx = idx;
+        }
 
         /**
          * Gets the neighbor-array index associated with this direction.
          *
          * @return zero-based index for this direction in Node.neighbors
          */
-        public int idx() { return idx; }
+        public int idx() {
+            return idx;
+        }
     }
 
     /**
@@ -72,13 +94,14 @@ public class Maze {
      */
 
     public static class Node {
-        public int row;
-        public int col;
-        //public int layer; // Optional: can be used for 3D mazes or multi-level mazes
+        public final int row;
+        public final int col;
         public boolean isGoal;
         
         // Neighbor references: [N, E, S, W] (null if wall or out of bounds)
         public Node[] neighbors;
+        // Movement costs: [N, E, S, W] (0 means movement is disabled)
+        private int[] moveCosts;
     
         /**
          * Creates a non-goal node at the given position.
@@ -87,10 +110,7 @@ public class Maze {
          * @param col node column coordinate
          */
         public Node(int row, int col) {
-            this.row = row;
-            this.col = col;
-            this.isGoal = false;
-            this.neighbors = new Node[4]; // [N, E, S, W]
+            this(row, col, false);
         }
 
         /**
@@ -105,6 +125,7 @@ public class Maze {
             this.col = col;
             this.isGoal = isGoal;
             this.neighbors = new Node[4]; // [N, E, S, W]
+            this.moveCosts = new int[4];
         }
 
         /**
@@ -123,6 +144,31 @@ public class Maze {
          */
         public void setNeighbor(Dir d, Node n) { neighbors[d.idx()] = n; }
 
+        /**
+         * Gets the movement cost in a direction.
+         *
+         * @param d direction to inspect
+         * @return zero when movement is disabled, otherwise a cost in the
+         *         range {@link Maze#MIN_MOVEMENT_COST}..{@link Maze#MAX_MOVEMENT_COST}
+         */
+        public int getMoveCost(Dir d) { return moveCosts[d.idx()]; }
+
+        /**
+         * Sets the movement cost in a direction.
+         *
+         * @param d direction to update
+         * @param cost zero to disable movement, or a positive integer movement cost
+         * @throws IllegalArgumentException if cost is outside 0..MAX_MOVEMENT_COST
+         */
+        public void setMoveCost(Dir d, int cost) {
+            if (cost < DISABLED_MOVEMENT_COST || cost > MAX_MOVEMENT_COST) {
+                throw new IllegalArgumentException(
+                        "Movement cost must be 0 or an integer from "
+                                + MIN_MOVEMENT_COST + " to " + MAX_MOVEMENT_COST + ".");
+            }
+            moveCosts[d.idx()] = cost;
+        }
+
     }
     
 
@@ -135,7 +181,6 @@ public class Maze {
     
     /**
      * Initializes a maze with fixed dimensions.
-        *
         * <p>A new maze starts empty: all cells are {@code null} (blocked) until
         * paths are created explicitly via {@link #createCell(int, int, int)} or
         * populated through {@link #importFromFile(String)}.
@@ -148,7 +193,7 @@ public class Maze {
         this.width = width;
         this.grid = new Node[length][width];
     }
-    
+
 
     /**
      * Marks a cell as occupied and creates a node at that coordinate.
@@ -173,7 +218,7 @@ public class Maze {
             linkToNeighbor(node, row, col - 1, Dir.WEST, Dir.EAST);
         }
     }
-    
+
     /**
      * Helper method to establish bidirectional neighbor link.
      * Links the new node in a given direction and updates the neighbor's reverse link.
@@ -188,7 +233,9 @@ public class Maze {
         if (isInBounds(neighborRow, neighborCol) && grid[neighborRow][neighborCol] != null) {
             Node neighbor = grid[neighborRow][neighborCol];
             newNode.setNeighbor(forwardDir, neighbor);
+            newNode.setMoveCost(forwardDir, 1);
             neighbor.setNeighbor(reverseDir, newNode);
+            neighbor.setMoveCost(reverseDir, 1);
         }
     }   
 
@@ -198,7 +245,8 @@ public class Maze {
      * line 2: column count
      * line 3: start: row,col
      * line 4: end: row,col
-    * line 5+: layout rows of 1s and 0s
+     * line 5+: layout rows of 1s and 0s
+     * optional: WEIGHTS followed by length * width rows of N,E,S,W costs
     *
     * <p>Cells marked {@code 1} are created through
     * {@link #createCell(int, int, int)} so neighbor links are built incrementally
@@ -224,7 +272,9 @@ public class Maze {
             throw new IllegalArgumentException("Maze dimensions must be positive.");
         }
 
-        if (lines.size() < 4 + length) {
+        int layoutStart = 4;
+        int layoutEnd = layoutStart + length;
+        if (lines.size() < layoutEnd) {
             throw new IllegalArgumentException("Maze file does not contain the expected number of layout rows.");
         }
 
@@ -234,7 +284,7 @@ public class Maze {
         Maze maze = new Maze(length, width);
 
         for (int row = 0; row < length; row++) {
-            String layoutRow = lines.get(4 + row).trim();
+            String layoutRow = lines.get(layoutStart + row).trim();
             if (layoutRow.length() != width) {
                 throw new IllegalArgumentException("Layout row " + row + " has width " + layoutRow.length() + " but expected " + width + ".");
             }
@@ -247,6 +297,45 @@ public class Maze {
                     maze.grid[row][col] = null;
                 } else {
                     throw new IllegalArgumentException("Invalid cell character '" + cell + "' at row " + row + ", col " + col + ". Use only 0 or 1.");
+                }
+            }
+        }
+
+        int weightsMarker = findWeightsMarker(lines, layoutEnd);
+        if (weightsMarker >= 0) {
+            int firstWeightLine = weightsMarker + 1;
+            int expectedWeightRows = length * width;
+            if (lines.size() < firstWeightLine + expectedWeightRows) {
+                throw new IllegalArgumentException("WEIGHTS section must contain exactly "
+                        + expectedWeightRows + " rows.");
+            }
+
+            for (int row = 0; row < length; row++) {
+                for (int col = 0; col < width; col++) {
+                    int lineIndex = firstWeightLine + row * width + col;
+                    int[] costs = parseWeightRow(lines.get(lineIndex), row, col);
+                    validateWeightRow(maze, row, col, costs);
+
+                    Node node = maze.getNode(row, col);
+                    if (node != null) {
+                        for (Dir dir : Dir.values()) {
+                            node.setMoveCost(dir, costs[dir.idx()]);
+                        }
+                    }
+                }
+            }
+
+            for (int lineIndex = firstWeightLine + expectedWeightRows; lineIndex < lines.size(); lineIndex++) {
+                if (!lines.get(lineIndex).trim().isEmpty()) {
+                    throw new IllegalArgumentException("Unexpected data after the WEIGHTS section at line "
+                            + (lineIndex + 1) + ".");
+                }
+            }
+        } else {
+            for (int lineIndex = layoutEnd; lineIndex < lines.size(); lineIndex++) {
+                if (!lines.get(lineIndex).trim().isEmpty()) {
+                    throw new IllegalArgumentException("Unexpected data after the maze layout at line "
+                            + (lineIndex + 1) + ". Expected WEIGHTS.");
                 }
             }
         }
@@ -278,8 +367,54 @@ public class Maze {
      * @throws IllegalArgumentException if dimensions are smaller than 3
      */
     public static Maze generateRandomMaze(int length, int width) {
+        return generateRandomMaze(length, width, false, 1, 1, true);
+    }
+
+    /**
+     * Builds a random, guaranteed-solvable maze with optional directional weights.
+     *
+     * <p>When weighting is enabled, each permitted connection receives a random
+     * positive integer cost in the inclusive range {@code [minWeight, maxWeight]}.
+     * The five-argument overload uses the same cost in both directions by default.
+     *
+     * @param length total number of rows (minimum 3)
+     * @param width total number of columns (minimum 3)
+     * @param weighted whether to assign random movement costs
+     * @param minWeight inclusive minimum movement cost
+     * @param maxWeight inclusive maximum movement cost
+     * @return newly generated solvable maze
+     * @throws IllegalArgumentException if dimensions or weight bounds are invalid
+     */
+    public static Maze generateRandomMaze(
+            int length, int width, boolean weighted, int minWeight, int maxWeight) {
+        return generateRandomMaze(length, width, weighted, minWeight, maxWeight, true);
+    }
+
+    /**
+     * Builds a random maze with optional weighted movement and reverse-edge matching.
+     *
+     * @param length total number of rows (minimum 3)
+     * @param width total number of columns (minimum 3)
+     * @param weighted whether to assign random movement costs
+     * @param minWeight inclusive minimum movement cost
+     * @param maxWeight inclusive maximum movement cost
+     * @param sameCostBothDirections whether each connection uses one cost in both directions
+     * @return newly generated solvable maze
+     * @throws IllegalArgumentException if dimensions or weight bounds are invalid
+     */
+    public static Maze generateRandomMaze(
+            int length, int width, boolean weighted, int minWeight, int maxWeight,
+            boolean sameCostBothDirections) {
         if (length < 3 || width < 3) {
             throw new IllegalArgumentException("Random maze dimensions must be at least 3x3.");
+        }
+        if (minWeight < MIN_MOVEMENT_COST
+                || maxWeight > MAX_MOVEMENT_COST
+                || minWeight > maxWeight) {
+            throw new IllegalArgumentException(
+                    "Random maze weights must satisfy "
+                            + MIN_MOVEMENT_COST + " <= minimum <= maximum <= "
+                            + MAX_MOVEMENT_COST + ".");
         }
 
         final int startRow = 1;
@@ -305,8 +440,68 @@ public class Maze {
 
         maze.setStart(startRow, startCol);
         maze.setGoal(goalRow, goalCol);
+        if (weighted) {
+            assignRandomMovementCosts(
+                    maze, minWeight, maxWeight, sameCostBothDirections, random);
+        }
         return maze;
     }
+
+    /**
+     * Assigns random integer costs to all permitted directional connections.
+     *
+     * <p>Each geometric connection is processed once from its north or west
+     * endpoint. When reverse costs are matched, the same integer is written to
+     * both directions. Otherwise each direction receives its own integer.
+     *
+     * @param maze maze whose permitted connections should be weighted
+     * @param minWeight inclusive minimum movement cost
+     * @param maxWeight inclusive maximum movement cost
+      * @param sameCostBothDirections whether reverse directions share one cost
+      * @param random random source
+      */
+     private static void assignRandomMovementCosts(
+             Maze maze, int minWeight, int maxWeight,
+             boolean sameCostBothDirections, Random random) {
+         for (int row = 0; row < maze.length; row++) {
+             for (int col = 0; col < maze.width; col++) {
+                 Node node = maze.grid[row][col];
+                 if (node == null) {
+                     continue;
+                 }
+
+                 if (node.getNeighbor(Dir.EAST) != null) {
+                     assignConnectionCosts(
+                             node, Dir.EAST, minWeight, maxWeight,
+                             sameCostBothDirections, random);
+                 }
+                 if (node.getNeighbor(Dir.SOUTH) != null) {
+                     assignConnectionCosts(
+                             node, Dir.SOUTH, minWeight, maxWeight,
+                             sameCostBothDirections, random);
+                 }
+             }
+         }
+     }
+
+     private static void assignConnectionCosts(
+             Node node, Dir direction, int minWeight, int maxWeight,
+             boolean sameCostBothDirections, Random random) {
+         Node neighbor = node.getNeighbor(direction);
+         int cost = nextRandomWeight(minWeight, maxWeight, random);
+         node.setMoveCost(direction, cost);
+
+         if (!sameCostBothDirections) {
+             neighbor.setMoveCost(opposite(direction),
+                     nextRandomWeight(minWeight, maxWeight, random));
+         } else {
+             neighbor.setMoveCost(opposite(direction), cost);
+         }
+     }
+
+     private static int nextRandomWeight(int minWeight, int maxWeight, Random random) {
+         return minWeight + random.nextInt(maxWeight - minWeight + 1);
+     }
 
     /**
      * Carves a traditional maze by depth-first backtracking over interior cells.
@@ -480,7 +675,57 @@ public class Maze {
             output.append(System.lineSeparator());
         }
 
+        output.append(System.lineSeparator());
+        output.append("WEIGHTS").append(System.lineSeparator());
+        for (int row = 0; row < length; row++) {
+            for (int col = 0; col < width; col++) {
+                Node node = grid[row][col];
+                for (int direction = 0; direction < Dir.values().length; direction++) {
+                    if (direction > 0) {
+                        output.append(",");
+                    }
+                    output.append(node == null ? 0 : node.getMoveCost(Dir.values()[direction]));
+                }
+                output.append(System.lineSeparator());
+            }
+        }
+
         Files.writeString(Paths.get(filePath), output.toString());
+    }
+
+    /**
+     * Gets the cost of moving between two adjacent nodes.
+     *
+     * @param from source node
+     * @param to destination node
+     * @return zero when movement is disabled, otherwise the positive cost
+     * @throws IllegalArgumentException if the nodes are not adjacent
+     */
+    public int getMoveCost(Node from, Node to) {
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("Both movement nodes are required.");
+        }
+
+        for (Dir dir : Dir.values()) {
+            if (from.getNeighbor(dir) == to) {
+                return from.getMoveCost(dir);
+            }
+        }
+
+        throw new IllegalArgumentException("Nodes are not Manhattan neighbors.");
+    }
+
+    /**
+     * Indicates whether movement is enabled from a node in a direction.
+     *
+     * @param from source node
+     * @param direction direction to inspect
+     * @return true when a neighbor exists and its movement cost is positive
+     */
+    public boolean canMove(Node from, Dir direction) {
+        return from != null
+                && from.getNeighbor(direction) != null
+                && from.getMoveCost(direction) > 0;
     }
 
 
@@ -512,6 +757,93 @@ public class Maze {
         int row = Integer.parseInt(parts[0].trim());
         int col = Integer.parseInt(parts[1].trim());
         return new int[] { row, col };
+    }
+
+    /**
+     * Finds the optional WEIGHTS marker after the layout.
+     *
+     * @param lines complete file contents
+     * @param layoutEnd first line after the layout
+     * @return marker line index, or -1 when the optional section is absent
+     */
+    private static int findWeightsMarker(List<String> lines, int layoutEnd) {
+        int index = layoutEnd;
+        while (index < lines.size() && lines.get(index).trim().isEmpty()) {
+            index++;
+        }
+
+        if (index < lines.size() && "WEIGHTS".equalsIgnoreCase(lines.get(index).trim())) {
+            return index;
+        }
+        return -1;
+    }
+
+    /**
+     * Parses one row of four movement costs in [N,E,S,W] order.
+     *
+     * @param line source line
+     * @param row row coordinate represented by the line
+     * @param col column coordinate represented by the line
+     * @return parsed movement costs
+     */
+    private static int[] parseWeightRow(String line, int row, int col) {
+        if (line == null || line.trim().isEmpty()) {
+            throw new IllegalArgumentException("Missing weights at (" + row + "," + col + ").");
+        }
+
+        String[] values = line.trim().split(",", -1);
+        if (values.length != Dir.values().length) {
+            throw new IllegalArgumentException("Expected four weights at (" + row + "," + col + ").");
+        }
+
+        int[] costs = new int[Dir.values().length];
+        for (int index = 0; index < values.length; index++) {
+            try {
+                costs[index] = Integer.parseInt(values[index].trim());
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("Invalid movement cost at (" + row + "," + col
+                        + "), direction index " + index + ".", ex);
+            }
+
+            if (costs[index] < DISABLED_MOVEMENT_COST
+                    || costs[index] > MAX_MOVEMENT_COST) {
+                throw new IllegalArgumentException("Movement costs must be 0 or an integer from "
+                        + MIN_MOVEMENT_COST + " to " + MAX_MOVEMENT_COST + " at ("
+                        + row + "," + col + ").");
+            }
+        }
+        return costs;
+    }
+
+    /**
+     * Validates weighted movement against the binary layout.
+     *
+     * @param maze maze whose layout is being validated
+     * @param row row coordinate
+     * @param col column coordinate
+     * @param costs four costs in [N,E,S,W] order
+     */
+    private static void validateWeightRow(Maze maze, int row, int col, int[] costs) {
+        if (!maze.isOccupied(row, col)) {
+            for (int cost : costs) {
+                if (cost != 0) {
+                    throw new IllegalArgumentException("Blocked cell (" + row + "," + col
+                            + ") must have four zero movement costs.");
+                }
+            }
+            return;
+        }
+
+        for (Dir dir : Dir.values()) {
+            int neighborRow = row + rowDelta(dir);
+            int neighborCol = col + colDelta(dir);
+            boolean hasNeighbor = maze.isInBounds(neighborRow, neighborCol)
+                    && maze.isOccupied(neighborRow, neighborCol);
+            if (!hasNeighbor && costs[dir.idx()] != 0) {
+                throw new IllegalArgumentException("Movement cost at (" + row + "," + col + ") for "
+                        + dir + " points outside the traversable layout.");
+            }
+        }
     }
 
 
@@ -623,12 +955,7 @@ public class Maze {
 
 
 
-    /**
-     * Validation and debugging utilities.
-     */
-
-
-    
+    // Validation and debugging utilities.
 
     /**
      * Validation result for neighbor consistency checks.
@@ -776,7 +1103,9 @@ public class Maze {
                 String east = formatNode(node.getNeighbor(Dir.EAST));
                 String south = formatNode(node.getNeighbor(Dir.SOUTH));
                 String west = formatNode(node.getNeighbor(Dir.WEST));
-                lines.add("(" + row + "," + col + ") N=" + north + " E=" + east + " S=" + south + " W=" + west);
+                lines.add("(" + row + "," + col + ") N=" + north + " E=" + east + " S=" + south + " W=" + west
+                        + " costs=[" + node.getMoveCost(Dir.NORTH) + "," + node.getMoveCost(Dir.EAST)
+                        + "," + node.getMoveCost(Dir.SOUTH) + "," + node.getMoveCost(Dir.WEST) + "]");
             }
         }
 

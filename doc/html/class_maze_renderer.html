@@ -27,8 +27,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.5</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.6</span>
    </div>
+   <div id="projectbrief">Weighted intelligent route-planning maze solver</div>
   </td>
  </tr>
  </tbody>
@@ -97,6 +98,7 @@ $(function(){initNavTree('class_maze_renderer.html',''); initResizable(true); })
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="class_maze_renderer-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">MazeRenderer Class Reference</div></div>
@@ -106,6 +108,12 @@ $(function(){initNavTree('class_maze_renderer.html',''); initResizable(true); })
 <p>Renderer and UI controller for the maze application.  
  <a href="#details">More...</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enum_maze_renderer_1_1_weight_display_state.html">WeightDisplayState</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Describes how a weight label should be styled based on the solve state.  <a href="enum_maze_renderer_1_1_weight_display_state.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a7395a4a185478c93f106b480189c1ef9" id="r_a7395a4a185478c93f106b480189c1ef9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7395a4a185478c93f106b480189c1ef9">launchFromTitleScreen</a> ()</td></tr>
@@ -124,22 +132,24 @@ Static Public Member Functions</h2></td></tr>
 <li>
 Title screen mode selection (import or random generation) </li>
 <li>
-<a class="el" href="class_maze.html">Maze</a> file selection or random maze creation </li>
+<a class="el" href="class_maze.html" title="Core maze model storing occupancy, neighbor links, and start/goal nodes.">Maze</a> file selection or random maze creation </li>
 <li>
-<a class="el" href="class_maze.html">Maze</a> grid rendering with a paint-based renderer for all maze sizes </li>
+<a class="el" href="class_maze.html" title="Core maze model storing occupancy, neighbor links, and start/goal nodes.">Maze</a> grid rendering with a paint-based renderer for all maze sizes </li>
 <li>
 Runtime solver controls (start/pause/restart, delay, instant mode, map load/save/generate) </li>
 <li>
 Zoom handling (buttons and Ctrl+mouse wheel) </li>
+<li>
+Optional directional movement-cost overlay </li>
 </ul>
 <p>Typical usage is through <code><a class="el" href="#a7395a4a185478c93f106b480189c1ef9">launchFromTitleScreen()</a></code> from the app entrypoint. Example: </p><div class="fragment"><div class="line">SwingUtilities.invokeLater(<a class="code hl_function" href="#a7395a4a185478c93f106b480189c1ef9">MazeRenderer::launchFromTitleScreen</a>);</div>
-<div class="ttc" id="aclass_maze_renderer_html_a7395a4a185478c93f106b480189c1ef9"><div class="ttname"><a href="#a7395a4a185478c93f106b480189c1ef9">MazeRenderer.launchFromTitleScreen</a></div><div class="ttdeci">static void launchFromTitleScreen()</div><div class="ttdoc">Starts the renderer-driven application flow from the title screen.</div><div class="ttdef"><b>Definition</b> MazeRenderer.java:128</div></div>
+<div class="ttc" id="aclass_maze_renderer_html_a7395a4a185478c93f106b480189c1ef9"><div class="ttname"><a href="#a7395a4a185478c93f106b480189c1ef9">MazeRenderer.launchFromTitleScreen</a></div><div class="ttdeci">static void launchFromTitleScreen()</div><div class="ttdoc">Starts the renderer-driven application flow from the title screen.</div><div class="ttdef"><b>Definition</b> MazeRenderer.java:145</div></div>
 </div><!-- fragment --><p>Typical extension point for custom highlighting: </p><div class="fragment"><div class="line">Maze.Node node = maze.getStart();</div>
 <div class="line"><a class="code hl_class" href="class_maze_renderer.html">MazeRenderer</a>.<a class="code hl_function" href="#adc2cf2f7d52e5fa9a350025e6265fc66">setNodeColor</a>(node, Color.MAGENTA);</div>
 <div class="line"><a class="code hl_class" href="class_maze_renderer.html">MazeRenderer</a>.<a class="code hl_function" href="#a8b6f55abc0070fb2aa1dd520ae018af9">resetNodeColor</a>(node);</div>
-<div class="ttc" id="aclass_maze_renderer_html"><div class="ttname"><a href="class_maze_renderer.html">MazeRenderer</a></div><div class="ttdoc">Renderer and UI controller for the maze application.</div><div class="ttdef"><b>Definition</b> MazeRenderer.java:61</div></div>
-<div class="ttc" id="aclass_maze_renderer_html_a8b6f55abc0070fb2aa1dd520ae018af9"><div class="ttname"><a href="#a8b6f55abc0070fb2aa1dd520ae018af9">MazeRenderer.resetNodeColor</a></div><div class="ttdeci">static boolean resetNodeColor(Maze.Node node)</div><div class="ttdoc">Restores one node to its default semantic color.</div><div class="ttdef"><b>Definition</b> MazeRenderer.java:1076</div></div>
-<div class="ttc" id="aclass_maze_renderer_html_adc2cf2f7d52e5fa9a350025e6265fc66"><div class="ttname"><a href="#adc2cf2f7d52e5fa9a350025e6265fc66">MazeRenderer.setNodeColor</a></div><div class="ttdeci">static boolean setNodeColor(Maze.Node node, Color color)</div><div class="ttdoc">Sets one node color using maze coordinates.</div><div class="ttdef"><b>Definition</b> MazeRenderer.java:1060</div></div>
+<div class="ttc" id="aclass_maze_renderer_html"><div class="ttname"><a href="class_maze_renderer.html">MazeRenderer</a></div><div class="ttdoc">Renderer and UI controller for the maze application.</div><div class="ttdef"><b>Definition</b> MazeRenderer.java:64</div></div>
+<div class="ttc" id="aclass_maze_renderer_html_a8b6f55abc0070fb2aa1dd520ae018af9"><div class="ttname"><a href="#a8b6f55abc0070fb2aa1dd520ae018af9">MazeRenderer.resetNodeColor</a></div><div class="ttdeci">static boolean resetNodeColor(Maze.Node node)</div><div class="ttdoc">Restores one node to its default semantic color.</div><div class="ttdef"><b>Definition</b> MazeRenderer.java:1516</div></div>
+<div class="ttc" id="aclass_maze_renderer_html_adc2cf2f7d52e5fa9a350025e6265fc66"><div class="ttname"><a href="#adc2cf2f7d52e5fa9a350025e6265fc66">MazeRenderer.setNodeColor</a></div><div class="ttdeci">static boolean setNodeColor(Maze.Node node, Color color)</div><div class="ttdoc">Sets one node color using maze coordinates.</div><div class="ttdef"><b>Definition</b> MazeRenderer.java:1500</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a7395a4a185478c93f106b480189c1ef9" name="a7395a4a185478c93f106b480189c1ef9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7395a4a185478c93f106b480189c1ef9">&#9670;&#160;</a></span>launchFromTitleScreen()</h2>
@@ -159,7 +169,7 @@ Zoom handling (buttons and Ctrl+mouse wheel) </li>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -187,7 +197,7 @@ Zoom handling (buttons and Ctrl+mouse wheel) </li>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -226,7 +236,7 @@ Zoom handling (buttons and Ctrl+mouse wheel) </li>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
