@@ -1,16 +1,17 @@
 var searchData=
 [
-  ['generaterandommaze_0',['generateRandomMaze',['../class_maze.html#a1add35b9272410e8ac5ed4a0ed1bcb71',1,'Maze.generateRandomMaze(int length, int width)'],['../class_maze.html#a8a3c5692835952c9555baf64892fd9a7',1,'Maze.generateRandomMaze(int length, int width, boolean weighted, int minWeight, int maxWeight)'],['../class_maze.html#afa8fc8bb0b1d08e20d84dd5158735df4',1,'Maze.generateRandomMaze(int length, int width, boolean weighted, int minWeight, int maxWeight, boolean sameCostBothDirections)']]],
-  ['getalg_1',['getAlg',['../class_maze_solver.html#a4223613a3ef49712b3a81d02931e998c',1,'MazeSolver']]],
-  ['getcurrentpathcost_2',['getCurrentPathCost',['../class_maze_solver.html#a0d845516b17cf3d6f45b30316bf60c63',1,'MazeSolver']]],
-  ['getfinalpath_3',['getFinalPath',['../class_maze_solver.html#a188a2b6d5e8776a4b0715ab74990d71b',1,'MazeSolver']]],
-  ['getgoal_4',['getGoal',['../class_maze.html#a4abf627d4654079a2ab0e03b32df5173',1,'Maze']]],
-  ['getlength_5',['getLength',['../class_maze.html#a7bf4e7fb124ff2a0773f73b82af0ad73',1,'Maze']]],
-  ['getmovecost_6',['getMoveCost',['../class_maze.html#ab3e3c9884e0028e817f4bd7b0aec437f',1,'Maze']]],
-  ['getnode_7',['getNode',['../class_maze.html#a9a7416a313203bf219987db2c0e25814',1,'Maze']]],
-  ['getpathcost_8',['getPathCost',['../class_maze_solver.html#a73a149b9eb40c7e5f4df11b33a9b5af2',1,'MazeSolver']]],
-  ['getsolvetimens_9',['getSolveTimeNs',['../class_maze_solver.html#aad40c030a15ccb5840668939169c1c71',1,'MazeSolver']]],
-  ['getstart_10',['getStart',['../class_maze.html#a334073acb91f71281682945b37e82b60',1,'Maze']]],
-  ['getvisitedcount_11',['getVisitedCount',['../class_maze_solver.html#a930cd51699c61b24fa70f73072607ad5',1,'MazeSolver']]],
-  ['getwidth_12',['getWidth',['../class_maze.html#a5524b06dd2648f2f5fa5daf458ba9a9b',1,'Maze']]]
+  ['east_0',['EAST',['../enummaze_1_1map_1_1_maze_1_1_dir.html#ace940d1cca4b1cf9b2c6eb677ffe480e',1,'maze::map::Maze::Dir']]],
+  ['endpointmode_1',['EndpointMode',['../enumexperiments_1_1_test_suite_1_1_endpoint_mode.html',1,'experiments::TestSuite']]],
+  ['experimentresult_2',['ExperimentResult',['../classexperiments_1_1_experiment_result.html',1,'experiments.ExperimentResult'],['../classexperiments_1_1_experiment_result.html#a4764748e93735bad4bb44635dd10e3cf',1,'experiments.ExperimentResult.ExperimentResult()']]],
+  ['experimentresult_2ejava_3',['ExperimentResult.java',['../_experiment_result_8java.html',1,'']]],
+  ['experimentresultspanel_2ejava_4',['ExperimentResultsPanel.java',['../_experiment_results_panel_8java.html',1,'']]],
+  ['experimentresulttablemodel_2ejava_5',['ExperimentResultTableModel.java',['../_experiment_result_table_model_8java.html',1,'']]],
+  ['experimentrunner_6',['ExperimentRunner',['../classexperiments_1_1_experiment_runner.html',1,'experiments']]],
+  ['experimentrunner_2ejava_7',['ExperimentRunner.java',['../_experiment_runner_8java.html',1,'']]],
+  ['experiments_8',['experiments',['../namespaceexperiments.html',1,'']]],
+  ['exportcsv_9',['exportCsv',['../classexperiments_1_1_test_suite_i_o.html#a746aee9baa6a624467fbd59a2e4afff3',1,'experiments::TestSuiteIO']]],
+  ['exportmaps_10',['exportMaps',['../classexperiments_1_1_experiment_runner.html#a376ce229dd1602d343a8e077e4286f16',1,'experiments::ExperimentRunner']]],
+  ['exporttofile_11',['exportToFile',['../classmaze_1_1map_1_1_maze.html#aa1cbf08bf4ff60dc40b0d1d0f5608703',1,'maze.map.Maze.exportToFile()'],['../classmaze_1_1map_1_1_maze_file_i_o.html#aec299681a4e628335d4c3447370fe7f0',1,'maze.map.MazeFileIO.exportToFile()']]],
+  ['exporttotext_12',['exportToText',['../classmaze_1_1map_1_1_maze.html#abe60dcd272f592ebc66c6c93dbaf29a9',1,'maze.map.Maze.exportToText()'],['../classmaze_1_1map_1_1_maze_file_i_o.html#af06e383b16a21db77dc40fe35b3aa73d',1,'maze.map.MazeFileIO.exportToText()']]],
+  ['extension_20notes_13',['API and Extension Notes',['../index.html#autotoc_md13',1,'']]]
 ];

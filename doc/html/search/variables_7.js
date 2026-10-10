@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['south_0',['SOUTH',['../enum_maze_1_1_dir.html#aa5392e150fab923a1e23d65979ff6f0f',1,'Maze::Dir']]]
+  ['isgoal_0',['isGoal',['../classmaze_1_1map_1_1_maze_1_1_node.html#a31aab2196f5d649b0d944d0f8091a162',1,'maze::map::Maze::Node']]]
 ];
