@@ -6,7 +6,7 @@ Status notes use the following fields:
 
 - **Implementation status**: whether the repository currently contains the described change.
 - **Automated validation**: whether the change has been compiled or exercised by an automated smoke test.
-- **Human confirmation**: whether the user or another developer has independently confirmed or tested the behavior. The current weighted-map and weighted-solver work has not yet received independent human confirmation.
+- **Human confirmation**: whether the user or another developer has independently confirmed or tested the behavior. Weighted-map and weighted-solver behavior has been manually confirmed; remaining roadmap items may still be pending confirmation.
 
 ## Table of Contents
 
@@ -36,20 +36,25 @@ Status notes use the following fields:
 
 - **Completed** - Weighted movement costs with positive-integer validation.
   - Automated validation: Yes - compilation and weighted import/export smoke tests passed.
-  - Human confirmation: No.
+  - Human confirmation: Yes.
 - **Completed** - Backward-compatible weighted map import and export.
   - Automated validation: Yes - weighted round-trip and legacy-map compatibility smoke tests passed.
-  - Human confirmation: No.
-- Uniform Cost Search.
-- Greedy Best-First Search.
+  - Human confirmation: Yes.
+- **Completed** - Uniform Cost Search using accumulated route cost `g(n)`.
+  - Positive movement costs guarantee minimum-cost solutions.
+  - Human confirmation: Yes - repeated instant weighted-map runs matched A*.
+- **Completed** - Greedy Best-First Search using Manhattan heuristic `h(n)`.
+  - The algorithm is intentionally not guaranteed to minimize route cost.
+  - Human confirmation: Yes - repeated instant weighted-map runs produced
+    deterministic valid routes.
 - **Completed** - Cost-aware A* Search.
   - Automated validation: Yes - weighted A* selected a lower-cost longer route in a smoke test.
-  - Human confirmation: No.
+  - Human confirmation: Yes - repeated instant weighted-map runs matched UCS.
 - **Completed** - Total path-cost calculation and display.
   - `MazeSolver` calculates and exposes path cost through `getPathCost()`.
   - UI displays live current-route cost and final path cost.
-  - Automated validation: Yes - DFS, BFS, and A* path costs were checked in a smoke test.
-  - Human confirmation: No.
+  - Automated validation: Yes - DFS, BFS, UCS, Greedy, and A* path costs were checked in a smoke test.
+  - Human confirmation: Yes.
 - **Completed** - Solver timing reports computation time rather than animation
   delay or renderer work. A monotonic clock surrounds only each search-step
   call, avoiding platform-dependent thread CPU clock quantization. Human
@@ -69,15 +74,15 @@ Status notes use the following fields:
 - **Completed** - [Maze.java](../../../../../src/Maze.java) represents directional movement costs in addition to occupancy and neighbors.
   - Automated validation: Yes.
   - Human confirmation: No.
-- **Completed** - [MazeSolver.java](../../../../../src/MazeSolver.java) uses actual transition costs instead of the former hardcoded `+1` in A* and skips disabled edges in all current algorithms.
+- **Completed** - [MazeSolver.java](../../../../../src/MazeSolver.java) uses actual transition costs instead of the former hardcoded `+1` in weighted searches and skips disabled edges in all current algorithms.
   - Automated validation: Yes.
-  - Human confirmation: No.
+  - Human confirmation: Yes.
 - **Completed for the current cost convention** - The A* heuristic uses Manhattan distance. Because every valid movement cost is at least `1`, this is an admissible lower bound. A minimum-cost multiplier is not required unless the cost model changes.
   - Automated validation: Yes - weighted A* behavior was smoke-tested.
   - Human confirmation: No.
-- [MazeRenderer.java](../../../../../src/MazeRenderer.java) must expose UCS and Greedy, and support comparison-oriented workflows. Weighted A* and route-cost display are implemented.
+- [MazeRenderer.java](../../../../../src/MazeRenderer.java) exposes UCS and Greedy, route-cost display, and solve diagnostics. Comparison-oriented workflows remain future work.
 - [MS.java](../../../../../src/MS.java) may need an experiment or command-line entry mode.
-- [README.md](../../../../../README.md) and generated Doxygen documentation must describe the weighted problem and required algorithms.
+- [README.md](../../../../../README.md) and generated Doxygen documentation describe the weighted problem and required algorithms.
 
 ### Should remain
 
@@ -185,7 +190,9 @@ The application has no database, network API, cache, or external service. Its cu
 - Keep the existing plain Java and Swing architecture; the course emphasizes the AI algorithms rather than a UI framework migration.
 - Preserve binary-map compatibility by treating omitted movement costs as an implicit cost of `1`.
 - Make the required weighted algorithms independent of Swing so they can be tested and benchmarked deterministically.
-- Use a shared heuristic definition for Greedy Best-First Search and A*, with the minimum valid movement cost included in A*'s lower bound.
+- Use a shared Manhattan heuristic for Greedy Best-First Search and A*.
+  Because the minimum valid movement cost is `1`, the distance is already a
+  valid lower bound.
 
 ## Component Relationships
 
@@ -251,7 +258,8 @@ flowchart LR
     classDef current fill:#d9ecff,stroke:#2878b5,color:#111;
     classDef plannedComponent fill:#ffe0b2,stroke:#d97706,color:#111;
     class cEntry,cRenderer,cPaint,cMaze,cNode,cMapIO,cGenerator,cSolver current;
-    class cUcs,cGreedy,cAStar,cHeuristic,cSearchResult,cExperimentGenerator,cExperimentRunner,cMetricCollector,cCsvWriter,cTestSuite plannedComponent;
+    class cUcs,cGreedy,cAStar,cHeuristic current;
+    class cSearchResult,cExperimentGenerator,cExperimentRunner,cMetricCollector,cCsvWriter,cTestSuite plannedComponent;
 ~~~
 
 ### Component Inventory
@@ -266,9 +274,9 @@ flowchart LR
 | Map import/export | Model and IO | Existing file boundary | Reads and writes binary maze files; must be extended for costs |
 | Random maze generation | Model and IO | Existing generator | Creates traditional carved mazes with optional directional weights; seeded configurable generation remains pending |
 | `MazeSolver` | Search Engine | Existing search coordinator | Maintains incremental frontier state and dispatches the selected algorithm |
-| Uniform Cost Search | Search Engine | Planned algorithm | Finds the least-cost route using accumulated path cost |
-| Greedy Best-First | Search Engine | Planned algorithm | Uses only the heuristic and may sacrifice route cost for search effort |
-| Cost-aware A* | Search Engine | Planned algorithm | Combines accumulated cost and an admissible remaining-cost estimate |
+| Uniform Cost Search | Search Engine | Implemented algorithm | Finds the least-cost route using accumulated path cost |
+| Greedy Best-First | Search Engine | Implemented algorithm | Uses only the heuristic and may sacrifice route cost for search effort |
+| Cost-aware A* | Search Engine | Implemented algorithm | Combines accumulated cost and an admissible remaining-cost estimate |
 | Weighted heuristic | Search Engine | Implemented in `MazeSolver` | Computes an admissible Manhattan lower bound under the positive-cost convention |
 | Search result | Search Engine | Planned value object | Carries path, total cost, explored nodes, runtime, algorithm, and status |
 | Seeded experiment generator | Evaluation | Planned generator | Produces controlled maps with repeatable seeds and conditions |
@@ -313,7 +321,9 @@ The import path rejects negative, malformed, non-numeric, and dimension-mismatch
 
 ### 3. Implement the Required Search Algorithms
 
-**Status: Partially completed.** Weighted A* is implemented. Uniform Cost Search and Greedy Best-First Search remain pending.
+**Status: Completed.** UCS, Greedy Best-First Search, and weighted A* now share
+the incremental solver API and directional movement-cost model. DFS and BFS
+remain available as supplemental baselines.
 
 Refactor [MazeSolver.java](../../../../../src/MazeSolver.java) so algorithm-specific state is isolated and all algorithms use the same maze transition-cost API.
 
@@ -365,7 +375,7 @@ Define `nodes explored` consistently as nodes removed from the frontier and fina
 
 Update [MazeRenderer.java](../../../../../src/MazeRenderer.java) to:
 
-- Add UCS, Greedy Best-First, and weighted A* to the algorithm selector.
+- UCS, Greedy Best-First, and weighted A* are available in the algorithm selector.
 - Display total route cost beside runtime and explored nodes.
 - Display the active cost mode or a visible cost legend.
 - Allow start and goal selection, or expose a controlled coordinate/seed dialog.
@@ -448,7 +458,7 @@ If no test framework is desired, a small Java test harness can be added, but a s
 
 ### 9. Update Documentation
 
-**Status: Partially completed.** [README.md](../../../../../README.md), [Maze.java](../../../../../src/Maze.java), and [MazeSolver.java](../../../../../src/MazeSolver.java) now document weighted maps, directional costs, disabled edges, weighted A*, and path costs. Generated Doxygen output remains intentionally deferred.
+**Status: Completed for the current feature set.** [README.md](../../../../../README.md), [Maze.java](../../../../../src/Maze.java), [MazeSolver.java](../../../../../src/MazeSolver.java), and [MazeRenderer.java](../../../../../src/MazeRenderer.java) document weighted maps, directional costs, disabled edges, UCS, Greedy, weighted A*, path costs, and solve diagnostics. Generated Doxygen has been regenerated.
 
 Update [README.md](../../../../../README.md) with:
 
@@ -468,24 +478,20 @@ Regenerate the Doxygen output under [doc/](../../../../../doc/) after public API
 1. Decide and document the transition-cost convention.
 2. Add weighted maze storage and compatibility parsing.
 3. Add cost-aware solver primitives and structured results.
-4. Implement UCS.
-5. Implement Greedy Best-First Search.
-6. Convert A* to weighted A*.
-7. Add model and algorithm tests.
-8. Update the interactive UI.
-9. Add seeded generation and the non-UI experiment runner.
-10. Add CSV export.
-11. Run the controlled experiment matrix.
-12. Update README, Doxygen, presentation material, and final analysis.
+4. Add model and algorithm tests.
+5. Add seeded generation and the non-UI experiment runner.
+6. Add CSV export.
+7. Run the controlled experiment matrix.
+8. Update README, Doxygen, presentation material, and final analysis.
 
 ## Definition of Done
 
-- [x] Binary maps still load and solve with an implicit cost of `1`. Automated validation: Yes. Human confirmation: No.
-- [x] Weighted maps load, validate, export, and reload without data loss. Automated validation: Yes. Human confirmation: No.
-- [ ] UCS and Greedy Best-First run on the same weighted maze model. **Weighted A* is completed and smoke-tested. Human confirmation: No.**
-- [ ] UCS and A* return equal minimum route costs on positive weighted test maps. A* is implemented and smoke-tested; UCS is not yet implemented. Human confirmation: No.
-- [ ] Greedy's route cost can be compared against the optimal cost.
-- [x] The UI displays current route cost, final path cost, explored nodes, and runtime. Automated validation: compilation passed. Human confirmation: No.
+- [x] Binary maps still load and solve with an implicit cost of `1`. Automated validation: Yes. Human confirmation: Yes.
+- [x] Weighted maps load, validate, export, and reload without data loss. Automated validation: Yes. Human confirmation: Yes.
+- [x] UCS and Greedy Best-First run on the same weighted maze model. Automated weighted smoke test and repeated manual runs passed.
+- [x] UCS and A* return equal minimum route costs on the weighted example map. Automated weighted smoke test and repeated manual runs passed.
+- [x] Greedy's route cost can be compared against the optimal cost. Repeated runs demonstrated a valid but more expensive Greedy route.
+- [x] The UI displays current route cost, final path cost, explored nodes, runtime, and diagnostic path cost. Automated validation and manual testing passed.
 - [ ] Start and goal selection or seeded placement is configurable.
 - [ ] Experiments are reproducible from recorded seeds.
 - [ ] At least the proposed map sizes, densities, cost modes, and ten repetitions per condition are supported.
@@ -494,5 +500,5 @@ Regenerate the Doxygen output under [doc/](../../../../../doc/) after public API
 - [ ] Benchmark timing excludes Swing rendering and UI delays. The solver's
   displayed computation-time metric now excludes these concerns; the non-UI
   benchmark runner is still pending.
-- [ ] README and generated API documentation match the final implementation. README and inline/Javadoc documentation are updated; generated Doxygen remains pending.
+- [x] README and generated API documentation match the final implementation. README, inline/Javadoc documentation, and Doxygen V0.6 output are updated.
 - [ ] The final report explains algorithm behavior and trade-offs rather than only listing measurements.

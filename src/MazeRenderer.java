@@ -431,7 +431,7 @@ public final class MazeRenderer {
       * the timer-driven incremental solver loop.
      *
      * @param maze maze to render and solve
-     * @param initialAlgorithm initial algorithm label (DFS/BFS/A*)
+     * @param initialAlgorithm initial algorithm label (DFS, BFS, UCS, Greedy, or A*)
      * @param initialStepDelayMs initial delay between solver steps in milliseconds
      * @param visitedColor color used for visited cells
      */
@@ -655,7 +655,8 @@ public final class MazeRenderer {
                         ? "none" : solveSessionDelayMs + " ms")
                 + ", algorithm=" + solver.getAlg()
                 + ", visited=" + solver.getVisitedCount()
-                + ", compute=" + String.format("%.4f", computeMs) + " ms"
+                        + ", pathCost=" + (solved ? solver.getPathCost() : -1)
+                        + ", compute=" + String.format("%.4f", computeMs) + " ms"
                 + ", wall=" + String.format("%.4f", wallMs) + " ms"
                 + ", timingSource=monotonic search-step clock");
     }
@@ -1093,7 +1094,7 @@ public final class MazeRenderer {
         JLabel instantSolveLabel = new JLabel("Instant:");
         JLabel zoomLabel = new JLabel("Zoom:");
 
-        algorithmSelector = new JComboBox<>(new String[] { "DFS", "BFS", "A*" });
+        algorithmSelector = new JComboBox<>(new String[] { "DFS", "BFS", "UCS", "Greedy", "A*" });
         delaySpinner = new JSpinner(new SpinnerNumberModel(defaultStepDelayMs, 1, 5000, 1));
         instantSolveCheckBox = new JCheckBox();
         showWeightsCheckBox = new JCheckBox("Show Weights", DEFAULT_SHOW_WEIGHTS);
@@ -1406,7 +1407,7 @@ public final class MazeRenderer {
     }
 
     /**
-     * @brief Normalizes an algorithm label to DFS, BFS, or A*.
+     * @brief Normalizes an algorithm label to a supported search algorithm.
      *
      * @param algorithm input label
      * @return canonical label
@@ -1418,6 +1419,14 @@ public final class MazeRenderer {
         }
         if ("A*".equals(normalized) || "BFS".equals(normalized) || "DFS".equals(normalized)) {
             return normalized;
+        }
+        if ("UCS".equals(normalized) || "UNIFORM COST".equals(normalized)
+                || "UNIFORM_COST".equals(normalized)) {
+            return "UCS";
+        }
+        if ("GREEDY".equals(normalized) || "GREEDY BEST-FIRST".equals(normalized)
+                || "GREEDY_BEST_FIRST".equals(normalized)) {
+            return "Greedy";
         }
         return "DFS";
     }

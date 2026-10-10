@@ -1,6 +1,6 @@
 # Maze-Solver
 
-Maze-Solver is a Java Swing desktop app for loading, visualizing, and solving grid mazes using DFS, BFS, and A*. Maze files now support optional per-direction movement costs while preserving the original unweighted format.
+Maze-Solver is a Java Swing desktop app for loading, visualizing, and solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and A*. Maze files now support optional per-direction movement costs while preserving the original unweighted format.
 
 It is designed for both interactive exploration and large-map performance testing, with a paint-based renderer that supports very large mazes efficiently.
 
@@ -28,7 +28,7 @@ Maze-Solver has four main responsibilities:
 
 1. Load maze files from disk.
 2. Validate and visualize the maze graph.
-3. Run DFS, BFS, or weighted A* incrementally or instantly.
+3. Run DFS, BFS, UCS, Greedy Best-First Search, or weighted A* incrementally or instantly.
 4. Show traversal progress and final path with clear visual semantics.
 
 ## Features
@@ -89,7 +89,7 @@ After loading or generating a maze:
 - Load Map: replace the current session maze with another file.
 - Save Map: export the currently loaded maze to a text file.
 - Generate Map: create and load a new random maze without leaving the solver window.
-- Algorithm: choose DFS, BFS, or weighted A*.
+- Algorithm: choose DFS, BFS, Uniform Cost Search, Greedy Best-First Search, or weighted A*.
 - Step Delay (ms): set timer delay for step-by-step mode (1..5000).
 - Instant: solve to completion immediately (async worker).
 - Show Weights: overlay movement costs on grid edges. Labels appear when zoom is
@@ -108,8 +108,9 @@ After loading or generating a maze:
 - Solve Time: elapsed time spent inside solver search-step calls. Timer delays,
   UI repainting, and animation intervals are outside those measurements, so
   animated and instant solving times are directly comparable. The console also
-  prints a diagnostic line containing compute time, wall-clock session time,
-  interval, algorithm, and visited-node count after each completed solve.
+  prints a diagnostic line containing the result, interval, algorithm, visited
+  node count, final path cost, compute time, and wall-clock session time after
+  each completed solve.
 - Zoom +/-: adjust cell size.
 - Ctrl + Mouse Wheel: zoom while cursor is over the maze viewport.
 
@@ -213,9 +214,9 @@ The current map model preserves geometric neighbor references separately from
 movement availability: a neighboring node is traversable only when its movement
 cost is greater than zero.
 
-`MazeSolver` now uses movement costs when determining whether an edge is
-traversable and when calculating weighted A* scores. Uniform Cost Search and
-Greedy Best-First Search remain planned additions.
+`MazeSolver` uses movement costs when determining whether an edge is traversable
+and when calculating weighted search scores. UCS and A* guarantee a minimum-cost
+route when a route exists because all enabled movement costs are positive.
 
 Validation rules enforced by import:
 
@@ -249,6 +250,11 @@ The solver supports:
 - BFS: breadth-first exploration, shortest by number of moves when all enabled
   moves have equal cost; it respects disabled edges but does not optimize
   weighted path cost.
+- Uniform Cost Search: uninformed priority search ordered by accumulated route
+  cost `g(n)`. With positive movement costs, it returns a minimum-cost path.
+- Greedy Best-First Search: priority search ordered only by the Manhattan
+  heuristic `h(n)`. It can explore fewer nodes, but it is not guaranteed to
+  return a minimum-cost path.
 - A*: weighted informed search using cumulative directional movement costs and
   the Manhattan-distance heuristic. Since valid movement costs are at least
   `1`, the heuristic remains an admissible lower bound and A* returns a
@@ -264,6 +270,22 @@ A* heuristic used:
 $$h(n) = |r_n - r_g| + |c_n - c_g|$$
 
 where $r_n,c_n$ is current node and $r_g,c_g$ is goal.
+
+The priority functions used by the informed searches are:
+
+- UCS: `f(n) = g(n)`
+- Greedy Best-First Search: `f(n) = h(n)`
+- A*: `f(n) = g(n) + h(n)`
+
+The solver uses graph-search repeated-state tracking for all priority-based
+algorithms. UCS and A* ignore stale frontier entries after a cheaper route is
+discovered. Greedy keeps the first discovered route to each cell, consistent
+with its heuristic-only ordering and non-optimality guarantee.
+
+The Manhattan heuristic is admissible because every enabled move costs at
+least `1`. It is also consistent for this four-directional maze: moving to an
+adjacent cell changes Manhattan distance by at most `1`, while the transition
+cost is at least `1`.
 
 ## Rendering and Performance
 

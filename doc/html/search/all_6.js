@@ -12,5 +12,6 @@ var searchData=
   ['getsolvetimens_9',['getSolveTimeNs',['../class_maze_solver.html#aad40c030a15ccb5840668939169c1c71',1,'MazeSolver']]],
   ['getstart_10',['getStart',['../class_maze.html#a334073acb91f71281682945b37e82b60',1,'Maze']]],
   ['getvisitedcount_11',['getVisitedCount',['../class_maze_solver.html#a930cd51699c61b24fa70f73072607ad5',1,'MazeSolver']]],
-  ['getwidth_12',['getWidth',['../class_maze.html#a5524b06dd2648f2f5fa5daf458ba9a9b',1,'Maze']]]
+  ['getwidth_12',['getWidth',['../class_maze.html#a5524b06dd2648f2f5fa5daf458ba9a9b',1,'Maze']]],
+  ['greedy_13',['GREEDY',['../enum_maze_solver_1_1_algorithm.html#af0bc15c0a95311a2f0063171aa6432c6',1,'MazeSolver::Algorithm']]]
 ];

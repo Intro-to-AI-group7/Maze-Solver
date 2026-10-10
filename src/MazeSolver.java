@@ -1,12 +1,13 @@
 import java.awt.Point;
-import java.util.ArrayList;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.PriorityQueue;
 
 /**
- * Incremental maze solver that supports DFS, BFS, and weighted A*.
+ * Incremental maze solver that supports DFS, BFS, Uniform Cost Search,
+ * Greedy Best-First Search, and weighted A*.
  *
  * <p>The solver keeps internal state between calls to {@link #updateSolve()},
  * so callers can visualize or inspect each step one node at a time.
@@ -36,6 +37,8 @@ public class MazeSolver {
     public enum Algorithm {
         DFS,
         BFS,
+        UCS,
+        GREEDY,
         A_STAR
     }
 
@@ -51,20 +54,21 @@ public class MazeSolver {
     private long currentPathCost = -1;
     private Maze.Node[][] parent;
 
-    // DFS/BFS state
+    // DFS and BFS state
     private final Deque<Maze.Node> frontier = new ArrayDeque<>();
     private boolean[][] discovered;
 
-    // A* state
+    // Priority-search state
     private final PriorityQueue<AStarEntry> aStarFrontier = new PriorityQueue<>();
+    private final PriorityQueue<PriorityEntry> priorityFrontier = new PriorityQueue<>();
     private long[][] gScore;
     private boolean[][] closed;
 
     /**
      * Sets which algorithm to run.
      *
-     * @param alg algorithm label. Accepted values are DFS, BFS, A*, ASTAR, and A_STAR
-     *            (case-insensitive)
+     * @param alg algorithm label. Accepted values are DFS, BFS, UCS, Greedy,
+     *            A*, ASTAR, and A_STAR (case-insensitive)
      * @throws IllegalArgumentException if {@code alg} is null or unsupported
      */
     public void setAlg(String alg) {
@@ -77,10 +81,17 @@ public class MazeSolver {
             this.algorithm = Algorithm.DFS;
         } else if ("BFS".equals(normalized)) {
             this.algorithm = Algorithm.BFS;
+        } else if ("UCS".equals(normalized) || "UNIFORM COST".equals(normalized)
+                || "UNIFORM_COST".equals(normalized)) {
+            this.algorithm = Algorithm.UCS;
+        } else if ("GREEDY".equals(normalized) || "GREEDY BEST-FIRST".equals(normalized)
+                || "GREEDY_BEST_FIRST".equals(normalized)) {
+            this.algorithm = Algorithm.GREEDY;
         } else if ("A*".equals(normalized) || "ASTAR".equals(normalized) || "A_STAR".equals(normalized)) {
             this.algorithm = Algorithm.A_STAR;
         } else {
-            throw new IllegalArgumentException("Unsupported algorithm: " + alg + ". Use DFS, BFS, or A*.");
+            throw new IllegalArgumentException(
+                    "Unsupported algorithm: " + alg + ". Use DFS, BFS, UCS, Greedy, or A*.");
         }
 
         resetSearch();
@@ -94,6 +105,9 @@ public class MazeSolver {
     public String getAlg() {
         if (algorithm == Algorithm.A_STAR) {
             return "A*";
+        }
+        if (algorithm == Algorithm.GREEDY) {
+            return "Greedy";
         }
         return algorithm.name();
     }
@@ -130,6 +144,10 @@ public class MazeSolver {
                 break;
             case BFS:
                 result = bfsStep();
+                break;
+            case UCS:
+            case GREEDY:
+                result = prioritySearchStep();
                 break;
             case A_STAR:
                 result = aStarStep();
@@ -207,12 +225,12 @@ public class MazeSolver {
      * Gets the final path after a successful solve.
      *
      * <p>The path is traced backward using the internal parent table, so the returned
-      * list begins at the goal and ends at the start.
+     * list begins at the goal and ends at the start.
       *
       * <p>Typical UI code can iterate as-is for reverse painting, or reverse the list
       * first if start-to-goal order is preferred.
      *
-     * @return list of path points where {@code x=col, y=row}; empty if unsolved
+     * @return goal-to-start path points where {@code x=col, y=row}; empty if unsolved
      */
     public List<Point> getFinalPath() {
         List<Point> path = new ArrayList<>();
@@ -237,6 +255,7 @@ public class MazeSolver {
     public void resetSearch() {
         frontier.clear();
         aStarFrontier.clear();
+        priorityFrontier.clear();
         parent = null;
         discovered = null;
         gScore = null;
@@ -272,6 +291,8 @@ public class MazeSolver {
 
         if (algorithm == Algorithm.A_STAR) {
             initializeAStar();
+        } else if (algorithm == Algorithm.UCS || algorithm == Algorithm.GREEDY) {
+            initializePrioritySearch();
         } else {
             initializeUninformedSearch();
         }
@@ -400,6 +421,122 @@ public class MazeSolver {
         Maze.Node start = maze.getStart();
         gScore[start.row][start.col] = 0;
         aStarFrontier.add(new AStarEntry(start, 0, heuristic(start, maze.getGoal())));
+    }
+
+    /**
+     * Initializes the state shared by UCS and Greedy Best-First Search.
+     */
+    private void initializePrioritySearch() {
+        int rows = maze.getLength();
+        int cols = maze.getWidth();
+        discovered = new boolean[rows][cols];
+        closed = new boolean[rows][cols];
+        gScore = new long[rows][cols];
+        parent = new Maze.Node[rows][cols];
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                gScore[r][c] = Long.MAX_VALUE;
+            }
+        }
+
+        Maze.Node start = maze.getStart();
+        discovered[start.row][start.col] = true;
+        gScore[start.row][start.col] = 0;
+        long priority = algorithm == Algorithm.UCS ? 0 : heuristic(start, maze.getGoal());
+        priorityFrontier.add(new PriorityEntry(start, 0, priority));
+    }
+
+    /**
+     * Frontier entry used by UCS and Greedy Best-First Search.
+     */
+    private static class PriorityEntry implements Comparable<PriorityEntry> {
+        private final Maze.Node node;
+        private final long gCost;
+        private final long priority;
+
+        private PriorityEntry(Maze.Node node, long gCost, long priority) {
+            this.node = node;
+            this.gCost = gCost;
+            this.priority = priority;
+        }
+
+        @Override
+        public int compareTo(PriorityEntry other) {
+            int byPriority = Long.compare(priority, other.priority);
+            if (byPriority != 0) {
+                return byPriority;
+            }
+            return Long.compare(gCost, other.gCost);
+        }
+    }
+
+    /**
+     * Executes one UCS or Greedy Best-First Search step.
+     *
+     * <p>UCS orders the frontier by accumulated route cost. Greedy orders it
+     * only by the heuristic and therefore does not guarantee a minimum-cost
+     * route. Both algorithms use graph-search repeated-state tracking.
+     *
+     * @return node visited this step, or {@code null} if no node remains
+     */
+    private Maze.Node prioritySearchStep() {
+        while (!priorityFrontier.isEmpty()) {
+            PriorityEntry entry = priorityFrontier.remove();
+            Maze.Node current = entry.node;
+
+            if (closed[current.row][current.col]) {
+                continue;
+            }
+            if (algorithm == Algorithm.UCS && entry.gCost != gScore[current.row][current.col]) {
+                continue;
+            }
+
+            closed[current.row][current.col] = true;
+            visitedCount++;
+            currentPathCost = gScore[current.row][current.col];
+
+            if (current == maze.getGoal()) {
+                finished = true;
+                solved = true;
+                pathCost = gScore[current.row][current.col];
+                return current;
+            }
+
+            for (Maze.Dir dir : Maze.Dir.values()) {
+                Maze.Node neighbor = current.getNeighbor(dir);
+                if (neighbor == null || closed[neighbor.row][neighbor.col]
+                        || !maze.canMove(current, dir)) {
+                    continue;
+                }
+
+                long tentativeG = gScore[current.row][current.col]
+                        + maze.getMoveCost(current, neighbor);
+                if (algorithm == Algorithm.UCS) {
+                    if (tentativeG >= gScore[neighbor.row][neighbor.col]) {
+                        continue;
+                    }
+                    gScore[neighbor.row][neighbor.col] = tentativeG;
+                    parent[neighbor.row][neighbor.col] = current;
+                    priorityFrontier.add(new PriorityEntry(neighbor, tentativeG, tentativeG));
+                } else if (!discovered[neighbor.row][neighbor.col]) {
+                    discovered[neighbor.row][neighbor.col] = true;
+                    gScore[neighbor.row][neighbor.col] = tentativeG;
+                    parent[neighbor.row][neighbor.col] = current;
+                    priorityFrontier.add(new PriorityEntry(
+                            neighbor, tentativeG, heuristic(neighbor, maze.getGoal())));
+                }
+            }
+
+            if (priorityFrontier.isEmpty()) {
+                finished = true;
+            }
+            return current;
+        }
+
+        finished = true;
+        solved = false;
+        return null;
     }
 
     /**
