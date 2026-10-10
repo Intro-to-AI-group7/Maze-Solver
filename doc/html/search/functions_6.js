@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['main_0',['main',['../class_m_s.html#a10dc989ca35b5a83c0555b59c4873d6b',1,'MS']]],
-  ['maze_1',['Maze',['../class_maze.html#a64794a0b1cbed9d04736002da7ee62cb',1,'Maze']]]
+  ['launchfromtitlescreen_0',['launchFromTitleScreen',['../class_maze_renderer.html#a7395a4a185478c93f106b480189c1ef9',1,'MazeRenderer']]]
 ];

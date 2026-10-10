@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['setalg_0',['setAlg',['../class_maze_solver.html#a9baf570c82f61e83d1e11e8bb8a93e3c',1,'MazeSolver']]],
-  ['setgoal_1',['setGoal',['../class_maze.html#aad70719e52756a45e3c00a9c1ff30fbd',1,'Maze']]],
-  ['setmaze_2',['setMaze',['../class_maze_solver.html#a19e7e09b1cf169d44927f2fbb1a4a9f9',1,'MazeSolver']]],
-  ['setnodecolor_3',['setNodeColor',['../class_maze_renderer.html#adc2cf2f7d52e5fa9a350025e6265fc66',1,'MazeRenderer']]],
-  ['setstart_4',['setStart',['../class_maze.html#ab06ebd4ce10a357460c2862fdfead186',1,'Maze']]]
+  ['normal_0',['NORMAL',['../enum_maze_renderer_1_1_weight_display_state.html#a5ea5d692a57a076acc0ca845ab58666c',1,'MazeRenderer::WeightDisplayState']]],
+  ['north_1',['NORTH',['../enum_maze_1_1_dir.html#abd07681e390201406bfd3ad417d3d652',1,'Maze::Dir']]]
 ];

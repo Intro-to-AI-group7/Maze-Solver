@@ -27,8 +27,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.5</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.6</span>
    </div>
+   <div id="projectbrief">Weighted intelligent route-planning maze solver</div>
   </td>
  </tr>
  </tbody>
@@ -100,62 +101,109 @@ $(function(){initNavTree('class_maze.html',''); initResizable(true); });
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="class_maze-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Maze Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Core maze model storing occupancy, neighbor links, and start/goal nodes.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>Dir</b></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enum_maze_1_1_dir.html">Dir</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cardinal directions used for indexing node neighbors.  <a href="enum_maze_1_1_dir.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><b>NeighborValidationResult</b></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validation result for neighbor consistency checks. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><b>Node</b></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a single cell in the maze grid. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a64794a0b1cbed9d04736002da7ee62cb" id="r_a64794a0b1cbed9d04736002da7ee62cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a64794a0b1cbed9d04736002da7ee62cb">Maze</a> (int length, int width)</td></tr>
+<tr class="memdesc:a64794a0b1cbed9d04736002da7ee62cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes a maze with fixed dimensions.  <br /></td></tr>
 <tr class="separator:a64794a0b1cbed9d04736002da7ee62cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad96d7e5ccf65fe29e318bd0c39b39a6a" id="r_ad96d7e5ccf65fe29e318bd0c39b39a6a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad96d7e5ccf65fe29e318bd0c39b39a6a">createCell</a> (int row, int col, int direction)</td></tr>
+<tr class="memdesc:ad96d7e5ccf65fe29e318bd0c39b39a6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Marks a cell as occupied and creates a node at that coordinate.  <br /></td></tr>
 <tr class="separator:ad96d7e5ccf65fe29e318bd0c39b39a6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae20cb68cb5dc52cf20d04c669d0cde3e" id="r_ae20cb68cb5dc52cf20d04c669d0cde3e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae20cb68cb5dc52cf20d04c669d0cde3e">exportToFile</a> (String filePath)  throws IOException </td></tr>
+<tr class="memdesc:ae20cb68cb5dc52cf20d04c669d0cde3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Export the current maze to text format for import/export.  <br /></td></tr>
 <tr class="separator:ae20cb68cb5dc52cf20d04c669d0cde3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3e3c9884e0028e817f4bd7b0aec437f" id="r_ab3e3c9884e0028e817f4bd7b0aec437f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab3e3c9884e0028e817f4bd7b0aec437f">getMoveCost</a> (Node from, Node to)</td></tr>
+<tr class="memdesc:ab3e3c9884e0028e817f4bd7b0aec437f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the cost of moving between two adjacent nodes.  <br /></td></tr>
+<tr class="separator:ab3e3c9884e0028e817f4bd7b0aec437f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35b968c5d80692b2f2bea517ffcd278a" id="r_a35b968c5d80692b2f2bea517ffcd278a"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35b968c5d80692b2f2bea517ffcd278a">canMove</a> (Node from, <a class="el" href="enum_maze_1_1_dir.html">Dir</a> direction)</td></tr>
+<tr class="memdesc:a35b968c5d80692b2f2bea517ffcd278a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates whether movement is enabled from a node in a direction.  <br /></td></tr>
+<tr class="separator:a35b968c5d80692b2f2bea517ffcd278a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab06ebd4ce10a357460c2862fdfead186" id="r_ab06ebd4ce10a357460c2862fdfead186"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab06ebd4ce10a357460c2862fdfead186">setStart</a> (int row, int col)</td></tr>
+<tr class="memdesc:ab06ebd4ce10a357460c2862fdfead186"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the start node if the given coordinate is occupied.  <br /></td></tr>
 <tr class="separator:ab06ebd4ce10a357460c2862fdfead186"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad70719e52756a45e3c00a9c1ff30fbd" id="r_aad70719e52756a45e3c00a9c1ff30fbd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad70719e52756a45e3c00a9c1ff30fbd">setGoal</a> (int row, int col)</td></tr>
+<tr class="memdesc:aad70719e52756a45e3c00a9c1ff30fbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the goal node and updates the goal flag on nodes accordingly.  <br /></td></tr>
 <tr class="separator:aad70719e52756a45e3c00a9c1ff30fbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a334073acb91f71281682945b37e82b60" id="r_a334073acb91f71281682945b37e82b60"><td class="memItemLeft" align="right" valign="top">Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a334073acb91f71281682945b37e82b60">getStart</a> ()</td></tr>
+<tr class="memdesc:a334073acb91f71281682945b37e82b60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current start node.  <br /></td></tr>
 <tr class="separator:a334073acb91f71281682945b37e82b60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4abf627d4654079a2ab0e03b32df5173" id="r_a4abf627d4654079a2ab0e03b32df5173"><td class="memItemLeft" align="right" valign="top">Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4abf627d4654079a2ab0e03b32df5173">getGoal</a> ()</td></tr>
+<tr class="memdesc:a4abf627d4654079a2ab0e03b32df5173"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current goal node.  <br /></td></tr>
 <tr class="separator:a4abf627d4654079a2ab0e03b32df5173"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a7416a313203bf219987db2c0e25814" id="r_a9a7416a313203bf219987db2c0e25814"><td class="memItemLeft" align="right" valign="top">Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9a7416a313203bf219987db2c0e25814">getNode</a> (int row, int col)</td></tr>
+<tr class="memdesc:a9a7416a313203bf219987db2c0e25814"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the node at a coordinate if that cell is occupied.  <br /></td></tr>
 <tr class="separator:a9a7416a313203bf219987db2c0e25814"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d449c5ff98fe08c078209ea45bd9824" id="r_a5d449c5ff98fe08c078209ea45bd9824"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5d449c5ff98fe08c078209ea45bd9824">isInBounds</a> (int row, int col)</td></tr>
+<tr class="memdesc:a5d449c5ff98fe08c078209ea45bd9824"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks whether coordinates are inside maze boundaries.  <br /></td></tr>
 <tr class="separator:a5d449c5ff98fe08c078209ea45bd9824"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7dc187bb000382efc20df7ff80b525be" id="r_a7dc187bb000382efc20df7ff80b525be"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7dc187bb000382efc20df7ff80b525be">isOccupied</a> (int row, int col)</td></tr>
+<tr class="memdesc:a7dc187bb000382efc20df7ff80b525be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks whether a cell is a traversable/occupied cell.  <br /></td></tr>
 <tr class="separator:a7dc187bb000382efc20df7ff80b525be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7bf4e7fb124ff2a0773f73b82af0ad73" id="r_a7bf4e7fb124ff2a0773f73b82af0ad73"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7bf4e7fb124ff2a0773f73b82af0ad73">getLength</a> ()</td></tr>
+<tr class="memdesc:a7bf4e7fb124ff2a0773f73b82af0ad73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the maze row count.  <br /></td></tr>
 <tr class="separator:a7bf4e7fb124ff2a0773f73b82af0ad73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5524b06dd2648f2f5fa5daf458ba9a9b" id="r_a5524b06dd2648f2f5fa5daf458ba9a9b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5524b06dd2648f2f5fa5daf458ba9a9b">getWidth</a> ()</td></tr>
+<tr class="memdesc:a5524b06dd2648f2f5fa5daf458ba9a9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the maze column count.  <br /></td></tr>
 <tr class="separator:a5524b06dd2648f2f5fa5daf458ba9a9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a164060b8ad4c0e102daa8aa2d23aeaa8" id="r_a164060b8ad4c0e102daa8aa2d23aeaa8"><td class="memItemLeft" align="right" valign="top">NeighborValidationResult&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a164060b8ad4c0e102daa8aa2d23aeaa8">validateNeighborConnections</a> (int maxIssuesToCollect)</td></tr>
+<tr class="memdesc:a164060b8ad4c0e102daa8aa2d23aeaa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validate all node-to-neighbor links against occupied adjacency.  <br /></td></tr>
 <tr class="separator:a164060b8ad4c0e102daa8aa2d23aeaa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87ee5eb9a8eac29ec2d4595877d9a0da" id="r_a87ee5eb9a8eac29ec2d4595877d9a0da"><td class="memItemLeft" align="right" valign="top">List&lt; String &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a87ee5eb9a8eac29ec2d4595877d9a0da">buildNeighborTableLines</a> ()</td></tr>
+<tr class="memdesc:a87ee5eb9a8eac29ec2d4595877d9a0da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a compact, line-by-line neighbor table for occupied cells.  <br /></td></tr>
 <tr class="separator:a87ee5eb9a8eac29ec2d4595877d9a0da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a262a0c154562ed47724604c0cc46bcab" id="r_a262a0c154562ed47724604c0cc46bcab"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_maze.html">Maze</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a262a0c154562ed47724604c0cc46bcab">importFromFile</a> (String filePath)  throws IOException </td></tr>
+<tr class="memdesc:a262a0c154562ed47724604c0cc46bcab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Import a maze from text using this format: line 1: row count line 2: column count line 3: start: row,col line 4: end: row,col line 5+: layout rows of 1s and 0s optional: WEIGHTS followed by length * width rows of N,E,S,W costs.  <br /></td></tr>
 <tr class="separator:a262a0c154562ed47724604c0cc46bcab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1add35b9272410e8ac5ed4a0ed1bcb71" id="r_a1add35b9272410e8ac5ed4a0ed1bcb71"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_maze.html">Maze</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1add35b9272410e8ac5ed4a0ed1bcb71">generateRandomMaze</a> (int length, int width)</td></tr>
+<tr class="memdesc:a1add35b9272410e8ac5ed4a0ed1bcb71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds a random, guaranteed-solvable maze with the given dimensions.  <br /></td></tr>
 <tr class="separator:a1add35b9272410e8ac5ed4a0ed1bcb71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a3c5692835952c9555baf64892fd9a7" id="r_a8a3c5692835952c9555baf64892fd9a7"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_maze.html">Maze</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a3c5692835952c9555baf64892fd9a7">generateRandomMaze</a> (int length, int width, boolean weighted, int minWeight, int maxWeight)</td></tr>
+<tr class="memdesc:a8a3c5692835952c9555baf64892fd9a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds a random, guaranteed-solvable maze with optional directional weights.  <br /></td></tr>
+<tr class="separator:a8a3c5692835952c9555baf64892fd9a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa8fc8bb0b1d08e20d84dd5158735df4" id="r_afa8fc8bb0b1d08e20d84dd5158735df4"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_maze.html">Maze</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa8fc8bb0b1d08e20d84dd5158735df4">generateRandomMaze</a> (int length, int width, boolean weighted, int minWeight, int maxWeight, boolean sameCostBothDirections)</td></tr>
+<tr class="memdesc:afa8fc8bb0b1d08e20d84dd5158735df4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds a random maze with optional weighted movement and reverse-edge matching.  <br /></td></tr>
+<tr class="separator:afa8fc8bb0b1d08e20d84dd5158735df4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a8ee604ab8342f085648511cb31942ce2" id="r_a8ee604ab8342f085648511cb31942ce2"><td class="memItemLeft" align="right" valign="top">static final int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ee604ab8342f085648511cb31942ce2">MIN_MOVEMENT_COST</a> = 1</td></tr>
+<tr class="memdesc:a8ee604ab8342f085648511cb31942ce2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum allowed positive movement cost.  <br /></td></tr>
+<tr class="separator:a8ee604ab8342f085648511cb31942ce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85c447a38ed9a434d086899148a8814c" id="r_a85c447a38ed9a434d086899148a8814c"><td class="memItemLeft" align="right" valign="top">static final int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85c447a38ed9a434d086899148a8814c">MAX_MOVEMENT_COST</a> = 100</td></tr>
+<tr class="memdesc:a85c447a38ed9a434d086899148a8814c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum allowed movement cost for all maps and generated mazes.  <br /></td></tr>
+<tr class="separator:a85c447a38ed9a434d086899148a8814c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28462ea61135c939ade85dfdad11efe6" id="r_a28462ea61135c939ade85dfdad11efe6"><td class="memItemLeft" align="right" valign="top">static final int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a28462ea61135c939ade85dfdad11efe6">DISABLED_MOVEMENT_COST</a> = 0</td></tr>
+<tr class="memdesc:a28462ea61135c939ade85dfdad11efe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cost value reserved for a disabled or non-existent movement direction.  <br /></td></tr>
+<tr class="separator:a28462ea61135c939ade85dfdad11efe6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Core maze model storing occupancy, neighbor links, and start/goal nodes.</p>
-<p>The maze uses a rectangular grid of <code><a class="el" href="">Node</a></code> objects. Traversable cells contain a Node reference and blocked cells are <code class="JavaDocCode">null</code>. Neighbor links represent valid movement between adjacent traversable cells.</p>
-<p>Example import format for <code><a class="el" href="#a262a0c154562ed47724604c0cc46bcab">importFromFile(String)</a></code> is: row count, column count, <code class="JavaDocCode">start: row,col</code>, <code class="JavaDocCode">end: row,col</code>, then one layout row per maze row using <code class="JavaDocCode">1</code> (path) and <code class="JavaDocCode">0</code> (wall). Example: </p><div class="fragment"><div class="line">4</div>
+<div class="textblock"><p>Core maze model storing occupancy, neighbor links, and start/goal nodes. </p>
+<p>The maze uses a rectangular grid of <code class="JavaDocCode">Node</code> objects. Traversable cells contain a Node reference and blocked cells are <code class="JavaDocCode">null</code>. Neighbor links represent geometric adjacency between traversable cells, while each direction has a movement cost. Enabled movement costs are positive integers from <code><a class="el" href="#a8ee604ab8342f085648511cb31942ce2">MIN_MOVEMENT_COST</a></code> through <code><a class="el" href="#a85c447a38ed9a434d086899148a8814c">MAX_MOVEMENT_COST</a></code>; zero is reserved for disabled or non-existent movement. Direction order is always <code class="JavaDocCode">[NORTH, EAST, SOUTH, WEST]</code>.</p>
+<p>Example import format for <code><a class="el" href="#a262a0c154562ed47724604c0cc46bcab">importFromFile(String)</a></code> is: row count, column count, <code class="JavaDocCode">start: row,col</code>, <code class="JavaDocCode">end: row,col</code>, then one layout row per maze row using <code class="JavaDocCode">1</code> (path) and <code class="JavaDocCode">0</code> (wall). An optional <code class="JavaDocCode">WEIGHTS</code> section may follow the layout. It contains one comma-separated four-value row for every grid coordinate in row-major order. Values use <code class="JavaDocCode">[N,E,S,W]</code> order; <code class="JavaDocCode">0</code> means no permitted movement and positive integer values are movement costs. If the section is absent, adjacent traversable cells default to cost <code class="JavaDocCode">1</code>. Example: </p><div class="fragment"><div class="line">4</div>
 <div class="line">5</div>
 <div class="line">start: 3,0</div>
 <div class="line">end: 0,4</div>
@@ -171,16 +219,19 @@ Static Public Member Functions</h2></td></tr>
 <div class="line">    }</div>
 <div class="line">}</div>
 <div class="line">maze.<a class="code hl_function" href="#ae20cb68cb5dc52cf20d04c669d0cde3e">exportToFile</a>(<span class="stringliteral">&quot;out.txt&quot;</span>);</div>
-<div class="ttc" id="aclass_maze_html"><div class="ttname"><a href="class_maze.html">Maze</a></div><div class="ttdef"><b>Definition</b> Maze.java:44</div></div>
-<div class="ttc" id="aclass_maze_html_a164060b8ad4c0e102daa8aa2d23aeaa8"><div class="ttname"><a href="#a164060b8ad4c0e102daa8aa2d23aeaa8">Maze.validateNeighborConnections</a></div><div class="ttdeci">NeighborValidationResult validateNeighborConnections(int maxIssuesToCollect)</div><div class="ttdef"><b>Definition</b> Maze.java:688</div></div>
-<div class="ttc" id="aclass_maze_html_a262a0c154562ed47724604c0cc46bcab"><div class="ttname"><a href="#a262a0c154562ed47724604c0cc46bcab">Maze.importFromFile</a></div><div class="ttdeci">static Maze importFromFile(String filePath)</div><div class="ttdef"><b>Definition</b> Maze.java:212</div></div>
-<div class="ttc" id="aclass_maze_html_ae20cb68cb5dc52cf20d04c669d0cde3e"><div class="ttname"><a href="#ae20cb68cb5dc52cf20d04c669d0cde3e">Maze.exportToFile</a></div><div class="ttdeci">void exportToFile(String filePath)</div><div class="ttdef"><b>Definition</b> Maze.java:462</div></div>
+<div class="ttc" id="aclass_maze_html"><div class="ttname"><a href="class_maze.html">Maze</a></div><div class="ttdoc">Core maze model storing occupancy, neighbor links, and start/goal nodes.</div><div class="ttdef"><b>Definition</b> Maze.java:53</div></div>
+<div class="ttc" id="aclass_maze_html_a164060b8ad4c0e102daa8aa2d23aeaa8"><div class="ttname"><a href="#a164060b8ad4c0e102daa8aa2d23aeaa8">Maze.validateNeighborConnections</a></div><div class="ttdeci">NeighborValidationResult validateNeighborConnections(int maxIssuesToCollect)</div><div class="ttdoc">Validate all node-to-neighbor links against occupied adjacency.</div><div class="ttdef"><b>Definition</b> Maze.java:1015</div></div>
+<div class="ttc" id="aclass_maze_html_a262a0c154562ed47724604c0cc46bcab"><div class="ttname"><a href="#a262a0c154562ed47724604c0cc46bcab">Maze.importFromFile</a></div><div class="ttdeci">static Maze importFromFile(String filePath)</div><div class="ttdoc">Import a maze from text using this format: line 1: row count line 2: column count line 3: start: row,...</div><div class="ttdef"><b>Definition</b> Maze.java:260</div></div>
+<div class="ttc" id="aclass_maze_html_ae20cb68cb5dc52cf20d04c669d0cde3e"><div class="ttname"><a href="#ae20cb68cb5dc52cf20d04c669d0cde3e">Maze.exportToFile</a></div><div class="ttdeci">void exportToFile(String filePath)</div><div class="ttdoc">Export the current maze to text format for import/export.</div><div class="ttdef"><b>Definition</b> Maze.java:657</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a64794a0b1cbed9d04736002da7ee62cb" name="a64794a0b1cbed9d04736002da7ee62cb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a64794a0b1cbed9d04736002da7ee62cb">&#9670;&#160;</a></span>Maze()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Maze.Maze </td>
@@ -193,8 +244,14 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>width</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Initializes a maze with fixed dimensions.</p>
+
+<p>Initializes a maze with fixed dimensions. </p>
 <p>A new maze starts empty: all cells are <code class="JavaDocCode">null</code> (blocked) until paths are created explicitly via <code><a class="el" href="#ad96d7e5ccf65fe29e318bd0c39b39a6a">createCell(int, int, int)</a></code> or populated through <code><a class="el" href="#a262a0c154562ed47724604c0cc46bcab">importFromFile(String)</a></code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -212,6 +269,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">List&lt; String &gt; Maze.buildNeighborTableLines </td>
@@ -220,9 +280,54 @@ Static Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Build a compact, line-by-line neighbor table for occupied cells.</p>
+
+<p>Build a compact, line-by-line neighbor table for occupied cells. </p>
 <dl class="section return"><dt>Returns</dt><dd>list of formatted lines describing neighbors for debugging </dd></dl>
+
+</div>
+</div>
+<a id="a35b968c5d80692b2f2bea517ffcd278a" name="a35b968c5d80692b2f2bea517ffcd278a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35b968c5d80692b2f2bea517ffcd278a">&#9670;&#160;</a></span>canMove()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">boolean Maze.canMove </td>
+          <td>(</td>
+          <td class="paramtype">Node</td>          <td class="paramname"><span class="paramname"><em>from</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="enum_maze_1_1_dir.html">Dir</a></td>          <td class="paramname"><span class="paramname"><em>direction</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Indicates whether movement is enabled from a node in a direction. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">from</td><td>source node </td></tr>
+    <tr><td class="paramname">direction</td><td>direction to inspect </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true when a neighbor exists and its movement cost is positive </dd></dl>
 
 </div>
 </div>
@@ -231,6 +336,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void Maze.createCell </td>
@@ -248,8 +356,14 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>direction</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Marks a cell as occupied and creates a node at that coordinate.</p>
+
+<p>Marks a cell as occupied and creates a node at that coordinate. </p>
 <p>Establishes bidirectional neighbor links immediately: this node is linked to existing occupied neighbors, and those neighbors are updated to point back. The <code class="JavaDocCode">direction</code> parameter is currently reserved and ignored.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -267,6 +381,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void Maze.exportToFile </td>
@@ -275,8 +392,14 @@ Static Public Member Functions</h2></td></tr>
           <td> throws IOException</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Export the current maze to text format for import/export.</p>
+
+<p>Export the current maze to text format for import/export. </p>
 <p>The output follows the same schema accepted by <code><a class="el" href="#a262a0c154562ed47724604c0cc46bcab">importFromFile(String)</a></code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -295,7 +418,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="a1add35b9272410e8ac5ed4a0ed1bcb71" name="a1add35b9272410e8ac5ed4a0ed1bcb71"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1add35b9272410e8ac5ed4a0ed1bcb71">&#9670;&#160;</a></span>generateRandomMaze()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1add35b9272410e8ac5ed4a0ed1bcb71">&#9670;&#160;</a></span>generateRandomMaze() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -316,11 +439,12 @@ Static Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Builds a random, guaranteed-solvable maze with the given dimensions.</p>
+
+<p>Builds a random, guaranteed-solvable maze with the given dimensions. </p>
 <p>The generated maze keeps the outer border blocked and carves interior corridors using a depth-first backtracking strategy to produce a classic maze appearance. For even dimensions, a follow-up pass extends corridors into the final interior row/column so right/bottom edges are not left as persistent solid strips.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -339,11 +463,147 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a8a3c5692835952c9555baf64892fd9a7" name="a8a3c5692835952c9555baf64892fd9a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a3c5692835952c9555baf64892fd9a7">&#9670;&#160;</a></span>generateRandomMaze() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="class_maze.html">Maze</a> Maze.generateRandomMaze </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>length</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>width</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">boolean</td>          <td class="paramname"><span class="paramname"><em>weighted</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>minWeight</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxWeight</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Builds a random, guaranteed-solvable maze with optional directional weights. </p>
+<p>When weighting is enabled, each permitted connection receives a random positive integer cost in the inclusive range <code class="JavaDocCode">[minWeight, maxWeight]</code>. The five-argument overload uses the same cost in both directions by default.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">length</td><td>total number of rows (minimum 3) </td></tr>
+    <tr><td class="paramname">width</td><td>total number of columns (minimum 3) </td></tr>
+    <tr><td class="paramname">weighted</td><td>whether to assign random movement costs </td></tr>
+    <tr><td class="paramname">minWeight</td><td>inclusive minimum movement cost </td></tr>
+    <tr><td class="paramname">maxWeight</td><td>inclusive maximum movement cost </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>newly generated solvable maze </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">IllegalArgumentException</td><td>if dimensions or weight bounds are invalid </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afa8fc8bb0b1d08e20d84dd5158735df4" name="afa8fc8bb0b1d08e20d84dd5158735df4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa8fc8bb0b1d08e20d84dd5158735df4">&#9670;&#160;</a></span>generateRandomMaze() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="class_maze.html">Maze</a> Maze.generateRandomMaze </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>length</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>width</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">boolean</td>          <td class="paramname"><span class="paramname"><em>weighted</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>minWeight</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxWeight</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">boolean</td>          <td class="paramname"><span class="paramname"><em>sameCostBothDirections</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Builds a random maze with optional weighted movement and reverse-edge matching. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">length</td><td>total number of rows (minimum 3) </td></tr>
+    <tr><td class="paramname">width</td><td>total number of columns (minimum 3) </td></tr>
+    <tr><td class="paramname">weighted</td><td>whether to assign random movement costs </td></tr>
+    <tr><td class="paramname">minWeight</td><td>inclusive minimum movement cost </td></tr>
+    <tr><td class="paramname">maxWeight</td><td>inclusive maximum movement cost </td></tr>
+    <tr><td class="paramname">sameCostBothDirections</td><td>whether each connection uses one cost in both directions </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>newly generated solvable maze </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">IllegalArgumentException</td><td>if dimensions or weight bounds are invalid </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a4abf627d4654079a2ab0e03b32df5173" name="a4abf627d4654079a2ab0e03b32df5173"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4abf627d4654079a2ab0e03b32df5173">&#9670;&#160;</a></span>getGoal()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Node Maze.getGoal </td>
@@ -352,8 +612,14 @@ Static Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Returns the current goal node.</p>
+
+<p>Returns the current goal node. </p>
 <dl class="section return"><dt>Returns</dt><dd>goal node, or null if not set </dd></dl>
 
 </div>
@@ -363,6 +629,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">int Maze.getLength </td>
@@ -371,9 +640,60 @@ Static Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Gets the maze row count.</p>
+
+<p>Gets the maze row count. </p>
 <dl class="section return"><dt>Returns</dt><dd>total number of rows </dd></dl>
+
+</div>
+</div>
+<a id="ab3e3c9884e0028e817f4bd7b0aec437f" name="ab3e3c9884e0028e817f4bd7b0aec437f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3e3c9884e0028e817f4bd7b0aec437f">&#9670;&#160;</a></span>getMoveCost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Maze.getMoveCost </td>
+          <td>(</td>
+          <td class="paramtype">Node</td>          <td class="paramname"><span class="paramname"><em>from</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Node</td>          <td class="paramname"><span class="paramname"><em>to</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the cost of moving between two adjacent nodes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">from</td><td>source node </td></tr>
+    <tr><td class="paramname">to</td><td>destination node </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>zero when movement is disabled, otherwise the positive cost </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">IllegalArgumentException</td><td>if the nodes are not adjacent </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -382,6 +702,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Node Maze.getNode </td>
@@ -394,8 +717,14 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>col</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Returns the node at a coordinate if that cell is occupied.</p>
+
+<p>Returns the node at a coordinate if that cell is occupied. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">row</td><td>row coordinate to query </td></tr>
@@ -412,6 +741,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Node Maze.getStart </td>
@@ -420,8 +752,14 @@ Static Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Returns the current start node.</p>
+
+<p>Returns the current start node. </p>
 <dl class="section return"><dt>Returns</dt><dd>start node, or null if not set </dd></dl>
 
 </div>
@@ -431,6 +769,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">int Maze.getWidth </td>
@@ -439,8 +780,14 @@ Static Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Gets the maze column count.</p>
+
+<p>Gets the maze column count. </p>
 <dl class="section return"><dt>Returns</dt><dd>total number of columns </dd></dl>
 
 </div>
@@ -463,11 +810,12 @@ Static Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Import a maze from text using this format: line 1: row count line 2: column count line 3: start: row,col line 4: end: row,col line 5+: layout rows of 1s and 0s</p>
+
+<p>Import a maze from text using this format: line 1: row count line 2: column count line 3: start: row,col line 4: end: row,col line 5+: layout rows of 1s and 0s optional: WEIGHTS followed by length * width rows of N,E,S,W costs. </p>
 <p>Cells marked <code class="JavaDocCode">1</code> are created through <code><a class="el" href="#ad96d7e5ccf65fe29e318bd0c39b39a6a">createCell(int, int, int)</a></code> so neighbor links are built incrementally and remain bidirectionally consistent.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -475,7 +823,7 @@ Static Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>newly created <a class="el" href="class_maze.html">Maze</a> instance populated from file data </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>newly created <a class="el" href="class_maze.html" title="Core maze model storing occupancy, neighbor links, and start/goal nodes.">Maze</a> instance populated from file data </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
     <tr><td class="paramname">IOException</td><td>if file reading fails </td></tr>
@@ -491,6 +839,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">boolean Maze.isInBounds </td>
@@ -503,8 +854,14 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>col</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Checks whether coordinates are inside maze boundaries.</p>
+
+<p>Checks whether coordinates are inside maze boundaries. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">row</td><td>row coordinate to test </td></tr>
@@ -521,6 +878,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">boolean Maze.isOccupied </td>
@@ -533,8 +893,14 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>col</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Checks whether a cell is a traversable/occupied cell.</p>
+
+<p>Checks whether a cell is a traversable/occupied cell. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">row</td><td>row coordinate to test </td></tr>
@@ -551,6 +917,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void Maze.setGoal </td>
@@ -563,8 +932,14 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>col</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Sets the goal node and updates the goal flag on nodes accordingly.</p>
+
+<p>Sets the goal node and updates the goal flag on nodes accordingly. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">row</td><td>goal row coordinate </td></tr>
@@ -580,6 +955,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void Maze.setStart </td>
@@ -592,8 +970,14 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>col</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Sets the start node if the given coordinate is occupied.</p>
+
+<p>Sets the start node if the given coordinate is occupied. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">row</td><td>start row coordinate </td></tr>
@@ -609,6 +993,9 @@ Static Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">NeighborValidationResult Maze.validateNeighborConnections </td>
@@ -617,8 +1004,14 @@ Static Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Validate all node-to-neighbor links against occupied adjacency.</p>
+
+<p>Validate all node-to-neighbor links against occupied adjacency. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">maxIssuesToCollect</td><td>maximum number of issue messages to store. </td></tr>
@@ -626,6 +1019,79 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>validation result containing status, issue count, and messages </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a28462ea61135c939ade85dfdad11efe6" name="a28462ea61135c939ade85dfdad11efe6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28462ea61135c939ade85dfdad11efe6">&#9670;&#160;</a></span>DISABLED_MOVEMENT_COST</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">final int Maze.DISABLED_MOVEMENT_COST = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cost value reserved for a disabled or non-existent movement direction. </p>
+
+</div>
+</div>
+<a id="a85c447a38ed9a434d086899148a8814c" name="a85c447a38ed9a434d086899148a8814c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85c447a38ed9a434d086899148a8814c">&#9670;&#160;</a></span>MAX_MOVEMENT_COST</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">final int Maze.MAX_MOVEMENT_COST = 100</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Maximum allowed movement cost for all maps and generated mazes. </p>
+
+</div>
+</div>
+<a id="a8ee604ab8342f085648511cb31942ce2" name="a8ee604ab8342f085648511cb31942ce2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ee604ab8342f085648511cb31942ce2">&#9670;&#160;</a></span>MIN_MOVEMENT_COST</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">final int Maze.MIN_MOVEMENT_COST = 1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Minimum allowed positive movement cost. </p>
 
 </div>
 </div>
