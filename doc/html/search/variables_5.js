@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['greedy_0',['GREEDY',['../enum_maze_solver_1_1_algorithm.html#af0bc15c0a95311a2f0063171aa6432c6',1,'MazeSolver::Algorithm']]]
+  ['final_5fpath_0',['FINAL_PATH',['../enumui_1_1_maze_renderer_1_1_weight_display_state.html#a80f85b1e042acb9c3817f69b9d4920ca',1,'ui::MazeRenderer::WeightDisplayState']]],
+  ['fixed_1',['FIXED',['../enumexperiments_1_1_test_suite_1_1_endpoint_mode.html#a961a2627ea1b94f9b9e355eaafe71991',1,'experiments::TestSuite::EndpointMode']]]
 ];

@@ -1,3 +1,5 @@
+package ui;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -14,6 +16,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,8 +39,11 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import maze.map.Maze;
+import maze.search.MazeSolver;
+
 /**
- * @brief Renderer and UI controller for the maze application.
+ * Renderer and UI controller for the maze application.
  *
  * <p>This class owns the full Swing-driven UX flow:
  * <ul>
@@ -50,16 +57,16 @@ import javax.swing.Timer;
  *
  * <p>Typical usage is through {@link #launchFromTitleScreen()} from the app entrypoint.
  * Example:
- * @code
+ * <pre>{@code
  * SwingUtilities.invokeLater(MazeRenderer::launchFromTitleScreen);
- * @endcode
+ * }</pre>
  *
  * <p>Typical extension point for custom highlighting:
- * @code
+ * <pre>{@code
  * Maze.Node node = maze.getStart();
  * MazeRenderer.setNodeColor(node, Color.MAGENTA);
  * MazeRenderer.resetNodeColor(node);
- * @endcode
+ * }</pre>
  */
 public final class MazeRenderer {
 
@@ -114,6 +121,8 @@ public final class MazeRenderer {
     private static MazeSolver solver;
     private static Timer solveTimer;
     private static volatile boolean solvingInstantly;
+    private static Thread instantSolveWorker;
+    private static boolean shuttingDown;
     private static long solveSessionWallStartNs;
     private static String solveSessionMode = "unknown";
     private static int solveSessionDelayMs;
@@ -138,12 +147,60 @@ public final class MazeRenderer {
     // ---------------------------------------------------------------------
 
     /**
-     * @brief Starts the renderer-driven application flow from the title screen.
+     * Starts the renderer-driven application flow from the title screen.
      *
      * <p>This is the recommended public entrypoint for GUI startup.
      */
     public static void launchFromTitleScreen() {
         showTitleScreen();
+    }
+
+    /**
+     * Stops active work, closes all application windows, and terminates the JVM.
+     *
+     * <p>This is used by every top-level window so closing the UI cannot leave
+     * an experiment worker or solve session running in the background.
+     */
+    public static void shutdownApplication() {
+        if (shuttingDown) {
+            return;
+        }
+        shuttingDown = true;
+        stopTimerIfRunning();
+        if (instantSolveWorker != null) {
+            instantSolveWorker.interrupt();
+            instantSolveWorker = null;
+        }
+        TestSuiteWindow.closeWindow();
+        if (titleFrame != null) {
+            titleFrame.dispose();
+            titleFrame = null;
+        }
+        if (mazeFrame != null) {
+            mazeFrame.dispose();
+            mazeFrame = null;
+        }
+        System.exit(0);
+    }
+
+    /**
+     * Opens an animated review session for an experiment result.
+     *
+     * @param maze exact map used by the result
+     * @param algorithm algorithm to select initially
+     */
+    public static void reviewExperiment(Maze maze, MazeSolver.Algorithm algorithm) {
+        if (maze == null || algorithm == null) {
+            throw new IllegalArgumentException("Maze and algorithm are required.");
+        }
+        Runnable review = () -> runInteractiveSolveSession(
+                maze, algorithm == MazeSolver.Algorithm.A_STAR ? "A*" : algorithm.name(),
+                DEFAULT_SESSION_STEP_DELAY_MS, DEFAULT_VISITED_COLOR);
+        if (SwingUtilities.isEventDispatchThread()) {
+            review.run();
+        } else {
+            SwingUtilities.invokeLater(review);
+        }
     }
 
     // ---------------------------------------------------------------------
@@ -159,7 +216,13 @@ public final class MazeRenderer {
         }
 
         titleFrame = new JFrame("Maze Solver");
-        titleFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        titleFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        titleFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent event) {
+                shutdownApplication();
+            }
+        });
         titleFrame.setSize(1280, 720);
         titleFrame.setLocationRelativeTo(null);
 
@@ -182,6 +245,10 @@ public final class MazeRenderer {
             promptForRandomMazeAndRun();
         });
 
+        JButton configureTestsButton = new JButton("CONFIGURE TESTS");
+        styleTitleButton(configureTestsButton);
+        configureTestsButton.addActionListener(e -> TestSuiteWindow.showWindow());
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -193,6 +260,9 @@ public final class MazeRenderer {
         gbc.gridy = 1;
         gbc.insets = new Insets(0, 0, 0, 0);
         mainPanel.add(generateButton, gbc);
+        gbc.gridy = 2;
+        gbc.insets = new Insets(12, 0, 0, 0);
+        mainPanel.add(configureTestsButton, gbc);
         titleFrame.add(mainPanel);
         titleFrame.setVisible(true);
     }
@@ -392,14 +462,22 @@ public final class MazeRenderer {
      */
     private static String chooseMazeFile() {
         FileDialog openDialog = new FileDialog((Frame) null, "Select Maze File", FileDialog.LOAD);
-        openDialog.setDirectory(".");
-        openDialog.setFile("*.txt");
+        openDialog.setDirectory(new java.io.File(".").getAbsoluteFile().getParent());
+        openDialog.setFile("*.msmap");
         openDialog.setVisible(true);
 
         String fileName = openDialog.getFile();
         String directory = openDialog.getDirectory();
         if (fileName == null) {
             System.out.println("No File Chosen");
+            return null;
+        }
+        if (!fileName.toLowerCase().endsWith(".msmap")) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Please select a .msmap map file.",
+                    "Maze File Type Error",
+                    JOptionPane.ERROR_MESSAGE);
             return null;
         }
         return directory + fileName;
@@ -603,17 +681,26 @@ public final class MazeRenderer {
 
         Thread worker = new Thread(() -> {
             List<Point> traversedPoints = new ArrayList<>();
-            while (!solver.isFinished()) {
+            while (!solver.isFinished()
+                    && !Thread.currentThread().isInterrupted()
+                    && !shuttingDown) {
                 Maze.Node visited = solver.updateSolve();
                 if (visited != null && visited != renderedMaze.getStart() && visited != renderedMaze.getGoal()) {
                     traversedPoints.add(new Point(visited.col, visited.row));
                 }
             }
 
+            if (Thread.currentThread().isInterrupted() || shuttingDown) {
+                return;
+            }
+
             boolean solved = solver.isSolved();
             List<Point> finalPath = solved ? solver.getFinalPath() : null;
 
             SwingUtilities.invokeLater(() -> {
+                if (shuttingDown) {
+                    return;
+                }
                 solvingInstantly = false;
                 traversedTiles = setCellColors(traversedPoints, sessionVisitedColor);
                 setTraversedCount(traversedTiles);
@@ -637,6 +724,7 @@ public final class MazeRenderer {
         }, "maze-instant-solve");
 
         worker.setDaemon(true);
+        instantSolveWorker = worker;
         worker.start();
     }
 
@@ -725,7 +813,13 @@ public final class MazeRenderer {
         });
 
         mazeFrame = new JFrame("Maze Map");
-        mazeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mazeFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        mazeFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent event) {
+                shutdownApplication();
+            }
+        });
         mazeFrame.setLayout(new BorderLayout());
         mazeFrame.add(renderedGridScrollPane, BorderLayout.CENTER);
         mazeFrame.add(controlPanel, BorderLayout.SOUTH);
@@ -1243,15 +1337,15 @@ public final class MazeRenderer {
     /**
      * @brief Prompts for destination path when saving a maze file.
      *
-     * <p>The application stores maze files with a {@code .txt} extension so
+     * <p>The application stores maze files with a {@code .msmap} extension so
      * they remain visible in the import dialog.
      *
      * @return selected absolute file path, or null when canceled
      */
     private static String chooseSaveMazeFile() {
         FileDialog saveDialog = new FileDialog((Frame) null, "Save Maze File", FileDialog.SAVE);
-        saveDialog.setDirectory(".");
-        saveDialog.setFile("maze.txt");
+        saveDialog.setDirectory(new java.io.File(".").getAbsoluteFile().getParent());
+        saveDialog.setFile("maze.msmap");
         saveDialog.setVisible(true);
 
         String fileName = saveDialog.getFile();
@@ -1259,8 +1353,8 @@ public final class MazeRenderer {
         if (fileName == null) {
             return null;
         }
-        if (!fileName.toLowerCase().endsWith(".txt")) {
-            fileName += ".txt";
+        if (!fileName.toLowerCase().endsWith(".msmap")) {
+            fileName += ".msmap";
         }
         return directory + fileName;
     }
@@ -1497,7 +1591,7 @@ public final class MazeRenderer {
     }
 
     /**
-     * @brief Sets one node color using maze coordinates.
+     * Sets one node color using maze coordinates.
       *
       * <p>Typical usage is temporary overlays (for example hints or debug markers)
       * on top of solver coloring.
@@ -1514,7 +1608,7 @@ public final class MazeRenderer {
     }
 
     /**
-     * @brief Restores one node to its default semantic color.
+     * Restores one node to its default semantic color.
       *
       * <p>Default semantic color rules are: start=green, goal=blue,
       * traversable=white, blocked=dark gray.

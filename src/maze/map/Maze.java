@@ -1,11 +1,12 @@
+package maze.map;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import experiments.TestSuite;
 
 /**
  * Core maze model storing occupancy, neighbor links, and start/goal nodes.
@@ -27,7 +28,7 @@ import java.util.Random;
  * and positive integer values are movement costs. If the section is absent, adjacent
  * traversable cells default to cost {@code 1}.
  * Example:
- * @code
+ * <pre>{@code
  * 4
  * 5
  * start: 3,0
@@ -36,21 +37,23 @@ import java.util.Random;
  * 10001
  * 10101
  * 11111
- * @endcode
+ * }</pre>
  *
  * <p>Typical implementation flow:
- * @code
- * Maze maze = Maze.importFromFile("src/test_346x346.txt");
+ * <pre>{@code
+ * Maze maze = Maze.importFromFile("test/resources/maps/test_346x346.msmap");
  * Maze.NeighborValidationResult vr = maze.validateNeighborConnections(25);
  * if (!vr.isValid()) {
  *     for (String issue : vr.getIssues()) {
  *         System.out.println(issue);
  *     }
  * }
- * maze.exportToFile("out.txt");
- * @endcode
+ * maze.exportToFile("out.msmap");
+ * }</pre>
  */
 public class Maze {
+    /** Extension used for editable maze map files. */
+    public static final String MAP_EXTENSION = ".msmap";
 
     /** Minimum allowed positive movement cost. */
     public static final int MIN_MOVEMENT_COST = 1;
@@ -65,7 +68,14 @@ public class Maze {
      * Cardinal directions used for indexing node neighbors.
      */
     public enum Dir {
-        NORTH(0), EAST(1), SOUTH(2), WEST(3);
+        /** Direction toward the previous row. */
+        NORTH(0),
+        /** Direction toward the next column. */
+        EAST(1),
+        /** Direction toward the next row. */
+        SOUTH(2),
+        /** Direction toward the previous column. */
+        WEST(3);
         private final int idx;
 
         /**
@@ -94,11 +104,15 @@ public class Maze {
      */
 
     public static class Node {
+        /** Zero-based row coordinate. */
         public final int row;
+        /** Zero-based column coordinate. */
         public final int col;
+        /** Whether this node is the maze goal. */
         public boolean isGoal;
         
         // Neighbor references: [N, E, S, W] (null if wall or out of bounds)
+        /** Adjacent nodes in {@code [NORTH, EAST, SOUTH, WEST]} order. */
         public Node[] neighbors;
         // Movement costs: [N, E, S, W] (0 means movement is disabled)
         private int[] moveCosts;
@@ -258,8 +272,21 @@ public class Maze {
     * @throws IllegalArgumentException if file contents are invalid
      */
     public static Maze importFromFile(String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-        List<String> lines = Files.readAllLines(path);
+        return MazeFileIO.importFromFile(filePath);
+    }
+
+    /**
+     * Imports a maze from the complete text representation.
+     *
+     * @param contents map file contents
+     * @return imported maze
+     * @throws IOException if the text cannot be read
+     */
+    public static Maze importFromText(String contents) throws IOException {
+        return MazeFileIO.importFromText(contents);
+    }
+
+    private static Maze importFromLines(List<String> lines) throws IOException {
 
         if (lines.size() < 4) {
             throw new IllegalArgumentException("Maze file must contain at least 4 header lines.");
@@ -445,6 +472,417 @@ public class Maze {
                     maze, minWeight, maxWeight, sameCostBothDirections, random);
         }
         return maze;
+    }
+
+    /**
+     * Generates a seeded experiment map from a validated test configuration.
+     *
+     * <p>The outside border is always blocked and is excluded from the
+     * requested density calculation. The generated map uses one effective
+     * seed for its layout, endpoint selection, and movement costs. Algorithms
+     * should run against the returned maze without regenerating it.
+     *
+     * @param testCase validated experiment configuration
+     * @param effectiveSeed seed for this specific iteration
+     * @return generated map and metadata used to describe the instance
+     * @throws IllegalArgumentException if the configuration is invalid or a
+     *         valid endpoint pair cannot be selected
+     */
+    public static GeneratedExperimentMap generateExperimentMap(
+            TestSuite.TestCase testCase, long effectiveSeed) {
+        if (testCase == null) {
+            throw new IllegalArgumentException("Experiment test case cannot be null.");
+        }
+        testCase.validate();
+
+        Random random = new Random(effectiveSeed);
+        int length = testCase.getRows();
+        int width = testCase.getColumns();
+        final int maxAttempts = 200;
+
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            boolean[][] open = createDensityLayout(testCase, random);
+            int[][] endpoints = selectEndpoints(testCase, open, random);
+            if (endpoints == null) {
+                continue;
+            }
+
+            int startRow = endpoints[0][0];
+            int startCol = endpoints[0][1];
+            int goalRow = endpoints[1][0];
+            int goalCol = endpoints[1][1];
+            boolean connected = areConnected(open, startRow, startCol, goalRow, goalCol);
+
+            if (testCase.getReachabilityMode() == TestSuite.ReachabilityMode.GUARANTEED_SOLVABLE
+                    && !connected) {
+                if (attempt == maxAttempts - 1) {
+                    carveDirectConnection(open, startRow, startCol, goalRow, goalCol);
+                    connected = true;
+                } else {
+                    continue;
+                }
+            }
+
+            if (testCase.getReachabilityMode() == TestSuite.ReachabilityMode.GUARANTEED_UNSOLVABLE) {
+                isolateGoal(open, goalRow, goalCol, startRow, startCol);
+                connected = areConnected(open, startRow, startCol, goalRow, goalCol);
+                if (connected) {
+                    continue;
+                }
+            }
+
+            Maze maze = createMazeFromLayout(open);
+            maze.setStart(startRow, startCol);
+            maze.setGoal(goalRow, goalCol);
+            assignExperimentCosts(maze, testCase, random);
+
+            int interiorCells = (length - 2) * (width - 2);
+            int blockedCells = countBlockedInterior(open);
+            double blockedPercent = 100.0 * blockedCells / interiorCells;
+            int actualDistance = Math.abs(startRow - goalRow) + Math.abs(startCol - goalCol);
+            return new GeneratedExperimentMap(
+                    maze, effectiveSeed, blockedCells, blockedPercent, connected,
+                    startRow, startCol, goalRow, goalCol, actualDistance);
+        }
+
+        throw new IllegalArgumentException(
+                "Unable to generate an experiment map for test case '" + testCase.getId() + "'.");
+    }
+
+    private static boolean[][] createDensityLayout(TestSuite.TestCase testCase, Random random) {
+        int length = testCase.getRows();
+        int width = testCase.getColumns();
+        boolean[][] open = new boolean[length][width];
+        List<int[]> candidates = new ArrayList<>();
+
+        for (int row = 1; row < length - 1; row++) {
+            for (int col = 1; col < width - 1; col++) {
+                open[row][col] = true;
+                candidates.add(new int[] {row, col});
+            }
+        }
+
+        if (testCase.getEndpointMode() == TestSuite.EndpointMode.FIXED) {
+            candidates.removeIf(coordinate ->
+                    (coordinate[0] == testCase.getStartRow()
+                            && coordinate[1] == testCase.getStartColumn())
+                    || (coordinate[0] == testCase.getGoalRow()
+                            && coordinate[1] == testCase.getGoalColumn()));
+        }
+
+        Collections.shuffle(candidates, random);
+        int interiorCells = (length - 2) * (width - 2);
+        int requestedBlocked = (int) Math.round(
+                interiorCells * testCase.getBlockedPercent() / 100.0);
+        for (int index = 0; index < requestedBlocked && index < candidates.size(); index++) {
+            int[] coordinate = candidates.get(index);
+            open[coordinate[0]][coordinate[1]] = false;
+        }
+        return open;
+    }
+
+    private static int[][] selectEndpoints(
+            TestSuite.TestCase testCase, boolean[][] open, Random random) {
+        if (testCase.getEndpointMode() == TestSuite.EndpointMode.FIXED) {
+            if (testCase.getReachabilityMode()
+                    == TestSuite.ReachabilityMode.GUARANTEED_UNSOLVABLE
+                    && Math.abs(testCase.getStartRow() - testCase.getGoalRow())
+                            + Math.abs(testCase.getStartColumn() - testCase.getGoalColumn()) <= 1) {
+                return null;
+            }
+            return new int[][] {
+                    {testCase.getStartRow(), testCase.getStartColumn()},
+                    {testCase.getGoalRow(), testCase.getGoalColumn()}
+            };
+        }
+
+        List<int[]> openCells = getOpenInteriorCells(open);
+        if (openCells.size() < 2) {
+            return null;
+        }
+        if (testCase.getEndpointMode() == TestSuite.EndpointMode.RANDOM) {
+            int[] start = openCells.get(random.nextInt(openCells.size()));
+            List<int[]> reachable = getReachableCells(open, start[0], start[1]);
+            if (testCase.getReachabilityMode() == TestSuite.ReachabilityMode.GUARANTEED_SOLVABLE
+                    && reachable.size() > 1) {
+                int[] goal = reachable.get(random.nextInt(reachable.size()));
+                if (sameCoordinate(start, goal)) {
+                    goal = reachable.get(1);
+                }
+                return new int[][] {start, goal};
+            }
+            int[] goal = openCells.get(random.nextInt(openCells.size()));
+            return sameCoordinate(start, goal) ? null : new int[][] {start, goal};
+        }
+
+        int target = testCase.getTargetManhattanDistance();
+        int tolerance = testCase.getDistanceTolerance();
+        int[] bestStart = null;
+        int[] bestGoal = null;
+        int bestDifference = Integer.MAX_VALUE;
+        for (int attempt = 0; attempt < 5000; attempt++) {
+            int[] start = openCells.get(random.nextInt(openCells.size()));
+            List<int[]> goals = testCase.getReachabilityMode()
+                    == TestSuite.ReachabilityMode.GUARANTEED_SOLVABLE
+                    ? getReachableCells(open, start[0], start[1]) : openCells;
+            if (goals.size() < 2) {
+                continue;
+            }
+            int[] goal = goals.get(random.nextInt(goals.size()));
+            if (sameCoordinate(start, goal)) {
+                continue;
+            }
+            int distance = manhattanDistance(start, goal);
+            if (testCase.getReachabilityMode()
+                    == TestSuite.ReachabilityMode.GUARANTEED_UNSOLVABLE && distance <= 1) {
+                continue;
+            }
+            int difference = Math.abs(distance - target);
+            if (difference < bestDifference) {
+                bestStart = start;
+                bestGoal = goal;
+                bestDifference = difference;
+            }
+            if (difference <= tolerance) {
+                return new int[][] {start, goal};
+            }
+        }
+        return bestDifference <= tolerance
+                ? new int[][] {bestStart, bestGoal} : null;
+    }
+
+    private static Maze createMazeFromLayout(boolean[][] open) {
+        Maze maze = new Maze(open.length, open[0].length);
+        for (int row = 0; row < open.length; row++) {
+            for (int col = 0; col < open[row].length; col++) {
+                if (open[row][col]) {
+                    maze.createCell(row, col, 0);
+                }
+            }
+        }
+        return maze;
+    }
+
+    private static void assignExperimentCosts(
+            Maze maze, TestSuite.TestCase testCase, Random random) {
+        if (testCase.getCostMode() == TestSuite.CostMode.UNIFORM) {
+            return;
+        }
+        assignRandomMovementCosts(
+                maze, testCase.getMinimumCost(), testCase.getMaximumCost(),
+                testCase.isSameCostBothDirections(), random);
+    }
+
+    private static List<int[]> getOpenInteriorCells(boolean[][] open) {
+        List<int[]> cells = new ArrayList<>();
+        for (int row = 1; row < open.length - 1; row++) {
+            for (int col = 1; col < open[row].length - 1; col++) {
+                if (open[row][col]) {
+                    cells.add(new int[] {row, col});
+                }
+            }
+        }
+        return cells;
+    }
+
+    private static List<int[]> getReachableCells(boolean[][] open, int startRow, int startCol) {
+        List<int[]> reachable = new ArrayList<>();
+        boolean[][] visited = new boolean[open.length][open[0].length];
+        List<int[]> queue = new ArrayList<>();
+        queue.add(new int[] {startRow, startCol});
+        visited[startRow][startCol] = true;
+        for (int index = 0; index < queue.size(); index++) {
+            int[] current = queue.get(index);
+            reachable.add(current);
+            for (Dir direction : Dir.values()) {
+                int row = current[0] + rowDelta(direction);
+                int col = current[1] + colDelta(direction);
+                if (row >= 0 && row < open.length && col >= 0 && col < open[0].length
+                        && open[row][col] && !visited[row][col]) {
+                    visited[row][col] = true;
+                    queue.add(new int[] {row, col});
+                }
+            }
+        }
+        return reachable;
+    }
+
+    private static boolean areConnected(
+            boolean[][] open, int startRow, int startCol, int goalRow, int goalCol) {
+        for (int[] coordinate : getReachableCells(open, startRow, startCol)) {
+            if (coordinate[0] == goalRow && coordinate[1] == goalCol) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void carveDirectConnection(
+            boolean[][] open, int startRow, int startCol, int goalRow, int goalCol) {
+        int row = startRow;
+        int col = startCol;
+        open[row][col] = true;
+        while (row != goalRow) {
+            row += Integer.signum(goalRow - row);
+            open[row][col] = true;
+        }
+        while (col != goalCol) {
+            col += Integer.signum(goalCol - col);
+            open[row][col] = true;
+        }
+    }
+
+    private static void isolateGoal(
+            boolean[][] open, int goalRow, int goalCol, int startRow, int startCol) {
+        for (Dir direction : Dir.values()) {
+            int row = goalRow + rowDelta(direction);
+            int col = goalCol + colDelta(direction);
+            if (row >= 1 && row < open.length - 1 && col >= 1 && col < open[0].length - 1
+                    && !(row == startRow && col == startCol)) {
+                open[row][col] = false;
+            }
+        }
+    }
+
+    private static int countBlockedInterior(boolean[][] open) {
+        int blocked = 0;
+        for (int row = 1; row < open.length - 1; row++) {
+            for (int col = 1; col < open[row].length - 1; col++) {
+                if (!open[row][col]) {
+                    blocked++;
+                }
+            }
+        }
+        return blocked;
+    }
+
+    private static boolean sameCoordinate(int[] first, int[] second) {
+        return first[0] == second[0] && first[1] == second[1];
+    }
+
+    private static int manhattanDistance(int[] first, int[] second) {
+        return Math.abs(first[0] - second[0]) + Math.abs(first[1] - second[1]);
+    }
+
+    /**
+     * Metadata for one generated experiment map.
+     */
+    public static final class GeneratedExperimentMap {
+        private final Maze maze;
+        private final long effectiveSeed;
+        private final int blockedCellCount;
+        private final double actualBlockedPercent;
+        private final boolean solvable;
+        private final int startRow;
+        private final int startColumn;
+        private final int goalRow;
+        private final int goalColumn;
+        private final int actualManhattanDistance;
+
+        private GeneratedExperimentMap(
+                Maze maze, long effectiveSeed, int blockedCellCount,
+                double actualBlockedPercent, boolean solvable,
+                int startRow, int startColumn, int goalRow, int goalColumn,
+                int actualManhattanDistance) {
+            this.maze = maze;
+            this.effectiveSeed = effectiveSeed;
+            this.blockedCellCount = blockedCellCount;
+            this.actualBlockedPercent = actualBlockedPercent;
+            this.solvable = solvable;
+            this.startRow = startRow;
+            this.startColumn = startColumn;
+            this.goalRow = goalRow;
+            this.goalColumn = goalColumn;
+            this.actualManhattanDistance = actualManhattanDistance;
+        }
+
+        /**
+         * Wraps an imported maze as an experiment map without regenerating it.
+         *
+         * @param maze imported maze to execute
+         * @param seed effective seed associated with the experiment row
+         * @return generated-map wrapper containing the imported maze
+         */
+        public static GeneratedExperimentMap fromSavedMap(Maze maze, long seed) {
+            int blocked = 0;
+            for (int row = 1; row < maze.getLength() - 1; row++) {
+                for (int col = 1; col < maze.getWidth() - 1; col++) {
+                    if (!maze.isOccupied(row, col)) {
+                        blocked++;
+                    }
+                }
+            }
+            int interior = Math.max(1, (maze.getLength() - 2) * (maze.getWidth() - 2));
+            int startRow = maze.getStart().row;
+            int startColumn = maze.getStart().col;
+            int goalRow = maze.getGoal().row;
+            int goalColumn = maze.getGoal().col;
+            return new GeneratedExperimentMap(maze, seed, blocked,
+                    100.0 * blocked / interior, true, startRow, startColumn,
+                    goalRow, goalColumn,
+                    Math.abs(startRow - goalRow) + Math.abs(startColumn - goalColumn));
+        }
+
+        /**
+         * Gets the generated maze containing the selected endpoints and costs.
+         *
+         * @return generated maze
+         */
+        public Maze getMaze() { return maze; }
+        /**
+         * Gets the effective seed used to generate this map.
+         *
+         * @return effective seed
+         */
+        public long getEffectiveSeed() { return effectiveSeed; }
+        /**
+         * Gets the blocked interior-cell count.
+         *
+         * @return blocked interior-cell count
+         */
+        public int getBlockedCellCount() { return blockedCellCount; }
+        /**
+         * Gets the actual blocked percentage among interior cells.
+         *
+         * @return actual blocked percentage
+         */
+        public double getActualBlockedPercent() { return actualBlockedPercent; }
+        /**
+         * Indicates whether the selected endpoints are connected.
+         *
+         * @return true when the generated map has a route
+         */
+        public boolean isSolvable() { return solvable; }
+        /**
+         * Gets the selected start row.
+         *
+         * @return start row
+         */
+        public int getStartRow() { return startRow; }
+        /**
+         * Gets the selected start column.
+         *
+         * @return start column
+         */
+        public int getStartColumn() { return startColumn; }
+        /**
+         * Gets the selected goal row.
+         *
+         * @return goal row
+         */
+        public int getGoalRow() { return goalRow; }
+        /**
+         * Gets the selected goal column.
+         *
+         * @return goal column
+         */
+        public int getGoalColumn() { return goalColumn; }
+        /**
+         * Gets the actual Manhattan distance between endpoints.
+         *
+         * @return actual Manhattan distance
+         */
+        public int getActualManhattanDistance() { return actualManhattanDistance; }
     }
 
     /**
@@ -655,42 +1093,16 @@ public class Maze {
       * @throws IllegalStateException if start or end is not set
      */
     public void exportToFile(String filePath) throws IOException {
-        if (start == null) {
-            throw new IllegalStateException("Start position is not set.");
-        }
-        if (goal == null) {
-            throw new IllegalStateException("End position is not set.");
-        }
+        MazeFileIO.exportToFile(this, filePath);
+    }
 
-        StringBuilder output = new StringBuilder();
-        output.append(length).append(System.lineSeparator());
-        output.append(width).append(System.lineSeparator());
-        output.append("start: ").append(start.row).append(",").append(start.col).append(System.lineSeparator());
-        output.append("end: ").append(goal.row).append(",").append(goal.col).append(System.lineSeparator());
-
-        for (int row = 0; row < length; row++) {
-            for (int col = 0; col < width; col++) {
-                output.append(grid[row][col] != null ? '1' : '0');
-            }
-            output.append(System.lineSeparator());
-        }
-
-        output.append(System.lineSeparator());
-        output.append("WEIGHTS").append(System.lineSeparator());
-        for (int row = 0; row < length; row++) {
-            for (int col = 0; col < width; col++) {
-                Node node = grid[row][col];
-                for (int direction = 0; direction < Dir.values().length; direction++) {
-                    if (direction > 0) {
-                        output.append(",");
-                    }
-                    output.append(node == null ? 0 : node.getMoveCost(Dir.values()[direction]));
-                }
-                output.append(System.lineSeparator());
-            }
-        }
-
-        Files.writeString(Paths.get(filePath), output.toString());
+    /**
+     * Exports the current maze using the complete saveable map format.
+     *
+     * @return serialized maze text
+     */
+    public String exportToText() {
+        return MazeFileIO.exportToText(this);
     }
 
     /**

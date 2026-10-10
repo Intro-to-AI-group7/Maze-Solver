@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['resetnodecolor_0',['resetNodeColor',['../class_maze_renderer.html#a8b6f55abc0070fb2aa1dd520ae018af9',1,'MazeRenderer']]],
-  ['resetsearch_1',['resetSearch',['../class_maze_solver.html#a5f7895d3d944960d5c68b7b5d4e33471',1,'MazeSolver']]]
+  ['launchfromtitlescreen_0',['launchFromTitleScreen',['../classui_1_1_maze_renderer.html#a7629fee0bfcce84fa1236467aae37eab',1,'ui::MazeRenderer']]],
+  ['load_1',['load',['../classexperiments_1_1_test_suite_i_o.html#a84b76664e41ef89c881d4095ae263969',1,'experiments::TestSuiteIO']]]
 ];

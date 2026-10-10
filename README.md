@@ -1,6 +1,9 @@
-# Maze-Solver
+# Maze-Solver 0.7
 
-Maze-Solver is a Java Swing desktop app for loading, visualizing, and solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and A*. Maze files now support optional per-direction movement costs while preserving the original unweighted format.
+Maze-Solver 0.7 is a Java Swing desktop app for loading, visualizing, and
+solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First
+Search, and weighted A*. Maze files support optional per-direction movement
+costs while preserving the original unweighted format.
 
 It is designed for both interactive exploration and large-map performance testing, with a paint-based renderer that supports very large mazes efficiently.
 
@@ -24,12 +27,14 @@ It is designed for both interactive exploration and large-map performance testin
 
 ## Overview
 
-Maze-Solver has four main responsibilities:
+Maze-Solver has six main responsibilities:
 
-1. Load maze files from disk.
+1. Load human-readable `.msmap` maze files from disk.
 2. Validate and visualize the maze graph.
 3. Run DFS, BFS, UCS, Greedy Best-First Search, or weighted A* incrementally or instantly.
-4. Show traversal progress and final path with clear visual semantics.
+4. Configure reproducible multi-algorithm experiment suites and export results.
+5. Review exact experiment maps in the animated renderer.
+6. Show traversal progress and final path with clear visual semantics.
 
 ## Features
 
@@ -48,12 +53,19 @@ Maze-Solver has four main responsibilities:
 - Optional grid overlay for viewing directional movement costs. Equal opposite
   costs share one edge label; asymmetric costs show separate directional labels.
 - Default startup solve settings: A* algorithm and 200 ms step delay.
+- Configurable test-suite workflow from the title screen.
+- Seeded experiment generation with adjustable map size, interior obstacle
+  density, reachability, endpoint placement, and movement-cost policies.
+- Shared-map comparisons across any selected subset of the five algorithms.
+- Suite save/load, progress and cancellation, per-result animated review,
+  suite map export, and UTF-8 CSV export.
 
 ## Requirements
 
 - Java JDK 17+ (11+ may work, but 17+ is recommended).
 - Windows, macOS, or Linux with desktop GUI support.
 - No external dependencies required.
+- Release version: `0.7` (also exposed by `app.Version.RELEASE`).
 
 ## Quick Start
 
@@ -61,14 +73,23 @@ From the repository root:
 
 1. Compile (PowerShell)
 
-```bash
-javac src\*.java
+```powershell
+New-Item -ItemType Directory -Force build\classes | Out-Null
+$sources = @((Get-ChildItem -Filter *.java src -Recurse).FullName) +
+    @((Get-ChildItem -Filter *.java test\java -Recurse).FullName)
+javac -Xlint:all -d build\classes $sources
 ```
 
 2. Run
 
-```bash
-java -cp src MS
+```powershell
+java -cp build\classes app.MS
+```
+
+Run the dependency-free regression suite with:
+
+```powershell
+java -cp build\classes test.RegressionTests
 ```
 
 Startup sequence:
@@ -78,6 +99,48 @@ Startup sequence:
 3. If importing, select a maze text file. If generating, enter rows and columns,
    then optionally enable movement weights with a range from 1 through 100.
 4. Solve interactively.
+
+To configure experiments, choose **Configure Tests** on the title screen. Add
+one row per test condition, edit the row values, select algorithms and
+iterations, then choose **Run Tests**. Each generated-map iteration creates
+one map and uses that same map for every selected algorithm. Saved-map rows
+reuse their embedded map for every iteration. Automatic seeds are materialized
+when a suite is saved so later generated-map runs can be reproduced. Results
+can be exported manually or automatically to CSV, and unique maps can be
+exported for later inspection.
+
+The test editor uses dropdowns for reachability, cost, endpoint, and map-source
+preferences. The Algorithms cell provides a checkbox multi-select, and
+boolean options use checkboxes. Numeric values are normalized to integers when
+editing ends. In `RANDOM` and `DISTANCE` endpoint modes, start and goal
+coordinates are disabled; `DISTANCE` enables the target-distance field.
+
+Each row can use an automatic seed, a manually entered seed, or a saved map.
+Saved maps are imported through the row editor and embedded in the suite file
+using UTF-8-safe encoding, so the suite does not depend on the original map
+file remaining available. Saved-map results identify the source as `SAVED_MAP`
+and display `N/A (saved map)` instead of a generated seed.
+Test suites use the human-readable `.mstests` extension; individual maps use
+the human-readable `.msmap` extension. Import and save dialogs filter and
+normalize to their corresponding extension and open in the application
+directory. A saved suite contains `applicationVersion=0.7` and
+`version=1`; the former identifies the application release and the latter is
+the stable suite schema version. Older schema-version-1 suites remain
+readable.
+
+Before measured runs begin, the experiment runner performs a short JVM
+warm-up using each selected algorithm. Warm-up solves are excluded from the
+results, progress count, and timing metrics so class loading and JIT
+compilation are less likely to skew the first measured iteration.
+
+The test-suite results tab includes a **Review** button for each result. It
+reimports the exact map snapshot used by that result and opens the animated
+MazeRenderer with the result's algorithm selected. **Export Maps** creates a
+`<suite-name>-maps` folder under the selected directory and writes one
+complete saveable map file for each unique map. Repeated iterations are grouped
+in the filename, such as `iterations-1-3`, while distinct maps retain their
+iteration numbers. Seed-generated maps are converted into the same format used
+by imported maps, making them portable for later inspection or reuse.
 
 ## How to Use
 
@@ -114,8 +177,8 @@ After loading or generating a maze:
 - Zoom +/-: adjust cell size.
 - Ctrl + Mouse Wheel: zoom while cursor is over the maze viewport.
 
-Saved maze files automatically receive a `.txt` extension when one is not
-provided. The import dialog filters for `.txt` maze files; reopening the dialog
+Saved maze files automatically receive a `.msmap` extension when one is not
+provided. The import dialog filters for `.msmap` maze files; reopening the dialog
 is sufficient to see a newly saved file, and restarting the application is not
 required.
 
@@ -164,7 +227,7 @@ connection receives a default movement cost of `1`.
 
 ### Weighted map format
 
-The optional section follows the complete binary layout:
+The optional section follows the complete text layout:
 
 ```text
 4
@@ -235,11 +298,11 @@ Validation rules enforced by import:
 
 Located in src:
 
-- test.txt: small sample map for quick checks.
-- test_100x100.txt: medium map for standard performance checks.
-- test_346x346.txt: larger map for stress testing.
-- test_1000x1000.txt: very large map for renderer scalability tests.
-- test_weighted_100x100.txt: weighted 100x100 example with directional costs.
+- `*.msmap`: human-readable individual maze map files.
+- test_100x100.msmap: medium map for standard performance checks.
+- test_346x346.msmap: larger map for stress testing.
+- test_1000x1000.msmap: very large map for renderer scalability tests.
+- test_weighted_100x100.msmap: weighted 100x100 example with directional costs.
 
 ## Algorithms
 
@@ -322,25 +385,57 @@ Maze-Solver/
 ├─ TODO.md
 ├─ LICENSE
 ├─ src/
-│  ├─ MS.java
-│  ├─ Maze.java
-│  ├─ MazeSolver.java
-│  ├─ MazeRenderer.java
-│  ├─ test.txt
-│  ├─ test_100x100.txt
-│  ├─ test_346x346.txt
-│  ├─ test_1000x1000.txt
-│  ├─ test_weighted_100x100.txt
-│  └─ images/
-└─ doc/
+│  ├─ app/                     application entry point
+│  ├─ maze/
+│  │  ├─ map/                  maze model, generation, and map persistence
+│  │  └─ search/               solver facade and search strategies
+│  ├─ experiments/             experiment configuration and execution
+│  └─ ui/                      Swing renderer and test-suite window
+├─ test/
+│  ├─ java/                    regression tests
+│  └─ resources/
+│     ├─ maps/                 .msmap fixtures
+│     └─ suites/               .mstests fixtures
+└─ doc/                       generated Doxygen HTML documentation
 ```
 
-Core classes:
+Core packages and classes:
 
-- MS: application entry point.
-- Maze: model for occupancy, neighbors, directional costs, start, goal, import/export.
-- MazeSolver: incremental solver engine and path reconstruction.
-- MazeRenderer: UI flow, controls, rendering, and solve orchestration.
+- `app.MS`: application entry point for release 0.7.
+- `app.Version`: authoritative application release metadata.
+- `maze.map.Maze`: model for occupancy, neighbors, directional costs, start, goal,
+  generation, and validation.
+- `maze.map.MazeFileIO`: dedicated `.msmap` parser and serializer used by the
+  compatibility import/export methods on `maze.map.Maze`.
+- `maze.search.MazeSolver`: public incremental solver facade, lifecycle, metrics, and
+  path reconstruction.
+- `maze.search.SearchStrategy`, `maze.search.UninformedSearch`, `maze.search.UCS`,
+  `maze.search.GreedySearch`, and `maze.search.Astar`: internal incremental algorithm
+  strategies used by the solver facade. `UninformedSearch` handles both DFS
+  and BFS through its explicit `TraversalMode` frontier policy.
+- `ui.MazeRenderer`: UI flow, controls, rendering, and solve orchestration.
+- `experiments.TestSuite`: validated experiment-row and suite configuration.
+- `experiments.ExperimentResult`: immutable per-algorithm experiment metrics.
+- `experiments.ExperimentRunner`: non-UI seeded experiment execution with progress and cancellation.
+- `experiments.TestSuiteIO`: versioned `.mstests` persistence and CSV export.
+- `ui.TestSuiteWindow`: Swing configuration, execution, results, map review, and
+  export workflow and coordination.
+- `ui.TestConfigurationTableModel` and `ui.ExperimentResultTableModel`:
+  extracted configuration/result table state.
+- `ui.TestConfigurationTable`: context-sensitive saved-map and endpoint
+  editability behavior.
+- `ui.TestSuiteTableComponents`: reusable experiment-table editors and
+  renderers, including algorithm selection, saved-map import, and Review
+  actions.
+- `ui.TestSuiteConfigurationPanel` and `ui.ExperimentResultsPanel`: extracted
+  Swing layout and action wiring for configuration and result areas.
+- `test.RegressionTests`: dependency-free checks for weighted maps, all algorithms,
+  reproducibility, persistence, CSV export, and cancellation.
+
+Test fixtures are kept separate from application sources:
+
+- `test/resources/maps/`: sample `.msmap` files used by regression checks.
+- `test/resources/suites/`: sample `.mstests` experiment suite.
 
 ## API and Extension Notes
 
@@ -355,7 +450,8 @@ MazeRenderer.resetNodeColor(start);
 Typical programmatic solve usage:
 
 ```java
-Maze maze = Maze.importFromFile("src/test_346x346.txt");
+Maze maze = Maze.importFromFile(
+        "test/resources/maps/test_346x346.msmap");
 Maze.Node next = maze.getStart().getNeighbor(Maze.Dir.EAST);
 if (next != null && maze.getMoveCost(maze.getStart(), next) > 0) {
 	System.out.println("East movement is enabled.");
@@ -399,14 +495,17 @@ release-folder/
    └─ TitleImage.jpg
 ```
 
-If the app starts but the title image does not appear, ensure the `images` folder is present next to the JAR. The title screen images can be loaded from `images/TitleImage.jpg`. 
+If the app starts but the title image does not appear, ensure the `images`
+folder is present next to the JAR. The title screen images can be loaded from
+`images/TitleImage.jpg`.
 
 ## Troubleshooting
 
 1. App does not start
 
 - Confirm javac and java are on PATH.
-- Rebuild with javac src\*.java from the repository root.
+- Rebuild by compiling application sources in `src\` and regression tests in
+  `test\java\` from the repository root.
 
 2. Maze fails to load
 
@@ -427,18 +526,81 @@ If the app starts but the title image does not appear, ensure the `images` folde
 
 Useful commands from repo root:
 
-```bash
-javac src\*.java
-java -cp src MS
+```powershell
+New-Item -ItemType Directory -Force build\classes | Out-Null
+$sources = @(
+    (Get-ChildItem -Filter *.java src -Recurse).FullName
+    (Get-ChildItem -Filter *.java test\java -Recurse).FullName
+)
+javac -Xlint:all -d build\classes $sources
+java -cp build\classes app.MS
 ```
+
+Convenience scripts are available under `scripts\`:
+
+```powershell
+.\scripts\compile-and-run.ps1
+.\scripts\build-executable.ps1
+```
+
+The first script compiles the application and regression tests, runs the
+regression suite, and launches the Swing application. The second creates a
+self-contained Windows application image at
+`dist\MazeSolver\MazeSolver.exe` using `jpackage`. It requires a JDK that
+includes `jpackage`.
+
+On Linux, make the equivalent scripts executable once and run:
+
+```bash
+chmod +x scripts/compile-and-run.sh scripts/build-executable.sh
+./scripts/compile-and-run.sh
+./scripts/build-executable.sh
+```
+
+The Linux application image is created at
+`dist/MazeSolver/bin/MazeSolver`. The generated `build/` and `dist/`
+directories are ignored by Git.
 
 Optional cleanup of compiled artifacts:
 
-```bash
-del src\*.class
+```powershell
+Remove-Item -Recurse -Force build
 ```
 
-Optional docs generation can be done later from the doc tooling already included in this repo.
+JavaDoc validation is documented in `TODO.md`. Doxygen is configured by
+`doc/Doxyfile`; regenerate the HTML reference from the repository root with:
+
+```powershell
+Push-Location doc
+doxygen Doxyfile
+Pop-Location
+```
+
+The generated reference is written to `doc/html`. The release PDF is saved as
+`doc/Maze-Solver-docs_V0.7.pdf`. If a TeX Live installation is available, the
+PDF can be generated from `doc\latex` with XeLaTeX:
+
+```powershell
+Set-Location doc\latex
+xelatex -interaction=nonstopmode refman.tex
+xelatex -interaction=nonstopmode refman.tex
+Set-Location ..\..
+```
+
+Doxygen's JavaDoc conversion can join a line-break command to the following
+word in generated LaTeX. If XeLaTeX reports an undefined command such as
+`\newlinestart`, normalize the generated files before compiling:
+
+```powershell
+Get-ChildItem doc\latex -Filter *.tex | ForEach-Object {
+    $text = Get-Content $_.FullName -Raw
+    $text = $text -replace '\\newline(?=[A-Za-z])', '\newline{}'
+    Set-Content $_.FullName $text -NoNewline
+}
+```
+
+After a successful build, copy `doc\latex\refman.pdf` to
+`doc\Maze-Solver-docs_V0.7.pdf`.
 
 ## License
 
