@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['dfs_0',['DFS',['../enum_maze_solver_1_1_algorithm.html#a2fc21376cb5be0c57613cbb0fde8999e',1,'MazeSolver::Algorithm']]],
-  ['dir_1',['Dir',['../enum_maze_1_1_dir.html',1,'Maze.Dir'],['../enum_maze_1_1_dir.html#aad4281264b55a5ef2b27b2eab752c4d9',1,'Maze.Dir.Dir()']]],
-  ['disabled_5fmovement_5fcost_2',['DISABLED_MOVEMENT_COST',['../class_maze.html#a28462ea61135c939ade85dfdad11efe6',1,'Maze']]]
+  ['bfs_0',['BFS',['../enummaze_1_1search_1_1_maze_solver_1_1_algorithm.html#afbc70e25b665eb82f181881d4dec868b',1,'maze.search.MazeSolver.Algorithm.BFS'],['../enummaze_1_1search_1_1_uninformed_search_1_1_traversal_mode.html#a5a68825a77d36e7a5a5dfd121803f0c5',1,'maze.search.UninformedSearch.TraversalMode.BFS']]],
+  ['buildneighbortablelines_1',['buildNeighborTableLines',['../classmaze_1_1map_1_1_maze.html#aa47949465eb33689d47f8935ba958138',1,'maze::map::Maze']]]
 ];
