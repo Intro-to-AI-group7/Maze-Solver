@@ -11,8 +11,6 @@
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript" src="navtreedata.js"></script>
-<script type="text/javascript" src="navtree.js"></script>
 <script type="text/javascript" src="resize.js"></script>
 <script type="text/javascript" src="cookie.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
@@ -27,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.5</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;0.7</span>
    </div>
   </td>
  </tr>
@@ -51,29 +49,19 @@ $(function() { codefold.init(0); });
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
 $(function() {
-  initMenu('',true,false,'search.php','Search',true);
+  initMenu('',true,false,'search.php','Search',false);
   $(function() { init_search(); });
 });
 /* @license-end */
 </script>
 <div id="main-nav"></div>
 </div><!-- top -->
-<div id="side-nav" class="ui-resizable side-nav-resizable">
-  <div id="nav-tree">
-    <div id="nav-tree-contents">
-      <div id="nav-sync" class="sync"></div>
-    </div>
-  </div>
-  <div id="splitbar" style="-moz-user-select:none;" 
-       class="ui-resizable-handle">
-  </div>
-</div>
+<div id="doc-content">
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('functions_func.html',''); initResizable(true); });
+$(function(){ initResizable(false); });
 /* @license-end */
 </script>
-<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -96,44 +84,221 @@ $(function(){initNavTree('functions_func.html',''); initResizable(true); });
 </div>
 
 <div class="contents">
-<div class="textblock">Here is a list of all functions with links to the classes they belong to:</div><ul>
-<li>buildNeighborTableLines()&#160;:&#160;<a class="el" href="class_maze.html#a87ee5eb9a8eac29ec2d4595877d9a0da">Maze</a></li>
-<li>createCell()&#160;:&#160;<a class="el" href="class_maze.html#ad96d7e5ccf65fe29e318bd0c39b39a6a">Maze</a></li>
-<li>exportToFile()&#160;:&#160;<a class="el" href="class_maze.html#ae20cb68cb5dc52cf20d04c669d0cde3e">Maze</a></li>
-<li>generateRandomMaze()&#160;:&#160;<a class="el" href="class_maze.html#a1add35b9272410e8ac5ed4a0ed1bcb71">Maze</a></li>
-<li>getAlg()&#160;:&#160;<a class="el" href="class_maze_solver.html#a4223613a3ef49712b3a81d02931e998c">MazeSolver</a></li>
-<li>getFinalPath()&#160;:&#160;<a class="el" href="class_maze_solver.html#a188a2b6d5e8776a4b0715ab74990d71b">MazeSolver</a></li>
-<li>getGoal()&#160;:&#160;<a class="el" href="class_maze.html#a4abf627d4654079a2ab0e03b32df5173">Maze</a></li>
-<li>getLength()&#160;:&#160;<a class="el" href="class_maze.html#a7bf4e7fb124ff2a0773f73b82af0ad73">Maze</a></li>
-<li>getNode()&#160;:&#160;<a class="el" href="class_maze.html#a9a7416a313203bf219987db2c0e25814">Maze</a></li>
-<li>getStart()&#160;:&#160;<a class="el" href="class_maze.html#a334073acb91f71281682945b37e82b60">Maze</a></li>
-<li>getVisitedCount()&#160;:&#160;<a class="el" href="class_maze_solver.html#a930cd51699c61b24fa70f73072607ad5">MazeSolver</a></li>
-<li>getWidth()&#160;:&#160;<a class="el" href="class_maze.html#a5524b06dd2648f2f5fa5daf458ba9a9b">Maze</a></li>
-<li>importFromFile()&#160;:&#160;<a class="el" href="class_maze.html#a262a0c154562ed47724604c0cc46bcab">Maze</a></li>
-<li>isFinished()&#160;:&#160;<a class="el" href="class_maze_solver.html#a1e2cd30b080991b73b0d717e1862b74d">MazeSolver</a></li>
-<li>isInBounds()&#160;:&#160;<a class="el" href="class_maze.html#a5d449c5ff98fe08c078209ea45bd9824">Maze</a></li>
-<li>isOccupied()&#160;:&#160;<a class="el" href="class_maze.html#a7dc187bb000382efc20df7ff80b525be">Maze</a></li>
-<li>isSolved()&#160;:&#160;<a class="el" href="class_maze_solver.html#a976101159c6108d2600323fbd913f5d7">MazeSolver</a></li>
-<li>launchFromTitleScreen()&#160;:&#160;<a class="el" href="class_maze_renderer.html#a7395a4a185478c93f106b480189c1ef9">MazeRenderer</a></li>
-<li>main()&#160;:&#160;<a class="el" href="class_m_s.html#a10dc989ca35b5a83c0555b59c4873d6b">MS</a></li>
-<li>Maze()&#160;:&#160;<a class="el" href="class_maze.html#a64794a0b1cbed9d04736002da7ee62cb">Maze</a></li>
-<li>resetNodeColor()&#160;:&#160;<a class="el" href="class_maze_renderer.html#a8b6f55abc0070fb2aa1dd520ae018af9">MazeRenderer</a></li>
-<li>resetSearch()&#160;:&#160;<a class="el" href="class_maze_solver.html#a5f7895d3d944960d5c68b7b5d4e33471">MazeSolver</a></li>
-<li>setAlg()&#160;:&#160;<a class="el" href="class_maze_solver.html#a9baf570c82f61e83d1e11e8bb8a93e3c">MazeSolver</a></li>
-<li>setGoal()&#160;:&#160;<a class="el" href="class_maze.html#aad70719e52756a45e3c00a9c1ff30fbd">Maze</a></li>
-<li>setMaze()&#160;:&#160;<a class="el" href="class_maze_solver.html#a19e7e09b1cf169d44927f2fbb1a4a9f9">MazeSolver</a></li>
-<li>setNodeColor()&#160;:&#160;<a class="el" href="class_maze_renderer.html#adc2cf2f7d52e5fa9a350025e6265fc66">MazeRenderer</a></li>
-<li>setStart()&#160;:&#160;<a class="el" href="class_maze.html#ab06ebd4ce10a357460c2862fdfead186">Maze</a></li>
-<li>updateSolve()&#160;:&#160;<a class="el" href="class_maze_solver.html#a4731d9d114db6ed8934c1bb5b5153355">MazeSolver</a></li>
-<li>validateNeighborConnections()&#160;:&#160;<a class="el" href="class_maze.html#a164060b8ad4c0e102daa8aa2d23aeaa8">Maze</a></li>
+<div class="textblock">Here is a list of all functions with links to the classes they belong to:</div>
+
+<h3><a id="index_a" name="index_a"></a>- a -</h3><ul>
+<li>addTestCase()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#a02345dafcf64e0cebe181df43550608d">experiments.TestSuite</a></li>
+</ul>
+
+
+<h3><a id="index_b" name="index_b"></a>- b -</h3><ul>
+<li>buildNeighborTableLines()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#aa47949465eb33689d47f8935ba958138">maze.map.Maze</a></li>
+</ul>
+
+
+<h3><a id="index_c" name="index_c"></a>- c -</h3><ul>
+<li>canMove()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#aa64d7b807a192c431d80ef1404e8920e">maze.map.Maze</a></li>
+<li>closeWindow()&#160;:&#160;<a class="el" href="classui_1_1_test_suite_window.html#adf6d91161572751b605060a235796647">ui.TestSuiteWindow</a></li>
+<li>createCell()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a9f8c8f217f14e857e103a83ce1aa6ec2">maze.map.Maze</a></li>
+</ul>
+
+
+<h3><a id="index_d" name="index_d"></a>- d -</h3><ul>
+<li>defaultExportDirectory()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_i_o.html#a5d37a843bd378749e3e30f7b36dd5241">experiments.TestSuiteIO</a></li>
+<li>Dir()&#160;:&#160;<a class="el" href="enummaze_1_1map_1_1_maze_1_1_dir.html#a689acd9c4477abbc8111f5d1107e894c">maze.map.Maze.Dir</a></li>
+</ul>
+
+
+<h3><a id="index_e" name="index_e"></a>- e -</h3><ul>
+<li>ExperimentResult()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a4764748e93735bad4bb44635dd10e3cf">experiments.ExperimentResult</a></li>
+<li>exportCsv()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_i_o.html#a746aee9baa6a624467fbd59a2e4afff3">experiments.TestSuiteIO</a></li>
+<li>exportMaps()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_runner.html#a376ce229dd1602d343a8e077e4286f16">experiments.ExperimentRunner</a></li>
+<li>exportToFile()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#aa1cbf08bf4ff60dc40b0d1d0f5608703">maze.map.Maze</a>, <a class="el" href="classmaze_1_1map_1_1_maze_file_i_o.html#aec299681a4e628335d4c3447370fe7f0">maze.map.MazeFileIO</a></li>
+<li>exportToText()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#abe60dcd272f592ebc66c6c93dbaf29a9">maze.map.Maze</a>, <a class="el" href="classmaze_1_1map_1_1_maze_file_i_o.html#af06e383b16a21db77dc40fe35b3aa73d">maze.map.MazeFileIO</a></li>
+</ul>
+
+
+<h3><a id="index_f" name="index_f"></a>- f -</h3><ul>
+<li>formatSummary()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_runner.html#ad107d505aa0da4a988105ae78f3bf660">experiments.ExperimentRunner</a></li>
+<li>fromSavedMap()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a42c943ba721fd7015a9f2e3b6cb3be82">maze.map.Maze.GeneratedExperimentMap</a></li>
+</ul>
+
+
+<h3><a id="index_g" name="index_g"></a>- g -</h3><ul>
+<li>generateExperimentMap()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a80c07fbacae2b865d9008256692102c8">maze.map.Maze</a></li>
+<li>generateRandomMaze()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a4618a75043b2c366c7a5ea2078386236">maze.map.Maze</a></li>
+<li>getActualBlockedPercent()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a67c5b348660584c4434bcc8c196e527d">experiments.ExperimentResult</a>, <a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a822d2c5320ce062798987d32a65c634f">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>getActualManhattanDistance()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a3c88347ba3358397d9b8f35fb638858f">experiments.ExperimentResult</a>, <a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a843385198e4c8bc0f6d48fa407b666fb">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>getAlg()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#a8f330a1b648451d64e78947d5e9c859a">maze.search.MazeSolver</a></li>
+<li>getAlgorithm()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#aa86eb116b7397f851fd4474a60c8fa65">experiments.ExperimentResult</a></li>
+<li>getAlgorithms()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a3bb2645b760fb6b8442cea5d2baae726">experiments.TestSuite.TestCase</a></li>
+<li>getBlockedCellCount()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#ab01ab16ca52dbb0e768e474ce2e03cae">experiments.ExperimentResult</a>, <a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a607c3f63d07c2998d99d191cf09a8ce6">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>getBlockedPercent()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a2789834b8f5745d5de89be99c1980e60">experiments.TestSuite.TestCase</a></li>
+<li>getColumns()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#ad3f3f7eb2baca5a2baf6019da90d6ccf">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a8eb6da21ddb59743d21d78501b682110">experiments.TestSuite.TestCase</a></li>
+<li>getConfigurationId()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a7d5cb3b537632c5ca8f760914ba59014">experiments.ExperimentResult</a></li>
+<li>getCostMode()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a786417347d73c334b1010d47167e46f5">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a1e7b40e77b63736b107beeaffe356b90">experiments.TestSuite.TestCase</a></li>
+<li>getCurrentPathCost()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#aafaa0389e2550388e7cf828cbdee66c4">maze.search.MazeSolver</a></li>
+<li>getDistanceTolerance()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#ad82e1b596a1754044475051a2f938fd6">experiments.TestSuite.TestCase</a></li>
+<li>getEffectiveSeed()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#aaf7fdefc2d692a8287c710cdf01808bc">experiments.ExperimentResult</a>, <a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a95f086950e4cb0b2fa3e6377af122cd4">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>getEndpointMode()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a4fadeea88e4bff3602bb34abbb61cde1">experiments.TestSuite.TestCase</a></li>
+<li>getExportDirectory()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#a4dd1b303c9bbc71cc8d065035cc2c610">experiments.TestSuite</a></li>
+<li>getFinalPath()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#aad5cd57f5f5e2fb5cba95cac9170b0fe">maze.search.MazeSolver</a></li>
+<li>getGoal()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a3925854a234f1458bafb958590deded4">maze.map.Maze</a></li>
+<li>getGoalColumn()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a6542dda3294e652be3f756eb17ccb0bf">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a116564099f2ec25f088f6d1a78551c65">experiments.TestSuite.TestCase</a>, <a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a6224607f213c29cb372edbcbe4945135">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>getGoalRow()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#ac0ea5c01cf0880905086c11d432768ae">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#abf3678a7fb62cad37fb595bf109585c0">experiments.TestSuite.TestCase</a>, <a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a564cae0629b74b7e95b5c9ab2206398f">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>getId()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#ad5f3eec6ff9453f8c68c3b8fe40d8fc9">experiments.TestSuite.TestCase</a></li>
+<li>getIssueCount()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_neighbor_validation_result.html#ac879fa53851fa51bcdebbcc77e18fba9">maze.map.Maze.NeighborValidationResult</a></li>
+<li>getIssues()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_neighbor_validation_result.html#a2c6dbe95c01664bcb6299124a63e2a52">maze.map.Maze.NeighborValidationResult</a></li>
+<li>getIteration()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a34e0e8fc2d4c7be817f4c03b37cb8a41">experiments.ExperimentResult</a></li>
+<li>getIterations()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a27a369f908ea8d0cb49164afef9beb5f">experiments.TestSuite.TestCase</a></li>
+<li>getLength()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#ac290439376aca17ea9e0ae078c2bfc64">maze.map.Maze</a></li>
+<li>getMapSource()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a9efb3102851ac88254f080ee804893f6">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a06e43271159977b8aa28980db3af72a6">experiments.TestSuite.TestCase</a></li>
+<li>getMapText()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a1f91d76ff5db0003c3811e8b02a4c8b2">experiments.ExperimentResult</a></li>
+<li>getMaximumCost()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#aff5cb44ff2c2f7f672ba1e83aba8fcea">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a91a98645c8787d6f8c03aa19141a3a8d">experiments.TestSuite.TestCase</a></li>
+<li>getMaze()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a5633d72b451df129448976b90a0ef049">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>getMinimumCost()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#ac2029791ecc1a94cadc23ad0fa8ed863">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a29a7ca88dfa3521267d28081224296fc">experiments.TestSuite.TestCase</a></li>
+<li>getMoveCost()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a0ce8c59c5d1f6305466e53a2ae6ec7d3">maze.map.Maze</a>, <a class="el" href="classmaze_1_1map_1_1_maze_1_1_node.html#a5a287e546026e475813aa77acc2e92ab">maze.map.Maze.Node</a></li>
+<li>getName()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#ae49d81fe997050681bb6a702bb937a57">experiments.TestSuite</a></li>
+<li>getNeighbor()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_node.html#a09fb2a47ffc21102a49c475cbbe30898">maze.map.Maze.Node</a></li>
+<li>getNode()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#aa90eb06ba306d7ee15d8677d392d8375">maze.map.Maze</a></li>
+<li>getNodesExplored()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a253c046e6a94bf4af3c8760c0171fe2a">experiments.ExperimentResult</a></li>
+<li>getPathCost()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#adb69e6068866c7821df06ebfa36d57e6">experiments.ExperimentResult</a>, <a class="el" href="classmaze_1_1search_1_1_maze_solver.html#ade44d645d91baad4623de5954c802bc0">maze.search.MazeSolver</a></li>
+<li>getPathLength()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#afb32df9f96fe7b4dbd5c3d371ccec0d2">experiments.ExperimentResult</a></li>
+<li>getReachabilityMode()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a403107d04a7ac3c6bcf2dceb24229bf3">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a6db1eefbd8c1b98e96f79a2e682509a4">experiments.TestSuite.TestCase</a></li>
+<li>getRequestedBlockedPercent()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a1707749794440202152dc0d69ff6ac84">experiments.ExperimentResult</a></li>
+<li>getRequestedManhattanDistance()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a5846f672f61ae74c0905dcfddb45316f">experiments.ExperimentResult</a></li>
+<li>getRows()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a87d3df231e98dd33aa5d8af72abbb7f7">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a80c78bc825b1337397594f2562c2eca6">experiments.TestSuite.TestCase</a></li>
+<li>getRuntimeMs()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a8a3389018093d4eb18009b18b07926ce">experiments.ExperimentResult</a></li>
+<li>getRuntimeNs()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#ab494e88f105f3f6b0aba61e1858b7ac8">experiments.ExperimentResult</a></li>
+<li>getSavedMapName()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a2c524f85978a74e0709f85c6041b4cd4">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#aed1bbf3f42a5b64f41d2986044614fd7">experiments.TestSuite.TestCase</a></li>
+<li>getSavedMapText()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a116b89145f4ca6591d26ba2edca7938c">experiments.TestSuite.TestCase</a></li>
+<li>getSeed()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a2ed62a7800883971bc4fe112b17164c2">experiments.TestSuite.TestCase</a></li>
+<li>getSeedLabel()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#ab146e89f7f0e5eb46fe15288265c4769">experiments.ExperimentResult</a></li>
+<li>getSolveTimeNs()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#ad4bded563001c9aaf48023a2da260a75">maze.search.MazeSolver</a></li>
+<li>getStart()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a96d86a3816928f15ef94b91b1aa1a2a7">maze.map.Maze</a></li>
+<li>getStartColumn()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#ae24534f7e9b09f6ce503a0f29300f9fa">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#ac52892975987436c8c93b365e2a70223">experiments.TestSuite.TestCase</a>, <a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a432db80b6881e08b15caa12285f1f83e">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>getStartRow()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#abf5cf5b62e07c7f30c4f068d8703555c">experiments.ExperimentResult</a>, <a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a3ab868401819175f63d5775691b89085">experiments.TestSuite.TestCase</a>, <a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#a6a37097b78c4a002883a33989548a647">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>getSuiteName()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#ae16be3f56a25e5575312d07305220001">experiments.ExperimentResult</a></li>
+<li>getTargetManhattanDistance()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a993e1567171900137d120d225e61e5b4">experiments.TestSuite.TestCase</a></li>
+<li>getTestCases()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#ae44a89342d7dfa06a0d70e7f6b70ead3">experiments.TestSuite</a></li>
+<li>getVisitedCount()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#a302e9c4d362a46e53340aab65a94c370">maze.search.MazeSolver</a></li>
+<li>getWidth()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#aa05ce87d7ceaea3601eb3f3cfeb0d4d5">maze.map.Maze</a></li>
+</ul>
+
+
+<h3><a id="index_i" name="index_i"></a>- i -</h3><ul>
+<li>idx()&#160;:&#160;<a class="el" href="enummaze_1_1map_1_1_maze_1_1_dir.html#aaf53db3fc130177169757510257ef510">maze.map.Maze.Dir</a></li>
+<li>importFromFile()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a5c329bd97baffa62b2837eebecacc37c">maze.map.Maze</a>, <a class="el" href="classmaze_1_1map_1_1_maze_file_i_o.html#a16f32e84dcf11c915d6b6b5f56cb3398">maze.map.MazeFileIO</a></li>
+<li>importFromText()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a112d450b2ff35720e27b79b34bf84577">maze.map.Maze</a>, <a class="el" href="classmaze_1_1map_1_1_maze_file_i_o.html#a95d9508bc2fa065d2372dd97b1408594">maze.map.MazeFileIO</a></li>
+<li>initialize()&#160;:&#160;<a class="el" href="interfacemaze_1_1search_1_1_search_strategy.html#aa948d43d0eb3ea722071d22a2b4925ee">maze.search.SearchStrategy</a></li>
+<li>isAutomaticExport()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#a60a199ee02200c3d562b0ecaa4b160ad">experiments.TestSuite</a></li>
+<li>isAutomaticSeed()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#ace303140fd002232c5296e276cea3ddc">experiments.TestSuite.TestCase</a></li>
+<li>isCancelled()&#160;:&#160;<a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html#a055cd552e0682f96058f36e1a67f879d">experiments.ExperimentRunner.CancellationToken</a></li>
+<li>isFinished()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#a0590fb4ea205f4809089b96aebe7e8ce">maze.search.MazeSolver</a></li>
+<li>isGeneratedMapSolvable()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a8c68948c9e4dc244311de06d9c5ab214">experiments.ExperimentResult</a></li>
+<li>isInBounds()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a785e8e46fa8aa15c4ef23f1d4321c614">maze.map.Maze</a></li>
+<li>isOccupied()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a96b282d3b956df0049d9966f2d21e4a4">maze.map.Maze</a></li>
+<li>isSameCostBothDirections()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a95f033418c7ab8c77fa835ab75c79af5">experiments.TestSuite.TestCase</a></li>
+<li>isSolvable()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#aa5841b86733eab7cd6f56a021d0f1671">maze.map.Maze.GeneratedExperimentMap</a></li>
+<li>isSolved()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_result.html#a729d0e72982d0322ea5e072a60b52b9c">experiments.ExperimentResult</a>, <a class="el" href="classmaze_1_1search_1_1_maze_solver.html#a6a8b6bb0a463b42325cd68972994e1d6">maze.search.MazeSolver</a></li>
+<li>isValid()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_neighbor_validation_result.html#ae229baf6bc6774414dde7c032e5a8dc8">maze.map.Maze.NeighborValidationResult</a></li>
+</ul>
+
+
+<h3><a id="index_l" name="index_l"></a>- l -</h3><ul>
+<li>launchFromTitleScreen()&#160;:&#160;<a class="el" href="classui_1_1_maze_renderer.html#a7629fee0bfcce84fa1236467aae37eab">ui.MazeRenderer</a></li>
+<li>load()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_i_o.html#a84b76664e41ef89c881d4095ae263969">experiments.TestSuiteIO</a></li>
+</ul>
+
+
+<h3><a id="index_m" name="index_m"></a>- m -</h3><ul>
+<li>main()&#160;:&#160;<a class="el" href="classapp_1_1_m_s.html#ab69f53b767e2d9361eea83bb01caffdb">app.MS</a></li>
+<li>Maze()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a73cd7bf55e33eaa7b7632025094080ef">maze.map.Maze</a></li>
+<li>MazeSolver()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#a0849cfb0be6a0f74b3fb7a47fac0fc0d">maze.search.MazeSolver</a></li>
+<li>MS()&#160;:&#160;<a class="el" href="classapp_1_1_m_s.html#a032eb498db3d86032eae8dba597fd71e">app.MS</a></li>
+</ul>
+
+
+<h3><a id="index_n" name="index_n"></a>- n -</h3><ul>
+<li>Node()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_node.html#a375d75fb8d88f70dd239270dc53318e4">maze.map.Maze.Node</a></li>
+</ul>
+
+
+<h3><a id="index_o" name="index_o"></a>- o -</h3><ul>
+<li>onProgress()&#160;:&#160;<a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html#a69870d0c344f170b6d5e8ccfc135ecdd">experiments.ExperimentRunner.ProgressListener</a></li>
+</ul>
+
+
+<h3><a id="index_r" name="index_r"></a>- r -</h3><ul>
+<li>removeTestCase()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#accd1e0861c0784936280b69e00d9342a">experiments.TestSuite</a></li>
+<li>resetNodeColor()&#160;:&#160;<a class="el" href="classui_1_1_maze_renderer.html#adeaf7d4744c92f653c6965264af13452">ui.MazeRenderer</a></li>
+<li>resetSearch()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#ad3f428fc46f8f06b8f46c8d531222afe">maze.search.MazeSolver</a></li>
+<li>reviewExperiment()&#160;:&#160;<a class="el" href="classui_1_1_maze_renderer.html#ab6800c30926e67659cc94eb43d6c56ed">ui.MazeRenderer</a></li>
+<li>run()&#160;:&#160;<a class="el" href="classexperiments_1_1_experiment_runner.html#a1d797ae0b9b4c29fb729bf3be94dfdd8">experiments.ExperimentRunner</a></li>
+</ul>
+
+
+<h3><a id="index_s" name="index_s"></a>- s -</h3><ul>
+<li>save()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_i_o.html#a5f09723e4ce74ee4ad266a7567cf2de3">experiments.TestSuiteIO</a></li>
+<li>setAlg()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#a1b0cc5901f7713b6be5f22b1ad7e4d98">maze.search.MazeSolver</a></li>
+<li>setAlgorithms()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#af02a631439fc954362f287fd1453c796">experiments.TestSuite.TestCase</a></li>
+<li>setAutomaticExport()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#ac66a38cf4cd8f656ad00579dd6bf3dbc">experiments.TestSuite</a></li>
+<li>setAutomaticSeed()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a5137f9210b7dd9bf12fb88aad0dd7516">experiments.TestSuite.TestCase</a></li>
+<li>setBlockedPercent()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#ac5dbb41cac50cc524eff4aa4596d41bc">experiments.TestSuite.TestCase</a></li>
+<li>setColumns()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a1c659b0a7256050e3456bd065b26ef5a">experiments.TestSuite.TestCase</a></li>
+<li>setCostMode()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a2895acb45035ddfb09fb5771aac6b99f">experiments.TestSuite.TestCase</a></li>
+<li>setDistanceTolerance()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a22a0f35bfd175dd65009bccdd4f89dcd">experiments.TestSuite.TestCase</a></li>
+<li>setEndpointMode()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#ab0cb4b49368184a262f6fffeeee1fc78">experiments.TestSuite.TestCase</a></li>
+<li>setExportDirectory()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#a6686f9ab610028619744689e137218b3">experiments.TestSuite</a></li>
+<li>setGoal()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a1a5d2416065a525d4a53f17f003436b6">maze.map.Maze</a></li>
+<li>setGoalColumn()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#aed703d868c39305ad17b512276d00738">experiments.TestSuite.TestCase</a></li>
+<li>setGoalRow()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#aa86e456500c2a8ad36d69d707b75ea9c">experiments.TestSuite.TestCase</a></li>
+<li>setId()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a19781231198dec32e8113a528d78714c">experiments.TestSuite.TestCase</a></li>
+<li>setIterations()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a14143869a0a24f422d2e445691cbedb7">experiments.TestSuite.TestCase</a></li>
+<li>setMapSource()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#aeae7217d7ca5236642634688a45765bd">experiments.TestSuite.TestCase</a></li>
+<li>setMaximumCost()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a8a682851aad977c62febaaf79ca13856">experiments.TestSuite.TestCase</a></li>
+<li>setMaze()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#a480d573f9454efbfc82884815d03219d">maze.search.MazeSolver</a></li>
+<li>setMinimumCost()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a44f681466ad80c545d2e4f43565291ac">experiments.TestSuite.TestCase</a></li>
+<li>setMoveCost()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_node.html#a6fd0098d14e5ab38233c5926dc01bc28">maze.map.Maze.Node</a></li>
+<li>setName()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#a6f24056f9a1782965fc64f6c79a248ae">experiments.TestSuite</a></li>
+<li>setNeighbor()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze_1_1_node.html#a8d2c60da06bc82f31664f13755633833">maze.map.Maze.Node</a></li>
+<li>setNodeColor()&#160;:&#160;<a class="el" href="classui_1_1_maze_renderer.html#a91c839abccd94c3727ec8ce1a54300c2">ui.MazeRenderer</a></li>
+<li>setReachabilityMode()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a892345d32fb7a2959c0bb2e5747324fb">experiments.TestSuite.TestCase</a></li>
+<li>setRows()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#aea2a50dc24f7bc3f6a43478df47ef70a">experiments.TestSuite.TestCase</a></li>
+<li>setSameCostBothDirections()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#aca33078385d2565deb5450f67e96e478">experiments.TestSuite.TestCase</a></li>
+<li>setSavedMapName()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a227e4a3faa89a0bbec8d82f166459793">experiments.TestSuite.TestCase</a></li>
+<li>setSavedMapText()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a544375771b46332184cb51a6fc08901d">experiments.TestSuite.TestCase</a></li>
+<li>setSeed()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a735cdd412135407702a7ef79e676d4b4">experiments.TestSuite.TestCase</a></li>
+<li>setStart()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a5924ad49bb5e421537ee1009d91f32dc">maze.map.Maze</a></li>
+<li>setStartColumn()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#aeb39940aa9a986d00dc0ba3e095a7d78">experiments.TestSuite.TestCase</a></li>
+<li>setStartRow()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a47c9280dff6de97ead4736f0c2d55764">experiments.TestSuite.TestCase</a></li>
+<li>setTargetManhattanDistance()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a3f99ff82a8c73b3e81b1c462a482c02e">experiments.TestSuite.TestCase</a></li>
+<li>showWindow()&#160;:&#160;<a class="el" href="classui_1_1_test_suite_window.html#a23903c3daa8dc0e36854486c295ea808">ui.TestSuiteWindow</a></li>
+<li>shutdownApplication()&#160;:&#160;<a class="el" href="classui_1_1_maze_renderer.html#adea7dee14a893ec39fce582c4c38bd33">ui.MazeRenderer</a></li>
+<li>step()&#160;:&#160;<a class="el" href="interfacemaze_1_1search_1_1_search_strategy.html#a4b1e2185e94df09eaa5693533ba775ca">maze.search.SearchStrategy</a></li>
+</ul>
+
+
+<h3><a id="index_t" name="index_t"></a>- t -</h3><ul>
+<li>TestCase()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a5c862a192492dcf7d32e7b9443ee5734">experiments.TestSuite.TestCase</a></li>
+<li>TestSuite()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite.html#a5b7c4c3096f7dc71c74a98e01494fd4c">experiments.TestSuite</a></li>
+</ul>
+
+
+<h3><a id="index_u" name="index_u"></a>- u -</h3><ul>
+<li>updateSolve()&#160;:&#160;<a class="el" href="classmaze_1_1search_1_1_maze_solver.html#a961567555b5f713d5adc9e2858a96b23">maze.search.MazeSolver</a></li>
+</ul>
+
+
+<h3><a id="index_v" name="index_v"></a>- v -</h3><ul>
+<li>validate()&#160;:&#160;<a class="el" href="classexperiments_1_1_test_suite_1_1_test_case.html#a561d6ed029a4a31510263532f85edc55">experiments.TestSuite.TestCase</a>, <a class="el" href="classexperiments_1_1_test_suite.html#a9426ca37452c358492055c24f2ae53a2">experiments.TestSuite</a></li>
+<li>validateNeighborConnections()&#160;:&#160;<a class="el" href="classmaze_1_1map_1_1_maze.html#a0a3180154e1d22d2640dcd5ea401f178">maze.map.Maze</a></li>
 </ul>
 </div><!-- contents -->
-</div><!-- doc-content -->
 <!-- start footer part -->
-<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
-  <ul>
-    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0 </li>
-  </ul>
-</div>
+<hr class="footer"/><address class="footer"><small>
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0
+</small></address>
+</div><!-- doc-content -->
 </body>
 </html>
