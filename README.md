@@ -140,6 +140,13 @@ warm-up using each selected algorithm. Warm-up solves are excluded from the
 results, progress count, and timing metrics so class loading and JIT
 compilation are less likely to skew the first measured iteration.
 
+Seed behavior is stable for the complete execution of each test case. Manual
+seed mode reuses the configured seed for every iteration, while automatic seed
+mode generates one seed once and reuses it for every iteration. Saved-map mode
+reuses the embedded map and does not use a generated seed. This means every
+selected algorithm in an iteration receives the same map, and repeated
+iterations in a test case are directly comparable.
+
 The test-suite results tab includes a **Review** button for each result. It
 reimports the exact map snapshot used by that result and opens the animated
 MazeRenderer with the result's algorithm selected. **Export Maps** creates a
@@ -588,9 +595,15 @@ Optional cleanup of compiled artifacts:
 Remove-Item -Recurse -Force build
 ```
 
-JavaDoc validation is documented in `TODO.md`. Doxygen is configured by
-`doc/Doxyfile`. Generate the HTML reference and release PDF with the
-documentation script:
+Validate JavaDoc without generating the Doxygen/PDF artifacts:
+
+```powershell
+$files = (Get-ChildItem src -Filter *.java -Recurse).FullName
+javadoc -quiet -Xdoclint:all -d "$env:TEMP\maze-javadoc" $files
+```
+
+Doxygen is configured by `doc/Doxyfile`. Generate the HTML reference and
+release PDF with the documentation script:
 
 ```powershell
 .\scripts\generate-documentation.ps1
