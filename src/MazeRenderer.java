@@ -6,6 +6,7 @@ import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -44,6 +45,7 @@ import javax.swing.Timer;
  *   <li>Maze grid rendering with a paint-based renderer for all maze sizes</li>
  *   <li>Runtime solver controls (start/pause/restart, delay, instant mode, map load/save/generate)</li>
  *   <li>Zoom handling (buttons and Ctrl+mouse wheel)</li>
+ *   <li>Optional directional movement-cost overlay</li>
  * </ul>
  *
  * <p>Typical usage is through {@link #launchFromTitleScreen()} from the app entrypoint.
@@ -68,6 +70,7 @@ public final class MazeRenderer {
     private static final String TITLE_SCREEN_IMAGE_PATH = "images/TitleImage.jpg";
     private static final String DEFAULT_SESSION_ALGORITHM = "A*";
     private static final boolean DEFAULT_SHOW_NEIGHBORS = true;
+    private static final boolean DEFAULT_SHOW_WEIGHTS = false;
     private static final int DEFAULT_SESSION_STEP_DELAY_MS = 200;
     private static final Color DEFAULT_VISITED_COLOR = new Color(0xF4C542);
 
@@ -76,6 +79,11 @@ public final class MazeRenderer {
     private static final Color BLOCKED_CELL_COLOR = Color.DARK_GRAY;
     private static final Color OPEN_CELL_COLOR = Color.WHITE;
     private static final Color GRID_LINE_COLOR = new Color(0, 0, 0, 55);
+    private static final Color TRAVERSED_WEIGHT_COLOR = new Color(70, 70, 70, 180);
+    private static final Color FINAL_PATH_WEIGHT_COLOR = new Color(150, 55, 0);
+    private static final Color FINAL_PATH_WEIGHT_BACKGROUND = new Color(255, 220, 120, 235);
+    private static final int MIN_WEIGHT_LABEL_CELL_SIZE_PX = 20;
+    private static final float WEIGHT_LABEL_FONT_SIZE = 12f;
 
     private static final int MIN_CELL_SIZE_PX = 6;
     private static final int MAX_CELL_SIZE_PX = 60;
@@ -90,6 +98,7 @@ public final class MazeRenderer {
 
     private static Maze renderedMaze;
     private static Color[][] renderedCellColors;
+    private static boolean[][][] finalPathEdges;
     private static JPanel renderedGridPanel;
     private static JScrollPane renderedGridScrollPane;
 
@@ -97,11 +106,17 @@ public final class MazeRenderer {
     private static JSpinner delaySpinner;
     private static JLabel traversedCountLabel;
     private static JLabel solveTimeLabel;
+    private static JLabel currentCostLabel;
+    private static JLabel finalCostLabel;
     private static JCheckBox instantSolveCheckBox;
+    private static JCheckBox showWeightsCheckBox;
 
     private static MazeSolver solver;
     private static Timer solveTimer;
     private static volatile boolean solvingInstantly;
+    private static long solveSessionWallStartNs;
+    private static String solveSessionMode = "unknown";
+    private static int solveSessionDelayMs;
     private static boolean sessionStarted;
     private static int traversedTiles;
     private static Color sessionVisitedColor = DEFAULT_VISITED_COLOR;
@@ -184,14 +199,14 @@ public final class MazeRenderer {
 
     /**
      * @brief Opens a maze file, prints diagnostics, and starts an interactive session.
-      *
-      * <p>Flow:
-      * <ol>
-      *   <li>Prompt user for a maze text file</li>
-      *   <li>Load maze via {@link Maze#importFromFile(String)}</li>
-      *   <li>Print diagnostics to console</li>
-      *   <li>Create a fresh interactive solve session</li>
-      * </ol>
+     *
+     * <p>Flow:
+     * <ol>
+     *   <li>Prompt user for a maze text file</li>
+     *   <li>Load maze via {@link Maze#importFromFile(String)}</li>
+     *   <li>Print diagnostics to console</li>
+     *   <li>Create a fresh interactive solve session</li>
+     * </ol>
      */
     private static void promptForMazeAndRun() {
         try {
@@ -219,14 +234,17 @@ public final class MazeRenderer {
      * @brief Prompts for dimensions, generates a random maze, and starts a session.
      */
     private static void promptForRandomMazeAndRun() {
-        int[] dimensions = promptForRandomMazeDimensions();
-        if (dimensions == null) {
+        RandomMazeOptions options = promptForRandomMazeDimensions();
+        if (options == null) {
             showTitleScreen();
             return;
         }
 
         try {
-            Maze maze = Maze.generateRandomMaze(dimensions[0], dimensions[1]);
+            Maze maze = Maze.generateRandomMaze(
+                    options.rows, options.columns, options.weighted,
+                    options.minWeight, options.maxWeight,
+                    options.sameCostBothDirections);
             launchMazeSession(maze, DEFAULT_SESSION_ALGORITHM, DEFAULT_SESSION_STEP_DELAY_MS);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(
@@ -241,43 +259,109 @@ public final class MazeRenderer {
     /**
      * @brief Prompts for random maze dimensions.
      *
-     * @return two-element array [rows, cols], or null when canceled
+     * @return selected generation options, or null when canceled
      */
-    private static int[] promptForRandomMazeDimensions() {
-        JSpinner rowSpinner = new JSpinner(new SpinnerNumberModel(60, 3, 5000, 1));
-        JSpinner colSpinner = new JSpinner(new SpinnerNumberModel(60, 3, 5000, 1));
+    private static RandomMazeOptions promptForRandomMazeDimensions() {
+        while (true) {
+            JSpinner rowSpinner = new JSpinner(new SpinnerNumberModel(60, 3, 5000, 1));
+            JSpinner colSpinner = new JSpinner(new SpinnerNumberModel(60, 3, 5000, 1));
+            JCheckBox weightedCheckBox = new JCheckBox("Enable movement weights");
+            JCheckBox sameDirectionCheckBox =
+                    new JCheckBox("Use the same cost in both directions", true);
+            JSpinner minWeightSpinner = new JSpinner(new SpinnerNumberModel(
+                    Maze.MIN_MOVEMENT_COST,
+                    Maze.MIN_MOVEMENT_COST,
+                    Maze.MAX_MOVEMENT_COST,
+                    1));
+            JSpinner maxWeightSpinner = new JSpinner(new SpinnerNumberModel(
+                    10,
+                    Maze.MIN_MOVEMENT_COST,
+                    Maze.MAX_MOVEMENT_COST,
+                    1));
+            minWeightSpinner.setEnabled(false);
+            maxWeightSpinner.setEnabled(false);
+            sameDirectionCheckBox.setEnabled(false);
+            weightedCheckBox.addActionListener(e -> {
+                boolean enabled = weightedCheckBox.isSelected();
+                minWeightSpinner.setEnabled(enabled);
+                maxWeightSpinner.setEnabled(enabled);
+                sameDirectionCheckBox.setEnabled(enabled);
+            });
 
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 4, 4, 4);
-        gbc.anchor = GridBagConstraints.WEST;
+            JPanel panel = new JPanel(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(4, 4, 4, 4);
+            gbc.anchor = GridBagConstraints.WEST;
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(new JLabel("Rows:"), gbc);
-        gbc.gridx = 1;
-        panel.add(rowSpinner, gbc);
+            addLabeledControl(panel, gbc, 0, "Rows:", rowSpinner);
+            addLabeledControl(panel, gbc, 1, "Columns:", colSpinner);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(new JLabel("Columns:"), gbc);
-        gbc.gridx = 1;
-        panel.add(colSpinner, gbc);
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            gbc.gridwidth = 2;
+            panel.add(weightedCheckBox, gbc);
 
-        int result = JOptionPane.showConfirmDialog(
-                null,
-                panel,
-                "Generate Random Maze",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
+            gbc.gridy = 3;
+            panel.add(sameDirectionCheckBox, gbc);
 
-        if (result != JOptionPane.OK_OPTION) {
-            return null;
+            gbc.gridwidth = 1;
+            addLabeledControl(panel, gbc, 4, "Minimum weight:", minWeightSpinner);
+            addLabeledControl(panel, gbc, 5, "Maximum weight:", maxWeightSpinner);
+
+            int result = JOptionPane.showConfirmDialog(
+                    null, panel, "Generate Random Maze",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (result != JOptionPane.OK_OPTION) {
+                return null;
+            }
+
+            int minWeight = ((Number) minWeightSpinner.getValue()).intValue();
+            int maxWeight = ((Number) maxWeightSpinner.getValue()).intValue();
+            if (!weightedCheckBox.isSelected() || minWeight <= maxWeight) {
+                return new RandomMazeOptions(
+                        ((Number) rowSpinner.getValue()).intValue(),
+                        ((Number) colSpinner.getValue()).intValue(),
+                        weightedCheckBox.isSelected(),
+                        minWeight,
+                        maxWeight,
+                        sameDirectionCheckBox.isSelected());
+            }
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Minimum weight cannot be greater than maximum weight.",
+                    "Invalid Weight Range",
+                    JOptionPane.ERROR_MESSAGE);
         }
+    }
 
-        int rows = ((Number) rowSpinner.getValue()).intValue();
-        int cols = ((Number) colSpinner.getValue()).intValue();
-        return new int[] { rows, cols };
+    private static void addLabeledControl(
+            JPanel panel, GridBagConstraints constraints, int row, String label, JSpinner control) {
+        constraints.gridx = 0;
+        constraints.gridy = row;
+        panel.add(new JLabel(label), constraints);
+        constraints.gridx = 1;
+        panel.add(control, constraints);
+    }
+
+    private static final class RandomMazeOptions {
+        private final int rows;
+        private final int columns;
+        private final boolean weighted;
+        private final int minWeight;
+        private final int maxWeight;
+        private final boolean sameCostBothDirections;
+
+        private RandomMazeOptions(
+                int rows, int columns, boolean weighted, int minWeight, int maxWeight,
+                boolean sameCostBothDirections) {
+            this.rows = rows;
+            this.columns = columns;
+            this.weighted = weighted;
+            this.minWeight = minWeight;
+            this.maxWeight = maxWeight;
+            this.sameCostBothDirections = sameCostBothDirections;
+        }
     }
 
     /**
@@ -367,6 +451,11 @@ public final class MazeRenderer {
         applyControlDefaults(initialAlgorithm, initialStepDelayMs);
         resetTraversalCounter();
         setSolveTimeNs(0);
+        setCurrentPathCost(-1);
+        setFinalPathCost(-1);
+        solveSessionWallStartNs = 0;
+        solveSessionMode = "animated";
+        solveSessionDelayMs = getSelectedStepDelayMsValue();
 
         solver = new MazeSolver();
         solver.setMaze(maze);
@@ -380,13 +469,19 @@ public final class MazeRenderer {
 
     /**
      * @brief Handles one timer tick of incremental solving.
-         *
-         * <p>Each tick performs exactly one call to {@link MazeSolver#updateSolve()} and
-         * then updates UI state based on the returned node and terminal solver status.
-         * When solved, the final path is colored and start/goal semantic colors are restored.
+     *
+     * <p>Each tick performs exactly one call to {@link MazeSolver#updateSolve()} and
+     * then updates UI state based on the returned node and terminal solver status.
+     * When solved, the final path is colored and start/goal semantic colors are restored.
      */
     private static void onSolveTick() {
         syncTimerDelayWithUi();
+        if (solveSessionWallStartNs == 0) {
+            solveSessionWallStartNs = System.nanoTime();
+            solveSessionDelayMs = getSelectedStepDelayMsValue();
+            System.out.println("Solve debug: mode=animated, interval="
+                    + solveSessionDelayMs + " ms, algorithm=" + solver.getAlg());
+        }
 
         Maze.Node visited = solver.updateSolve();
         if (visited != null && visited != renderedMaze.getGoal() && visited != renderedMaze.getStart()) {
@@ -395,6 +490,7 @@ public final class MazeRenderer {
             setTraversedCount(traversedTiles);
         }
 
+        setCurrentPathCost(solver.getCurrentPathCost());
         setSolveTimeNs(solver.getSolveTimeNs());
 
         if (!solver.isFinished()) {
@@ -404,26 +500,26 @@ public final class MazeRenderer {
         stopTimerIfRunning();
         refreshRuntimeControlState();
         if (solver.isSolved()) {
-            setCellColors(solver.getFinalPath(), Color.CYAN);
+            setFinalPathCost(solver.getPathCost());
+            List<Point> finalPath = solver.getFinalPath();
+            setFinalPathEdges(finalPath);
+            setCellColors(finalPath, Color.CYAN);
             resetNodeColor(renderedMaze.getStart());
             resetNodeColor(renderedMaze.getGoal());
-            System.out.println("Solve result: goal reached using " + solver.getAlg()
-                    + " after visiting " + solver.getVisitedCount() + " node(s) in "
-                    + String.format("%.4f", solver.getSolveTimeNs() / 1_000_000.0) + " ms.");
+            printSolveDebugResult(true);
             return;
         }
 
-        System.out.println("Solve result: no path found using " + solver.getAlg()
-                + " after visiting " + solver.getVisitedCount() + " node(s) in "
-                + String.format("%.4f", solver.getSolveTimeNs() / 1_000_000.0) + " ms.");
+        printSolveDebugResult(false);
+        setFinalPathCost(-1);
     }
 
     /**
      * @brief Handles Start button action.
-        *
-        * <p>On first start after a restart, this resets solver search state while keeping
-        * current control selections (algorithm, delay, and instant mode).
-        * If Instant mode is selected, Start executes a background solve-to-completion.
+     *
+     * <p>On first start after a restart, this resets solver search state while keeping
+     * current control selections (algorithm, delay, and instant mode).
+     * If Instant mode is selected, Start executes a background solve-to-completion.
      */
     private static void handleStartRequested() {
         if (solver == null || solveTimer == null) {
@@ -457,9 +553,9 @@ public final class MazeRenderer {
 
     /**
      * @brief Handles Restart button action and algorithm changes.
-        *
-        * <p>This preserves the currently loaded maze while clearing traversal coloring and
-        * rebuilding solver state from the current algorithm selection.
+     *
+     * <p>This preserves the currently loaded maze while clearing traversal coloring and
+     * rebuilding solver state from the current algorithm selection.
      */
     private static void handleRestartRequested() {
         if (solver == null || solveTimer == null) {
@@ -472,7 +568,12 @@ public final class MazeRenderer {
         resetAllCellColors();
         resetTraversalCounter();
         setSolveTimeNs(0);
+        setCurrentPathCost(-1);
+        setFinalPathCost(-1);
         syncTimerDelayWithUi();
+        solveSessionWallStartNs = 0;
+        solveSessionMode = "animated";
+        solveSessionDelayMs = getSelectedStepDelayMsValue();
         sessionStarted = false;
         solvingInstantly = false;
         refreshRuntimeControlState();
@@ -482,10 +583,10 @@ public final class MazeRenderer {
      * @brief Runs solve loop to completion without per-step UI updates.
      *
      * <p>The display is updated only when solving has finished, either with a final path
-         * (solved) or with an unsolved result. During this run, mode toggling is disabled
-         * via {@link #refreshRuntimeControlState()}. Traversed-cell coloring and traversed
-         * count semantics match timer mode (start/goal excluded), including restoration
-         * of start/goal colors after final path painting.
+     * (solved) or with an unsolved result. During this run, mode toggling is disabled
+     * via {@link #refreshRuntimeControlState()}. Traversed-cell coloring and traversed
+     * count semantics match timer mode (start/goal excluded), including restoration
+     * of start/goal colors after final path painting.
      */
     private static void runInstantSolve() {
         if (solver == null || solvingInstantly || !isInstantSolveSelected()) {
@@ -494,6 +595,10 @@ public final class MazeRenderer {
 
         stopTimerIfRunning();
         solvingInstantly = true;
+        solveSessionWallStartNs = System.nanoTime();
+        solveSessionMode = "instant";
+        solveSessionDelayMs = 0;
+        System.out.println("Solve debug: mode=instant, interval=none, algorithm=" + solver.getAlg());
         refreshRuntimeControlState();
 
         Thread worker = new Thread(() -> {
@@ -512,19 +617,19 @@ public final class MazeRenderer {
                 solvingInstantly = false;
                 traversedTiles = setCellColors(traversedPoints, sessionVisitedColor);
                 setTraversedCount(traversedTiles);
+                setCurrentPathCost(solver.getCurrentPathCost());
                 setSolveTimeNs(solver.getSolveTimeNs());
 
                 if (solved && finalPath != null) {
+                    setFinalPathCost(solver.getPathCost());
+                    setFinalPathEdges(finalPath);
                     setCellColors(finalPath, Color.CYAN);
                     resetNodeColor(renderedMaze.getStart());
                     resetNodeColor(renderedMaze.getGoal());
-                    System.out.println("Solve result: goal reached using " + solver.getAlg()
-                            + " after visiting " + solver.getVisitedCount() + " node(s) in "
-                            + String.format("%.4f", solver.getSolveTimeNs() / 1_000_000.0) + " ms.");
+                    printSolveDebugResult(true);
                 } else {
-                    System.out.println("Solve result: no path found using " + solver.getAlg()
-                            + " after visiting " + solver.getVisitedCount() + " node(s) in "
-                            + String.format("%.4f", solver.getSolveTimeNs() / 1_000_000.0) + " ms.");
+                    setFinalPathCost(-1);
+                    printSolveDebugResult(false);
                 }
 
                 refreshRuntimeControlState();
@@ -533,6 +638,26 @@ public final class MazeRenderer {
 
         worker.setDaemon(true);
         worker.start();
+    }
+
+    /**
+     * Prints timing diagnostics without changing the user-facing solve metric.
+     */
+    private static void printSolveDebugResult(boolean solved) {
+        double computeMs = solver.getSolveTimeNs() / 1_000_000.0;
+        double wallMs = solveSessionWallStartNs == 0
+                ? 0.0
+                : (System.nanoTime() - solveSessionWallStartNs) / 1_000_000.0;
+        String result = solved ? "goal reached" : "no path found";
+        System.out.println("Solve debug: result=" + result
+                + ", mode=" + solveSessionMode
+                + ", interval=" + ("instant".equals(solveSessionMode)
+                        ? "none" : solveSessionDelayMs + " ms")
+                + ", algorithm=" + solver.getAlg()
+                + ", visited=" + solver.getVisitedCount()
+                + ", compute=" + String.format("%.4f", computeMs) + " ms"
+                + ", wall=" + String.format("%.4f", wallMs) + " ms"
+                + ", timingSource=monotonic search-step clock");
     }
 
     /**
@@ -574,6 +699,7 @@ public final class MazeRenderer {
 
         renderedMaze = maze;
         renderedCellColors = new Color[rows][cols];
+        finalPathEdges = new boolean[rows][cols][Maze.Dir.values().length];
         initializePaintedCellColors(rows, cols);
         renderedGridPanel = createPaintedGridPanel(rows, cols);
 
@@ -650,9 +776,9 @@ public final class MazeRenderer {
                 }
 
                 Rectangle clip = graphics.getClipBounds();
-                int startRow = Math.max(0, clip.y / cellSizePx);
+                int startRow = Math.max(0, (clip.y / cellSizePx) - 1);
                 int endRow = Math.min(renderedMaze.getLength() - 1, (clip.y + clip.height) / cellSizePx + 1);
-                int startCol = Math.max(0, clip.x / cellSizePx);
+                int startCol = Math.max(0, (clip.x / cellSizePx) - 1);
                 int endCol = Math.min(renderedMaze.getWidth() - 1, (clip.x + clip.width) / cellSizePx + 1);
 
                 Maze.Node start = renderedMaze.getStart();
@@ -692,11 +818,241 @@ public final class MazeRenderer {
                     int x = col * cellSizePx;
                     graphics.drawLine(x, minY, x, maxY);
                 }
+
+                if (isWeightOverlayVisible()) {
+                    drawMovementCosts((Graphics2D) graphics, startRow, endRow, startCol, endCol);
+                }
             }
         };
 
         panel.setPreferredSize(new Dimension(cols * cellSizePx, rows * cellSizePx));
         return panel;
+    }
+
+    /**
+     * @brief Draws directional movement costs on visible grid edges.
+     *
+     * <p>Each geometric connection is drawn once from its north or west node.
+     * Equal costs in opposite directions use one label. Different costs use two
+     * labels with direction markers so asymmetric movement remains visible.
+     *
+     * @param graphics graphics context for the grid
+     * @param startRow first visible row
+     * @param endRow last visible row
+     * @param startCol first visible column
+     * @param endCol last visible column
+     */
+    private static void drawMovementCosts(
+            Graphics2D graphics,
+            int startRow,
+            int endRow,
+            int startCol,
+            int endCol) {
+        graphics.setFont(graphics.getFont().deriveFont(WEIGHT_LABEL_FONT_SIZE));
+
+        for (int row = startRow; row <= endRow; row++) {
+            for (int col = startCol; col <= endCol; col++) {
+                Maze.Node node = renderedMaze.getNode(row, col);
+                if (node == null) {
+                    continue;
+                }
+
+                if (col < renderedMaze.getWidth() - 1) {
+                    Maze.Node east = node.getNeighbor(Maze.Dir.EAST);
+                    if (east != null) {
+                        drawHorizontalCostLabels(
+                                graphics,
+                                (col + 1) * cellSizePx,
+                                row * cellSizePx + (cellSizePx / 2),
+                                node.getMoveCost(Maze.Dir.EAST),
+                                east.getMoveCost(Maze.Dir.WEST),
+                                getWeightDisplayState(node, east));
+                    }
+                }
+
+                if (row < renderedMaze.getLength() - 1) {
+                    Maze.Node south = node.getNeighbor(Maze.Dir.SOUTH);
+                    if (south != null) {
+                        drawVerticalCostLabels(
+                                graphics,
+                                col * cellSizePx + (cellSizePx / 2),
+                                (row + 1) * cellSizePx,
+                                node.getMoveCost(Maze.Dir.SOUTH),
+                                south.getMoveCost(Maze.Dir.NORTH),
+                                getWeightDisplayState(node, south));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Draws one horizontal edge's cost labels.
+     */
+    private static void drawHorizontalCostLabels(
+            Graphics2D graphics,
+            int edgeX,
+            int centerY,
+            int eastCost,
+            int westCost,
+            WeightDisplayState state) {
+        if (eastCost == westCost) {
+            drawCostLabel(graphics, Integer.toString(eastCost), edgeX, centerY, state);
+            return;
+        }
+
+        drawCostLabel(graphics, ">" + eastCost, edgeX, centerY - 7, state);
+        drawCostLabel(graphics, "<" + westCost, edgeX, centerY + 7, state);
+    }
+
+    /**
+     * Draws one vertical edge's cost labels.
+     */
+    private static void drawVerticalCostLabels(
+            Graphics2D graphics,
+            int centerX,
+            int edgeY,
+            int southCost,
+            int northCost,
+            WeightDisplayState state) {
+        if (southCost == northCost) {
+            drawCostLabel(graphics, Integer.toString(southCost), centerX, edgeY, state);
+            return;
+        }
+
+        drawCostLabel(graphics, "v" + southCost, centerX + 8, edgeY, state);
+        drawCostLabel(graphics, "^" + northCost, centerX - 8, edgeY, state);
+    }
+
+    /**
+     * Describes how a weight label should be styled based on the solve state.
+     */
+    private enum WeightDisplayState {
+        NORMAL,
+        TRAVERSED,
+        FINAL_PATH
+    }
+
+    /**
+     * Selects final-path styling before visited-node styling.
+     */
+    private static WeightDisplayState getWeightDisplayState(Maze.Node first, Maze.Node second) {
+        Color firstColor = renderedCellColors[first.row][first.col];
+        Color secondColor = renderedCellColors[second.row][second.col];
+        if (isFinalPathEdge(first, second)) {
+            return WeightDisplayState.FINAL_PATH;
+        }
+        if (sessionVisitedColor.equals(firstColor) || sessionVisitedColor.equals(secondColor)) {
+            return WeightDisplayState.TRAVERSED;
+        }
+        return WeightDisplayState.NORMAL;
+    }
+
+    /**
+     * Records only the consecutive node-to-node edges in the final solution.
+     *
+     * @param path solver path in goal-to-start order
+     */
+    private static void setFinalPathEdges(List<Point> path) {
+        if (finalPathEdges == null) {
+            return;
+        }
+
+        for (int row = 0; row < finalPathEdges.length; row++) {
+            for (int col = 0; col < finalPathEdges[row].length; col++) {
+                for (int direction = 0; direction < finalPathEdges[row][col].length; direction++) {
+                    finalPathEdges[row][col][direction] = false;
+                }
+            }
+        }
+
+        if (path == null) {
+            return;
+        }
+
+        for (int index = 0; index + 1 < path.size(); index++) {
+            Point first = path.get(index);
+            Point second = path.get(index + 1);
+            if (first == null || second == null
+                    || !renderedMaze.isInBounds(first.y, first.x)
+                    || !renderedMaze.isInBounds(second.y, second.x)) {
+                continue;
+            }
+
+            Maze.Dir firstDirection = directionBetween(first, second);
+            Maze.Dir secondDirection = directionBetween(second, first);
+            if (firstDirection != null && secondDirection != null) {
+                finalPathEdges[first.y][first.x][firstDirection.idx()] = true;
+                finalPathEdges[second.y][second.x][secondDirection.idx()] = true;
+            }
+        }
+    }
+
+    /**
+     * @return true only when the two nodes form a consecutive final-path edge
+     */
+    private static boolean isFinalPathEdge(Maze.Node first, Maze.Node second) {
+        if (finalPathEdges == null || first == null || second == null) {
+            return false;
+        }
+
+        Maze.Dir direction = directionBetween(
+                new Point(first.col, first.row),
+                new Point(second.col, second.row));
+        return direction != null && finalPathEdges[first.row][first.col][direction.idx()];
+    }
+
+    /**
+     * Determines the cardinal direction from one coordinate to an adjacent one.
+     */
+    private static Maze.Dir directionBetween(Point from, Point to) {
+        int rowDelta = to.y - from.y;
+        int colDelta = to.x - from.x;
+        if (rowDelta == -1 && colDelta == 0) {
+            return Maze.Dir.NORTH;
+        }
+        if (rowDelta == 0 && colDelta == 1) {
+            return Maze.Dir.EAST;
+        }
+        if (rowDelta == 1 && colDelta == 0) {
+            return Maze.Dir.SOUTH;
+        }
+        if (rowDelta == 0 && colDelta == -1) {
+            return Maze.Dir.WEST;
+        }
+        return null;
+    }
+
+    /**
+     * Draws a compact cost label with state-specific styling and a background
+     * for readability over visited and path cells.
+     */
+    private static void drawCostLabel(
+            Graphics2D graphics,
+            String text,
+            int centerX,
+            int centerY,
+            WeightDisplayState state) {
+        int padding = 2;
+        int width = graphics.getFontMetrics().stringWidth(text);
+        int height = graphics.getFontMetrics().getHeight();
+        int x = centerX - (width / 2);
+        int y = centerY + (height / 3);
+
+        Color background = Color.WHITE;
+        Color foreground = Color.BLACK;
+        if (state == WeightDisplayState.TRAVERSED) {
+            background = new Color(235, 235, 235, 205);
+            foreground = TRAVERSED_WEIGHT_COLOR;
+        } else if (state == WeightDisplayState.FINAL_PATH) {
+            background = FINAL_PATH_WEIGHT_BACKGROUND;
+            foreground = FINAL_PATH_WEIGHT_COLOR;
+        }
+
+        graphics.setColor(background);
+        graphics.fillRect(x - padding, y - height + padding, width + (2 * padding), height);
+        graphics.setColor(foreground);
+        graphics.drawString(text, x, y);
     }
 
     /**
@@ -713,6 +1069,9 @@ public final class MazeRenderer {
          *   <li><b>Step Delay</b>: 1..5000 ms for timer-driven solving</li>
          *   <li><b>Instant</b>: solve to completion with timer-mode-equivalent final output</li>
          *   <li><b>Zoom +/-</b>: adjust cell size in fixed increments</li>
+         *   <li><b>Show Weights</b>: overlay directional movement costs at larger zoom levels</li>
+         *   <li><b>Current Cost</b>: cost to the most recently visited node</li>
+         *   <li><b>Final Cost</b>: total cost of the completed solution path</li>
          * </ul>
      *
      * @return constructed control panel
@@ -737,8 +1096,13 @@ public final class MazeRenderer {
         algorithmSelector = new JComboBox<>(new String[] { "DFS", "BFS", "A*" });
         delaySpinner = new JSpinner(new SpinnerNumberModel(defaultStepDelayMs, 1, 5000, 1));
         instantSolveCheckBox = new JCheckBox();
+        showWeightsCheckBox = new JCheckBox("Show Weights", DEFAULT_SHOW_WEIGHTS);
+        showWeightsCheckBox.setToolTipText(
+                "Show N/E/S/W movement costs. Zoom in to display labels; 0 means disabled.");
         traversedCountLabel = new JLabel("Traversed: " + defaultTraversedCount);
         solveTimeLabel = new JLabel("Solve Time: 0.0000 ms");
+        currentCostLabel = new JLabel("Current Cost: --");
+        finalCostLabel = new JLabel("Final Cost: --");
 
         algorithmSelector.addActionListener(e -> {
             if (!applyingControlDefaults) {
@@ -750,6 +1114,11 @@ public final class MazeRenderer {
                 instantSolveCheckBox.setSelected(false);
             }
             refreshRuntimeControlState();
+        });
+        showWeightsCheckBox.addActionListener(e -> {
+            if (renderedGridPanel != null) {
+                renderedGridPanel.repaint();
+            }
         });
 
         startButton.addActionListener(e -> handleStartRequested());
@@ -779,8 +1148,11 @@ public final class MazeRenderer {
         controlPanel.add(zoomLabel);
         controlPanel.add(zoomOutButton);
         controlPanel.add(zoomInButton);
+        controlPanel.add(showWeightsCheckBox);
         controlPanel.add(traversedCountLabel);
         controlPanel.add(solveTimeLabel);
+        controlPanel.add(currentCostLabel);
+        controlPanel.add(finalCostLabel);
 
         refreshRuntimeControlState();
 
@@ -844,8 +1216,8 @@ public final class MazeRenderer {
      * @brief Generates a new random maze and restarts the session with it.
      */
     private static void handleGenerateMapRequested() {
-        int[] dimensions = promptForRandomMazeDimensions();
-        if (dimensions == null) {
+        RandomMazeOptions options = promptForRandomMazeDimensions();
+        if (options == null) {
             return;
         }
 
@@ -853,7 +1225,10 @@ public final class MazeRenderer {
         int selectedDelay = getSelectedStepDelayMsValue();
 
         try {
-            Maze maze = Maze.generateRandomMaze(dimensions[0], dimensions[1]);
+            Maze maze = Maze.generateRandomMaze(
+                    options.rows, options.columns, options.weighted,
+                    options.minWeight, options.maxWeight,
+                    options.sameCostBothDirections);
             launchMazeSession(maze, selectedAlgorithm, selectedDelay);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(
@@ -867,6 +1242,9 @@ public final class MazeRenderer {
     /**
      * @brief Prompts for destination path when saving a maze file.
      *
+     * <p>The application stores maze files with a {@code .txt} extension so
+     * they remain visible in the import dialog.
+     *
      * @return selected absolute file path, or null when canceled
      */
     private static String chooseSaveMazeFile() {
@@ -879,6 +1257,9 @@ public final class MazeRenderer {
         String directory = saveDialog.getDirectory();
         if (fileName == null) {
             return null;
+        }
+        if (!fileName.toLowerCase().endsWith(".txt")) {
+            fileName += ".txt";
         }
         return directory + fileName;
     }
@@ -1071,8 +1452,39 @@ public final class MazeRenderer {
         }
 
         double timeMs = solveTimeNs / 1_000_000.0;
-        SwingUtilities.invokeLater(
-                () -> solveTimeLabel.setText(String.format("Solve Time: %.4f ms", timeMs)));
+        Runnable update = () -> solveTimeLabel.setText(
+                String.format("Solve Time: %.4f ms", timeMs));
+        if (SwingUtilities.isEventDispatchThread()) {
+            update.run();
+        } else {
+            SwingUtilities.invokeLater(update);
+        }
+    }
+
+    /**
+     * @brief Sets the live current-route cost label.
+     *
+     * @param cost cost to the most recently visited node, or -1 when unavailable
+     */
+    private static void setCurrentPathCost(long cost) {
+        if (currentCostLabel == null) {
+            return;
+        }
+        SwingUtilities.invokeLater(() -> currentCostLabel.setText(
+                cost >= 0 ? "Current Cost: " + cost : "Current Cost: --"));
+    }
+
+    /**
+     * @brief Sets the final-route cost label.
+     *
+     * @param cost final path cost, or -1 when no solution is available
+     */
+    private static void setFinalPathCost(long cost) {
+        if (finalCostLabel == null) {
+            return;
+        }
+        SwingUtilities.invokeLater(() -> finalCostLabel.setText(
+                cost >= 0 ? "Final Cost: " + cost : "Final Cost: --"));
     }
 
     /**
@@ -1124,9 +1536,7 @@ public final class MazeRenderer {
         SwingUtilities.invokeLater(() -> {
             renderedCellColors[row][col] = color;
             if (renderedGridPanel != null) {
-                int x = col * cellSizePx;
-                int y = row * cellSizePx;
-                renderedGridPanel.repaint(x, y, cellSizePx, cellSizePx);
+                repaintGridForWeightOverlay(row, col);
             }
         });
         return true;
@@ -1154,9 +1564,79 @@ public final class MazeRenderer {
         }
 
         if (updated > 0 && renderedGridPanel != null) {
-            renderedGridPanel.repaint();
+            repaintGridForWeightOverlay(cells);
         }
         return updated;
+    }
+
+    /**
+     * Repaints the changed cell and its adjacent edge-label area.
+     */
+    private static void repaintGridForWeightOverlay(int row, int col) {
+        if (renderedGridPanel == null) {
+            return;
+        }
+        repaintGridRegion(row, col, row, col);
+    }
+
+    /**
+     * Repaints all changed cells as one bounded region, expanded by one cell so
+     * labels on connections to neighboring cells are included.
+     */
+    private static void repaintGridForWeightOverlay(List<Point> cells) {
+        if (renderedGridPanel == null || cells == null || cells.isEmpty()) {
+            return;
+        }
+
+        int minRow = renderedMaze.getLength();
+        int minCol = renderedMaze.getWidth();
+        int maxRow = -1;
+        int maxCol = -1;
+        for (Point point : cells) {
+            if (point == null || !renderedMaze.isInBounds(point.y, point.x)) {
+                continue;
+            }
+            minRow = Math.min(minRow, point.y);
+            minCol = Math.min(minCol, point.x);
+            maxRow = Math.max(maxRow, point.y);
+            maxCol = Math.max(maxCol, point.x);
+        }
+
+        if (maxRow >= 0) {
+            repaintGridRegion(minRow, minCol, maxRow, maxCol);
+        }
+    }
+
+    /**
+     * Repaints an inclusive cell rectangle with one-cell padding.
+     */
+    private static void repaintGridRegion(int minRow, int minCol, int maxRow, int maxCol) {
+        int paddedMinRow = Math.max(0, minRow - 1);
+        int paddedMinCol = Math.max(0, minCol - 1);
+        int paddedMaxRow = Math.min(renderedMaze.getLength() - 1, maxRow + 1);
+        int paddedMaxCol = Math.min(renderedMaze.getWidth() - 1, maxCol + 1);
+
+        int labelMargin = Math.max(4, cellSizePx / 4);
+        int x = Math.max(0, (paddedMinCol * cellSizePx) - labelMargin);
+        int y = Math.max(0, (paddedMinRow * cellSizePx) - labelMargin);
+        int right = Math.min(
+                renderedMaze.getWidth() * cellSizePx,
+                ((paddedMaxCol + 1) * cellSizePx) + labelMargin);
+        int bottom = Math.min(
+                renderedMaze.getLength() * cellSizePx,
+                ((paddedMaxRow + 1) * cellSizePx) + labelMargin);
+        int width = right - x;
+        int height = bottom - y;
+        renderedGridPanel.repaint(x, y, width, height);
+    }
+
+    /**
+     * @return true when weight labels are currently being painted
+     */
+    private static boolean isWeightOverlayVisible() {
+        return showWeightsCheckBox != null
+                && showWeightsCheckBox.isSelected()
+                && cellSizePx >= MIN_WEIGHT_LABEL_CELL_SIZE_PX;
     }
 
     /**
@@ -1168,6 +1648,15 @@ public final class MazeRenderer {
         }
 
         SwingUtilities.invokeLater(() -> {
+            if (finalPathEdges != null) {
+                for (int row = 0; row < finalPathEdges.length; row++) {
+                    for (int col = 0; col < finalPathEdges[row].length; col++) {
+                        for (int direction = 0; direction < finalPathEdges[row][col].length; direction++) {
+                            finalPathEdges[row][col][direction] = false;
+                        }
+                    }
+                }
+            }
             for (int row = 0; row < renderedMaze.getLength(); row++) {
                 for (int col = 0; col < renderedMaze.getWidth(); col++) {
                     renderedCellColors[row][col] = getDefaultCellColor(renderedMaze, row, col);
@@ -1367,7 +1856,8 @@ public final class MazeRenderer {
      * @brief JPanel that paints a stretched background image.
      */
     private static class BackgroundImagePanel extends JPanel {
-        private final BufferedImage backgroundImage;
+        private static final long serialVersionUID = 1L;
+        private final transient BufferedImage backgroundImage;
 
         /**
          * @brief Creates a panel backed by the image at the given path.

@@ -27,8 +27,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.5</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.6</span>
    </div>
+   <div id="projectbrief">Weighted intelligent route-planning maze solver</div>
   </td>
  </tr>
  </tbody>
@@ -103,36 +104,58 @@ $(function(){initNavTree('class_maze_solver.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">MazeSolver Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Incremental maze solver that supports DFS, BFS, and weighted A*.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enum_maze_solver_1_1_algorithm.html">Algorithm</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Search strategies supported by this solver.  <a href="enum_maze_solver_1_1_algorithm.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a9baf570c82f61e83d1e11e8bb8a93e3c" id="r_a9baf570c82f61e83d1e11e8bb8a93e3c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9baf570c82f61e83d1e11e8bb8a93e3c">setAlg</a> (String alg)</td></tr>
+<tr class="memdesc:a9baf570c82f61e83d1e11e8bb8a93e3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets which algorithm to run.  <br /></td></tr>
 <tr class="separator:a9baf570c82f61e83d1e11e8bb8a93e3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4223613a3ef49712b3a81d02931e998c" id="r_a4223613a3ef49712b3a81d02931e998c"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4223613a3ef49712b3a81d02931e998c">getAlg</a> ()</td></tr>
+<tr class="memdesc:a4223613a3ef49712b3a81d02931e998c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the active algorithm label.  <br /></td></tr>
 <tr class="separator:a4223613a3ef49712b3a81d02931e998c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a19e7e09b1cf169d44927f2fbb1a4a9f9" id="r_a19e7e09b1cf169d44927f2fbb1a4a9f9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a19e7e09b1cf169d44927f2fbb1a4a9f9">setMaze</a> (<a class="el" href="class_maze.html">Maze</a> maze)</td></tr>
+<tr class="memdesc:a19e7e09b1cf169d44927f2fbb1a4a9f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns the maze instance to solve.  <br /></td></tr>
 <tr class="separator:a19e7e09b1cf169d44927f2fbb1a4a9f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4731d9d114db6ed8934c1bb5b5153355" id="r_a4731d9d114db6ed8934c1bb5b5153355"><td class="memItemLeft" align="right" valign="top">Maze.Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4731d9d114db6ed8934c1bb5b5153355">updateSolve</a> ()</td></tr>
+<tr class="memdesc:a4731d9d114db6ed8934c1bb5b5153355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advances solving by exactly one visited node.  <br /></td></tr>
 <tr class="separator:a4731d9d114db6ed8934c1bb5b5153355"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e2cd30b080991b73b0d717e1862b74d" id="r_a1e2cd30b080991b73b0d717e1862b74d"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1e2cd30b080991b73b0d717e1862b74d">isFinished</a> ()</td></tr>
+<tr class="memdesc:a1e2cd30b080991b73b0d717e1862b74d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates whether this run has terminated.  <br /></td></tr>
 <tr class="separator:a1e2cd30b080991b73b0d717e1862b74d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a976101159c6108d2600323fbd913f5d7" id="r_a976101159c6108d2600323fbd913f5d7"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a976101159c6108d2600323fbd913f5d7">isSolved</a> ()</td></tr>
+<tr class="memdesc:a976101159c6108d2600323fbd913f5d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates whether the current run found the goal.  <br /></td></tr>
 <tr class="separator:a976101159c6108d2600323fbd913f5d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a930cd51699c61b24fa70f73072607ad5" id="r_a930cd51699c61b24fa70f73072607ad5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a930cd51699c61b24fa70f73072607ad5">getVisitedCount</a> ()</td></tr>
+<tr class="memdesc:a930cd51699c61b24fa70f73072607ad5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets count of nodes visited in the current run.  <br /></td></tr>
 <tr class="separator:a930cd51699c61b24fa70f73072607ad5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad40c030a15ccb5840668939169c1c71" id="r_aad40c030a15ccb5840668939169c1c71"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad40c030a15ccb5840668939169c1c71">getSolveTimeNs</a> ()</td></tr>
+<tr class="memdesc:aad40c030a15ccb5840668939169c1c71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the total computation time elapsed in the current run.  <br /></td></tr>
+<tr class="separator:aad40c030a15ccb5840668939169c1c71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73a149b9eb40c7e5f4df11b33a9b5af2" id="r_a73a149b9eb40c7e5f4df11b33a9b5af2"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73a149b9eb40c7e5f4df11b33a9b5af2">getPathCost</a> ()</td></tr>
+<tr class="memdesc:a73a149b9eb40c7e5f4df11b33a9b5af2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the total movement cost of the final path.  <br /></td></tr>
+<tr class="separator:a73a149b9eb40c7e5f4df11b33a9b5af2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d845516b17cf3d6f45b30316bf60c63" id="r_a0d845516b17cf3d6f45b30316bf60c63"><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0d845516b17cf3d6f45b30316bf60c63">getCurrentPathCost</a> ()</td></tr>
+<tr class="memdesc:a0d845516b17cf3d6f45b30316bf60c63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the cost of the parent route for the most recently visited node.  <br /></td></tr>
+<tr class="separator:a0d845516b17cf3d6f45b30316bf60c63"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a188a2b6d5e8776a4b0715ab74990d71b" id="r_a188a2b6d5e8776a4b0715ab74990d71b"><td class="memItemLeft" align="right" valign="top">List&lt; Point &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a188a2b6d5e8776a4b0715ab74990d71b">getFinalPath</a> ()</td></tr>
+<tr class="memdesc:a188a2b6d5e8776a4b0715ab74990d71b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the final path after a successful solve.  <br /></td></tr>
 <tr class="separator:a188a2b6d5e8776a4b0715ab74990d71b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f7895d3d944960d5c68b7b5d4e33471" id="r_a5f7895d3d944960d5c68b7b5d4e33471"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f7895d3d944960d5c68b7b5d4e33471">resetSearch</a> ()</td></tr>
+<tr class="memdesc:a5f7895d3d944960d5c68b7b5d4e33471"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets transient search state so solving can start fresh.  <br /></td></tr>
 <tr class="separator:a5f7895d3d944960d5c68b7b5d4e33471"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Incremental maze solver that supports DFS, BFS, and A*.</p>
-<p>The solver keeps internal state between calls to <code><a class="el" href="#a4731d9d114db6ed8934c1bb5b5153355">updateSolve()</a></code>, so callers can visualize or inspect each step one node at a time.</p>
+<div class="textblock"><p>Incremental maze solver that supports DFS, BFS, and weighted A*. </p>
+<p>The solver keeps internal state between calls to <code><a class="el" href="#a4731d9d114db6ed8934c1bb5b5153355">updateSolve()</a></code>, so callers can visualize or inspect each step one node at a time. Reported solve time measures the elapsed time of each search-step call, excluding timer delays and UI repaint work.</p>
 <p>Typical usage: create a solver, set algorithm and maze, then call <code><a class="el" href="#a4731d9d114db6ed8934c1bb5b5153355">updateSolve()</a></code> repeatedly until <code><a class="el" href="#a1e2cd30b080991b73b0d717e1862b74d">isFinished()</a></code> returns true. Example: </p><div class="fragment"><div class="line"><a class="code hl_class" href="class_maze_solver.html">MazeSolver</a> solver = <span class="keyword">new</span> <a class="code hl_class" href="class_maze_solver.html">MazeSolver</a>();</div>
 <div class="line">solver.<a class="code hl_function" href="#a19e7e09b1cf169d44927f2fbb1a4a9f9">setMaze</a>(maze);</div>
 <div class="line">solver.<a class="code hl_function" href="#a9baf570c82f61e83d1e11e8bb8a93e3c">setAlg</a>(<span class="stringliteral">&quot;A*&quot;</span>);</div>
@@ -142,19 +165,22 @@ Public Member Functions</h2></td></tr>
 <div class="line"><span class="keywordflow">if</span> (solver.<a class="code hl_function" href="#a976101159c6108d2600323fbd913f5d7">isSolved</a>()) {</div>
 <div class="line">    List&lt;Point&gt; path = solver.<a class="code hl_function" href="#a188a2b6d5e8776a4b0715ab74990d71b">getFinalPath</a>();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclass_maze_solver_html"><div class="ttname"><a href="class_maze_solver.html">MazeSolver</a></div><div class="ttdef"><b>Definition</b> MazeSolver.java:28</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a188a2b6d5e8776a4b0715ab74990d71b"><div class="ttname"><a href="#a188a2b6d5e8776a4b0715ab74990d71b">MazeSolver.getFinalPath</a></div><div class="ttdeci">List&lt; Point &gt; getFinalPath()</div><div class="ttdef"><b>Definition</b> MazeSolver.java:169</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a19e7e09b1cf169d44927f2fbb1a4a9f9"><div class="ttname"><a href="#a19e7e09b1cf169d44927f2fbb1a4a9f9">MazeSolver.setMaze</a></div><div class="ttdeci">void setMaze(Maze maze)</div><div class="ttdef"><b>Definition</b> MazeSolver.java:100</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a1e2cd30b080991b73b0d717e1862b74d"><div class="ttname"><a href="#a1e2cd30b080991b73b0d717e1862b74d">MazeSolver.isFinished</a></div><div class="ttdeci">boolean isFinished()</div><div class="ttdef"><b>Definition</b> MazeSolver.java:135</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a4731d9d114db6ed8934c1bb5b5153355"><div class="ttname"><a href="#a4731d9d114db6ed8934c1bb5b5153355">MazeSolver.updateSolve</a></div><div class="ttdeci">Maze.Node updateSolve()</div><div class="ttdef"><b>Definition</b> MazeSolver.java:111</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a976101159c6108d2600323fbd913f5d7"><div class="ttname"><a href="#a976101159c6108d2600323fbd913f5d7">MazeSolver.isSolved</a></div><div class="ttdeci">boolean isSolved()</div><div class="ttdef"><b>Definition</b> MazeSolver.java:144</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a9baf570c82f61e83d1e11e8bb8a93e3c"><div class="ttname"><a href="#a9baf570c82f61e83d1e11e8bb8a93e3c">MazeSolver.setAlg</a></div><div class="ttdeci">void setAlg(String alg)</div><div class="ttdef"><b>Definition</b> MazeSolver.java:64</div></div>
+<div class="ttc" id="aclass_maze_solver_html"><div class="ttname"><a href="class_maze_solver.html">MazeSolver</a></div><div class="ttdoc">Incremental maze solver that supports DFS, BFS, and weighted A*.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:31</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a188a2b6d5e8776a4b0715ab74990d71b"><div class="ttname"><a href="#a188a2b6d5e8776a4b0715ab74990d71b">MazeSolver.getFinalPath</a></div><div class="ttdeci">List&lt; Point &gt; getFinalPath()</div><div class="ttdoc">Gets the final path after a successful solve.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:217</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a19e7e09b1cf169d44927f2fbb1a4a9f9"><div class="ttname"><a href="#a19e7e09b1cf169d44927f2fbb1a4a9f9">MazeSolver.setMaze</a></div><div class="ttdeci">void setMaze(Maze maze)</div><div class="ttdoc">Assigns the maze instance to solve.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:106</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a1e2cd30b080991b73b0d717e1862b74d"><div class="ttname"><a href="#a1e2cd30b080991b73b0d717e1862b74d">MazeSolver.isFinished</a></div><div class="ttdeci">boolean isFinished()</div><div class="ttdoc">Indicates whether this run has terminated.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:150</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a4731d9d114db6ed8934c1bb5b5153355"><div class="ttname"><a href="#a4731d9d114db6ed8934c1bb5b5153355">MazeSolver.updateSolve</a></div><div class="ttdeci">Maze.Node updateSolve()</div><div class="ttdoc">Advances solving by exactly one visited node.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:117</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a976101159c6108d2600323fbd913f5d7"><div class="ttname"><a href="#a976101159c6108d2600323fbd913f5d7">MazeSolver.isSolved</a></div><div class="ttdeci">boolean isSolved()</div><div class="ttdoc">Indicates whether the current run found the goal.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:159</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a9baf570c82f61e83d1e11e8bb8a93e3c"><div class="ttname"><a href="#a9baf570c82f61e83d1e11e8bb8a93e3c">MazeSolver.setAlg</a></div><div class="ttdeci">void setAlg(String alg)</div><div class="ttdoc">Sets which algorithm to run.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:70</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a4223613a3ef49712b3a81d02931e998c" name="a4223613a3ef49712b3a81d02931e998c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4223613a3ef49712b3a81d02931e998c">&#9670;&#160;</a></span>getAlg()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">String MazeSolver.getAlg </td>
@@ -163,9 +189,44 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Gets the active algorithm label.</p>
+
+<p>Gets the active algorithm label. </p>
 <dl class="section return"><dt>Returns</dt><dd>display label for the current algorithm </dd></dl>
+
+</div>
+</div>
+<a id="a0d845516b17cf3d6f45b30316bf60c63" name="a0d845516b17cf3d6f45b30316bf60c63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d845516b17cf3d6f45b30316bf60c63">&#9670;&#160;</a></span>getCurrentPathCost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">long MazeSolver.getCurrentPathCost </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the cost of the parent route for the most recently visited node. </p>
+<p>This is the current branch cost, not the sum of all explored branches. It is updated in constant time as each node is visited and remains useful for displaying progress during an incomplete search.</p>
+<dl class="section return"><dt>Returns</dt><dd>current route cost, or <code class="JavaDocCode">-1</code> before the first search step </dd></dl>
 
 </div>
 </div>
@@ -174,6 +235,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">List&lt; Point &gt; MazeSolver.getFinalPath </td>
@@ -182,11 +246,74 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Gets the final path after a successful solve.</p>
+
+<p>Gets the final path after a successful solve. </p>
 <p>The path is traced backward using the internal parent table, so the returned list begins at the goal and ends at the start.</p>
 <p>Typical UI code can iterate as-is for reverse painting, or reverse the list first if start-to-goal order is preferred.</p>
 <dl class="section return"><dt>Returns</dt><dd>list of path points where <code class="JavaDocCode">x=col, y=row</code>; empty if unsolved </dd></dl>
+
+</div>
+</div>
+<a id="a73a149b9eb40c7e5f4df11b33a9b5af2" name="a73a149b9eb40c7e5f4df11b33a9b5af2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73a149b9eb40c7e5f4df11b33a9b5af2">&#9670;&#160;</a></span>getPathCost()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">long MazeSolver.getPathCost </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the total movement cost of the final path. </p>
+<p>This is the sum of the directional movement costs in the path. It is <code class="JavaDocCode">-1</code> before a path is found or when the search is unsuccessful.</p>
+<dl class="section return"><dt>Returns</dt><dd>final path cost, or <code class="JavaDocCode">-1</code> when no path is available </dd></dl>
+
+</div>
+</div>
+<a id="aad40c030a15ccb5840668939169c1c71" name="aad40c030a15ccb5840668939169c1c71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad40c030a15ccb5840668939169c1c71">&#9670;&#160;</a></span>getSolveTimeNs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">long MazeSolver.getSolveTimeNs </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the total computation time elapsed in the current run. </p>
+<dl class="section return"><dt>Returns</dt><dd>elapsed computation time in nanoseconds, excluding timer and UI delays </dd></dl>
 
 </div>
 </div>
@@ -195,6 +322,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">int MazeSolver.getVisitedCount </td>
@@ -203,8 +333,14 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Gets count of nodes visited in the current run.</p>
+
+<p>Gets count of nodes visited in the current run. </p>
 <dl class="section return"><dt>Returns</dt><dd>number of visited nodes since last reset </dd></dl>
 
 </div>
@@ -214,6 +350,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">boolean MazeSolver.isFinished </td>
@@ -222,8 +361,14 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Indicates whether this run has terminated.</p>
+
+<p>Indicates whether this run has terminated. </p>
 <dl class="section return"><dt>Returns</dt><dd>true when goal was found or search space was exhausted </dd></dl>
 
 </div>
@@ -233,6 +378,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">boolean MazeSolver.isSolved </td>
@@ -241,8 +389,14 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Indicates whether the current run found the goal.</p>
+
+<p>Indicates whether the current run found the goal. </p>
 <dl class="section return"><dt>Returns</dt><dd>true when goal node has been reached </dd></dl>
 
 </div>
@@ -252,6 +406,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void MazeSolver.resetSearch </td>
@@ -260,8 +417,14 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Resets transient search state so solving can start fresh.</p>
+
+<p>Resets transient search state so solving can start fresh. </p>
 <p>This keeps the currently assigned maze and algorithm. Typical use is after changing visualization mode or when handling a restart. </p>
 
 </div>
@@ -271,6 +434,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void MazeSolver.setAlg </td>
@@ -279,8 +445,14 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Sets which algorithm to run.</p>
+
+<p>Sets which algorithm to run. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">alg</td><td>algorithm label. Accepted values are DFS, BFS, A*, ASTAR, and A_STAR (case-insensitive) </td></tr>
@@ -301,6 +473,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void MazeSolver.setMaze </td>
@@ -309,8 +484,14 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Assigns the maze instance to solve.</p>
+
+<p>Assigns the maze instance to solve. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">maze</td><td>maze object to solve; start/goal are validated when solving begins </td></tr>
@@ -325,6 +506,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Maze.Node MazeSolver.updateSolve </td>
@@ -333,8 +517,14 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Advances solving by exactly one visited node.</p>
+
+<p>Advances solving by exactly one visited node. </p>
 <dl class="section return"><dt>Returns</dt><dd>node visited in this step, or <code class="JavaDocCode">null</code> if solving is complete or no work remains </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">

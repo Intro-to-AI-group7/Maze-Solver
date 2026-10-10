@@ -1,14 +1,17 @@
+import java.awt.Point;
+import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.awt.Point;
 
 /**
- * Incremental maze solver that supports DFS, BFS, and A*.
+ * Incremental maze solver that supports DFS, BFS, and weighted A*.
  *
  * <p>The solver keeps internal state between calls to {@link #updateSolve()},
  * so callers can visualize or inspect each step one node at a time.
+ * Reported solve time measures the elapsed time of each search-step call,
+ * excluding timer delays and UI repaint work.
  *
  * <p>Typical usage: create a solver, set algorithm and maze, then call
  * {@link #updateSolve()} repeatedly until {@link #isFinished()} returns true.
@@ -44,6 +47,8 @@ public class MazeSolver {
     private boolean solved;
     private int visitedCount;
     private long solveTimeNs;
+    private long pathCost = -1;
+    private long currentPathCost = -1;
     private Maze.Node[][] parent;
 
     // DFS/BFS state
@@ -52,7 +57,7 @@ public class MazeSolver {
 
     // A* state
     private final PriorityQueue<AStarEntry> aStarFrontier = new PriorityQueue<>();
-    private int[][] gScore;
+    private long[][] gScore;
     private boolean[][] closed;
 
     /**
@@ -167,13 +172,37 @@ public class MazeSolver {
     /**
      * Gets the total computation time elapsed in the current run.
      *
-     * @return elapsed computation time in nanoseconds (algorithm execution only, excluding UI delays)
+     * @return elapsed computation time in nanoseconds, excluding timer and UI delays
      */
     public long getSolveTimeNs() {
         return solveTimeNs;
     }
 
-    
+    /**
+     * Gets the total movement cost of the final path.
+     *
+     * <p>This is the sum of the directional movement costs in the path. It is
+     * {@code -1} before a path is found or when the search is unsuccessful.
+     *
+     * @return final path cost, or {@code -1} when no path is available
+     */
+    public long getPathCost() {
+        return pathCost;
+    }
+
+    /**
+     * Gets the cost of the parent route for the most recently visited node.
+     *
+     * <p>This is the current branch cost, not the sum of all explored branches.
+     * It is updated in constant time as each node is visited and remains useful
+     * for displaying progress during an incomplete search.
+     *
+     * @return current route cost, or {@code -1} before the first search step
+     */
+    public long getCurrentPathCost() {
+        return currentPathCost;
+    }
+
     /**
      * Gets the final path after a successful solve.
      *
@@ -186,7 +215,7 @@ public class MazeSolver {
      * @return list of path points where {@code x=col, y=row}; empty if unsolved
      */
     public List<Point> getFinalPath() {
-        List<Point> path = new java.util.ArrayList<>();
+        List<Point> path = new ArrayList<>();
         if (parent == null || !solved) {
             return path;
         }
@@ -202,8 +231,8 @@ public class MazeSolver {
     /**
      * Resets transient search state so solving can start fresh.
      *
-      * <p>This keeps the currently assigned maze and algorithm.
-      * Typical use is after changing visualization mode or when handling a restart.
+     * <p>This keeps the currently assigned maze and algorithm.
+     * Typical use is after changing visualization mode or when handling a restart.
      */
     public void resetSearch() {
         frontier.clear();
@@ -217,6 +246,8 @@ public class MazeSolver {
         solved = false;
         visitedCount = 0;
         solveTimeNs = 0;
+        pathCost = -1;
+        currentPathCost = -1;
     }
 
     /**
@@ -259,8 +290,10 @@ public class MazeSolver {
     private void initializeUninformedSearch() {
         discovered = new boolean[maze.getLength()][maze.getWidth()];
         parent = new Maze.Node[maze.getLength()][maze.getWidth()];
+        gScore = new long[maze.getLength()][maze.getWidth()];
         Maze.Node start = maze.getStart();
         discovered[start.row][start.col] = true;
+        gScore[start.row][start.col] = 0;
         frontier.addLast(start);
     }
 
@@ -278,10 +311,12 @@ public class MazeSolver {
 
         Maze.Node current = frontier.removeFirst();
         visitedCount++;
+        currentPathCost = gScore[current.row][current.col];
 
         if (current == maze.getGoal()) {
             finished = true;
             solved = true;
+            pathCost = calculatePathCost(current);
             return current;
         }
 
@@ -306,10 +341,12 @@ public class MazeSolver {
 
         Maze.Node current = frontier.removeLast();
         visitedCount++;
+        currentPathCost = gScore[current.row][current.col];
 
         if (current == maze.getGoal()) {
             finished = true;
             solved = true;
+            pathCost = calculatePathCost(current);
             return current;
         }
 
@@ -321,21 +358,24 @@ public class MazeSolver {
     }
 
     /**
-     * Enqueues all currently undiscovered neighbors of a node.
-     * Sets the parent of all potential nodes to the current node
+     * Enqueues all currently undiscovered traversable neighbors of a node.
+     * A neighbor with movement cost zero is treated as disabled.
+     * Sets the parent of all discovered nodes to the current node.
      *
      * @param current node whose neighbor links are inspected
      */
     private void queueUndiscoveredNeighbors(Maze.Node current) {
         for (Maze.Dir dir : Maze.Dir.values()) {
             Maze.Node neighbor = current.getNeighbor(dir);
-            if (neighbor == null) {
+            if (neighbor == null || !maze.canMove(current, dir)) {
                 continue;
             }
 
             if (!discovered[neighbor.row][neighbor.col]) {
                 discovered[neighbor.row][neighbor.col] = true;
                 parent[neighbor.row][neighbor.col] = current;
+                gScore[neighbor.row][neighbor.col] = gScore[current.row][current.col]
+                        + maze.getMoveCost(current, neighbor);
                 frontier.addLast(neighbor);
             }
         }
@@ -347,13 +387,13 @@ public class MazeSolver {
     private void initializeAStar() {
         int rows = maze.getLength();
         int cols = maze.getWidth();
-        gScore = new int[rows][cols];
+        gScore = new long[rows][cols];
         closed = new boolean[rows][cols];
         parent = new Maze.Node[rows][cols];
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
-                gScore[r][c] = Integer.MAX_VALUE;
+                gScore[r][c] = Long.MAX_VALUE;
             }
         }
 
@@ -369,8 +409,8 @@ public class MazeSolver {
      */
     private static class AStarEntry implements Comparable<AStarEntry> {
         private final Maze.Node node;
-        private final int gCost;
-        private final int fCost;
+        private final long gCost;
+        private final long fCost;
 
         /**
          * Builds one A* frontier record.
@@ -379,7 +419,7 @@ public class MazeSolver {
          * @param gCost best-known path cost from start to {@code node}
          * @param fCost priority value used by queue ({@code gCost + heuristic})
          */
-        private AStarEntry(Maze.Node node, int gCost, int fCost) {
+        private AStarEntry(Maze.Node node, long gCost, long fCost) {
             this.node = node;
             this.gCost = gCost;
             this.fCost = fCost;
@@ -393,11 +433,11 @@ public class MazeSolver {
          */
         @Override
         public int compareTo(AStarEntry other) {
-            int byF = Integer.compare(this.fCost, other.fCost);
+            int byF = Long.compare(this.fCost, other.fCost);
             if (byF != 0) {
                 return byF;
             }
-            return Integer.compare(this.gCost, other.gCost);
+            return Long.compare(this.gCost, other.gCost);
         }
     }
 
@@ -423,26 +463,30 @@ public class MazeSolver {
 
             closed[current.row][current.col] = true;
             visitedCount++;
+            currentPathCost = gScore[current.row][current.col];
 
             if (current == maze.getGoal()) {
                 finished = true;
                 solved = true;
+                pathCost = gScore[current.row][current.col];
                 return current;
             }
 
             for (Maze.Dir dir : Maze.Dir.values()) {
                 Maze.Node neighbor = current.getNeighbor(dir);
-                if (neighbor == null || closed[neighbor.row][neighbor.col]) {
+                if (neighbor == null || closed[neighbor.row][neighbor.col]
+                        || !maze.canMove(current, dir)) {
                     continue;
                 }
 
-                int tentativeG = gScore[current.row][current.col] + 1;
+                long moveCost = maze.getMoveCost(current, neighbor);
+                long tentativeG = gScore[current.row][current.col] + moveCost;
                 if (tentativeG < gScore[neighbor.row][neighbor.col]) {
                     gScore[neighbor.row][neighbor.col] = tentativeG;
 
                     parent[neighbor.row][neighbor.col] = current;
 
-                    int h = heuristic(neighbor, maze.getGoal());
+                    long h = heuristic(neighbor, maze.getGoal());
                     aStarFrontier.add(new AStarEntry(neighbor, tentativeG, tentativeG + h));
                 }
             }
@@ -459,7 +503,7 @@ public class MazeSolver {
     }
 
     /**
-     * Computes the Manhattan-distance heuristic used by A*.
+     * Computes the Manhattan-distance heuristic used by weighted A*.
      *
      * <p>The value estimates remaining path length by summing horizontal and
      * vertical offsets between two grid coordinates:
@@ -470,9 +514,31 @@ public class MazeSolver {
      *
      * @param from current node being evaluated
      * @param to target node (typically maze goal)
+     * <p>Because every valid movement cost is at least one, Manhattan
+     * distance remains an admissible lower bound on the remaining movement
+     * cost. The calculation is implemented directly from row and column
+     * differences; no external math library is required.
+     *
      * @return Manhattan distance between the two nodes
      */
-    private int heuristic(Maze.Node from, Maze.Node to) {
-        return Math.abs(from.row - to.row) + Math.abs(from.col - to.col);
+    private long heuristic(Maze.Node from, Maze.Node to) {
+        return (long) Math.abs(from.row - to.row) + Math.abs(from.col - to.col);
+    }
+
+    /**
+     * Computes the movement cost represented by the current parent chain.
+     *
+     * @param end last node in the discovered path
+     * @return sum of directional costs from start to end
+     */
+    private long calculatePathCost(Maze.Node end) {
+        long total = 0;
+        Maze.Node current = end;
+        while (parent[current.row][current.col] != null) {
+            Maze.Node previous = parent[current.row][current.col];
+            total += maze.getMoveCost(previous, current);
+            current = previous;
+        }
+        return total;
     }
 }
