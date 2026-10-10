@@ -1,498 +1,328 @@
-# Option 1 Intelligent Route-Planning Agent
+# Maze-Solver Current Plan and Feature Checklist
 
-This document summarizes the work required to evolve the existing Maze-Solver application into the weighted intelligent route-planning agent described in the course requirements and the group proposal. Existing components are shown in blue; planned additions or changes are highlighted in orange.
-
-Status notes use the following fields:
-
-- **Implementation status**: whether the repository currently contains the described change.
-- **Automated validation**: whether the change has been compiled or exercised by an automated smoke test.
-- **Human confirmation**: whether the user or another developer has independently confirmed or tested the behavior. The current weighted-map and weighted-solver work has not yet received independent human confirmation.
+This document is the current implementation reference for the SOFE 3720
+Option 1 Intelligent Route-Planning Agent. It describes the implemented
+features, current package architecture, validation commands, and follow-up
+work. The `doc/html` reference is generated for release 0.7 from the package-aware
+Java source Javadocs and Markdown documentation.
 
 ## Table of Contents
 
-- [Remaining Work Summary](#remaining-work-summary)
-- [Application Architecture](#application-architecture)
-  - [Technology Stack Summary](#technology-stack-summary)
-  - [Data Storage and External Services](#data-storage-and-external-services)
-  - [Key Architectural Decisions](#key-architectural-decisions)
-- [Component Relationships](#component-relationships)
-  - [Component Inventory](#component-inventory)
-- [Implementation Plan](#implementation-plan)
-  - [1. Define the Weighted Problem Model](#1-define-the-weighted-problem-model)
-  - [2. Extend Maze Data and File Handling](#2-extend-maze-data-and-file-handling)
-  - [3. Implement the Required Search Algorithms](#3-implement-the-required-search-algorithms)
-  - [4. Introduce Structured Search Results](#4-introduce-structured-search-results)
-  - [5. Update the Interactive UI](#5-update-the-interactive-ui)
-  - [6. Add Reproducible Experiment Execution](#6-add-reproducible-experiment-execution)
-  - [7. Add Metrics Export and Analysis Inputs](#7-add-metrics-export-and-analysis-inputs)
-  - [8. Add Automated Tests](#8-add-automated-tests)
-  - [9. Update Documentation](#9-update-documentation)
-- [Recommended Build Order](#recommended-build-order)
-- [Definition of Done](#definition-of-done)
+- [Current Status](#current-status)
+- [Implemented Feature Checklist](#implemented-feature-checklist)
+- [Architecture](#architecture)
+- [Map Format](#map-format)
+- [Experiment Workflow](#experiment-workflow)
+- [Search Behavior](#search-behavior)
+- [Source Responsibilities](#source-responsibilities)
+- [Validation](#validation)
+- [Refactor Roadmap](#refactor-roadmap)
+- [Remaining Work](#remaining-work)
 
-## Remaining Work Summary
+## Current Status
 
-### Must be added
+The application implements the core weighted route-planning agent and the
+repeatable experiment workflow:
 
-- **Completed** - Weighted movement costs with positive-integer validation.
-  - Automated validation: Yes - compilation and weighted import/export smoke tests passed.
-  - Human confirmation: No.
-- **Completed** - Backward-compatible weighted map import and export.
-  - Automated validation: Yes - weighted round-trip and legacy-map compatibility smoke tests passed.
-  - Human confirmation: No.
-- Uniform Cost Search.
-- Greedy Best-First Search.
-- **Completed** - Cost-aware A* Search.
-  - Automated validation: Yes - weighted A* selected a lower-cost longer route in a smoke test.
-  - Human confirmation: No.
-- **Completed** - Total path-cost calculation and display.
-  - `MazeSolver` calculates and exposes path cost through `getPathCost()`.
-  - UI displays live current-route cost and final path cost.
-  - Automated validation: Yes - DFS, BFS, and A* path costs were checked in a smoke test.
-  - Human confirmation: No.
-- **Completed** - Solver timing reports computation time rather than animation
-  delay or renderer work. A monotonic clock surrounds only each search-step
-  call, avoiding platform-dependent thread CPU clock quantization. Human
-  confirmation: Yes - compared instant, 10 ms animated, and 50 ms animated
-  solves with matching visited-node counts and interval-independent compute
-  times.
-- Configurable or seeded start and goal selection.
-- **Partially completed** - Random generation supports optional independent
-  directional weights with a validated 1..100 range. Seeded generation,
-  obstacle-density controls, and reproducible cost distributions remain pending.
-- A non-UI experiment runner for repeated algorithm comparisons.
+- Weighted four-directional maze graphs.
+- DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and weighted A*.
+- Interactive animated solving and instant solving.
+- Seeded map generation with configurable obstacles, costs, endpoints, and
+  reachability.
+- Test-suite persistence using human-readable `.mstests` files.
+- Human-readable individual maps using `.msmap` files.
+- Embedded saved maps so a suite does not depend on the original map file.
+- Reproducible multi-algorithm comparisons.
+- JVM warm-up before measured experiment runs.
 - CSV metrics export.
-- Automated tests for maps, algorithms, heuristics, metrics, and reproducibility.
+- Unique map export with iteration grouping.
+- Exact per-result map snapshots and animated result review.
+- Dependency-free regression coverage.
+- Release metadata centralized in `app.Version` at 0.7.
+- `.mstests` files record the application release separately from their stable
+  schema version.
 
-### Must be changed
+## Implemented Feature Checklist
 
-- **Completed** - [Maze.java](../../../../../src/Maze.java) represents directional movement costs in addition to occupancy and neighbors.
-  - Automated validation: Yes.
-  - Human confirmation: No.
-- **Completed** - [MazeSolver.java](../../../../../src/MazeSolver.java) uses actual transition costs instead of the former hardcoded `+1` in A* and skips disabled edges in all current algorithms.
-  - Automated validation: Yes.
-  - Human confirmation: No.
-- **Completed for the current cost convention** - The A* heuristic uses Manhattan distance. Because every valid movement cost is at least `1`, this is an admissible lower bound. A minimum-cost multiplier is not required unless the cost model changes.
-  - Automated validation: Yes - weighted A* behavior was smoke-tested.
-  - Human confirmation: No.
-- [MazeRenderer.java](../../../../../src/MazeRenderer.java) must expose UCS and Greedy, and support comparison-oriented workflows. Weighted A* and route-cost display are implemented.
-- [MS.java](../../../../../src/MS.java) may need an experiment or command-line entry mode.
-- [README.md](../../../../../README.md) and generated Doxygen documentation must describe the weighted problem and required algorithms.
+### Interactive application
 
-### Should remain
+- [x] Title screen with import, random generation, and test-suite entry points.
+- [x] Import and save dialogs start in the application directory.
+- [x] Map import/save dialogs accept `.msmap`.
+- [x] Animated timer solving with start, pause, restart, and configurable delay.
+- [x] Instant solving in a background worker.
+- [x] Runtime algorithm selection.
+- [x] Load, save, and generate map actions during a solve session.
+- [x] Zoom buttons and Ctrl+mouse-wheel zoom.
+- [x] Viewport clipping for large maps.
+- [x] Grid and start/goal rendering.
+- [x] Visited-node and final-path rendering.
+- [x] Directional movement-cost overlay.
+- [x] Result review windows that do not close the whole application.
 
-- Existing map import and export, with compatibility for old binary maps.
-- Random maze generation as one available environment type.
-- DFS and BFS as optional supplemental baselines.
-- Incremental solving, instant solving, zoom, viewport clipping, and diagnostics.
+### Weighted map model
 
-### May be reduced or moved
+- [x] Four cardinal directions in fixed `[NORTH, EAST, SOUTH, WEST]` order.
+- [x] Positive movement costs from `1` through `100`.
+- [x] Cost `0` for blocked, missing, or disabled movement.
+- [x] Asymmetric reverse-direction costs.
+- [x] Validation that weights match map topology.
+- [x] Legacy layout-only maps with implicit cost `1`.
+- [x] Text export through `Maze.exportToText()` and `.msmap` file export.
+- [x] Text import through `Maze.importFromText(...)` and file import.
 
-- Full maze and neighbor-table console output should become an optional debug mode.
-- DFS should not be presented as one of the three required weighted algorithms.
-- Benchmark timing must be separated from Swing rendering, timers, dialogs, and console output.
+### Search algorithms
 
-## Application Architecture
+- [x] DFS baseline.
+- [x] BFS baseline.
+- [x] UCS ordered by accumulated cost `g(n)`.
+- [x] Greedy Best-First Search ordered by Manhattan distance `h(n)`.
+- [x] A* ordered by `g(n) + h(n)`.
+- [x] Disabled-edge handling in every algorithm.
+- [x] Route reconstruction.
+- [x] Path length, path cost, visited count, and solver-only runtime metrics.
+- [x] Positive-cost Manhattan heuristic guarantees for UCS and A*.
 
-<!-- mermaid-checked: no \n, no em-dash/en-dash, no {} in labels, subgraphs are id["label"], arrows are -->|"label"|, all subgraphs closed by end, ids unique -->
-~~~mermaid
+### Test suites
+
+- [x] Suite and row validation.
+- [x] Automatic, manual, and saved-map sources.
+- [x] Fixed, random, and approximate-distance endpoints.
+- [x] Natural, guaranteed-solvable, and guaranteed-unsolvable reachability.
+- [x] Uniform and random cost generation.
+- [x] Configurable dimensions and interior blocked percentage.
+- [x] Shared map instance across selected algorithms per iteration.
+- [x] Deterministic iteration seed derivation.
+- [x] Saved-map reuse without generated seeds.
+- [x] Cancellation and progress reporting.
+- [x] Three-round JVM warm-up excluded from measured results.
+- [x] Results table with map source, seed/file label, metrics, and Review action.
+- [x] `.mstests` save/load with embedded Base64 map text.
+- [x] Strict suite extension validation.
+
+### Exports
+
+- [x] UTF-8 CSV results export.
+- [x] Unique map export for every suite row.
+- [x] Repeated map iterations grouped in filenames.
+- [x] Export folder named `<suite-name>-maps`.
+- [x] Exported maps use `.msmap`.
+- [x] Windows-invalid filename characters sanitized.
+
+## Architecture
+
+```mermaid
 flowchart TD
-    subgraph UserLayer["User Layer"]
-        User["Student or evaluator"]
-    end
-    subgraph ExistingApp["Existing Java Swing Application"]
-        Entry["MS entry point"]
-        UI["MazeRenderer Swing UI"]
-        Model["Maze grid and graph model"]
-        Solver["MazeSolver incremental search"]
-        ExistingGen["Random maze generator"]
-        ExistingIO["Binary map import and export"]
-    end
-    subgraph PlannedAI["Planned Weighted Agent"]
-        Costs["Weighted transition costs"]
-        UCS["Uniform Cost Search"]
-        Greedy["Greedy Best First Search"]
-        WeightedAStar["Cost aware A Star Search"]
-        Result["Structured search result"]
-        Heuristic["Admissible cost heuristic"]
-    end
-    subgraph PlannedEval["Planned Evaluation Layer"]
-        Generator["Seeded experiment generator"]
-        Runner["Experiment runner"]
-        Metrics["Metrics collector"]
-        Csv["CSV result export"]
-        Tests["Automated test suite"]
-    end
-    subgraph Files["Local Files"]
-        Maps[("Weighted maze files")]
-        Results[("Experiment CSV files")]
-    end
-
-    User -->|"selects map and algorithm"| UI
-    Entry -->|"starts application"| UI
-    UI -->|"loads and displays"| Model
-    ExistingIO -->|"reads and writes"| Maps
-    ExistingGen -->|"creates"| Model
-    Model -->|"provides graph"| Solver
-    Model -->|"provides costs"| Costs
-    Costs -->|"weights transitions"| UCS
-    Costs -->|"weights transitions"| WeightedAStar
-    Costs -->|"weights transitions"| Greedy
-    Heuristic -->|"estimates remaining cost"| Greedy
-    Heuristic -->|"estimates remaining cost"| WeightedAStar
-    UCS -->|"produces"| Result
-    Greedy -->|"produces"| Result
-    WeightedAStar -->|"produces"| Result
-    Result -->|"renders path and metrics"| UI
-    Generator -->|"creates seeded maps"| Model
-    Runner -->|"executes same map"| UCS
-    Runner -->|"executes same map"| Greedy
-    Runner -->|"executes same map"| WeightedAStar
-    Runner -->|"collects"| Metrics
-    Metrics -->|"writes"| Csv
-    Csv -->|"stores"| Results
-    Tests -.->|"verifies"| Model
-    Tests -.->|"verifies"| UCS
-    Tests -.->|"verifies"| Greedy
-    Tests -.->|"verifies"| WeightedAStar
-
-    classDef existing fill:#d9ecff,stroke:#2878b5,color:#111;
-    classDef planned fill:#ffe0b2,stroke:#d97706,color:#111;
-    classDef data fill:#e5e7eb,stroke:#4b5563,color:#111;
-    class User,Entry,UI,Model,Solver,ExistingGen,ExistingIO existing;
-    class Costs,UCS,Greedy,WeightedAStar,Result,Heuristic,Generator,Runner,Metrics,Csv,Tests planned;
-    class Maps,Results data;
-~~~
-
-### Technology Stack Summary
-
-| Layer | Technology | Version | Purpose |
-|---|---|---:|---|
-| Runtime | Java | JDK 17+ recommended | Compiles and runs the application |
-| UI | Java Swing and AWT | JDK standard library | Interactive map selection, controls, and rendering |
-| Model | Plain Java classes | Current source | Stores grid occupancy, nodes, neighbors, start, and goal |
-| Search | Plain Java collections | JDK standard library | Deques for DFS/BFS and priority queues for informed search |
-| Persistence | Local text files | Custom format | Imports and exports maze layouts |
-| Documentation | Doxygen-generated HTML/PDF | 1.12.0 generated docs | Documents public classes and methods |
-| Evaluation | Planned plain Java runner | To be added | Repeats seeded trials and exports metrics |
-
-### Data Storage and External Services
-
-The application has no database, network API, cache, or external service. Its current persistence boundary is the local maze text file format. The planned evaluation layer should continue using local files: weighted maze files for reproducible instances and CSV files for experiment results. Rendering and benchmark execution should remain separate so UI work does not affect algorithm timing.
-
-### Key Architectural Decisions
-
-- Keep the existing plain Java and Swing architecture; the course emphasizes the AI algorithms rather than a UI framework migration.
-- Preserve binary-map compatibility by treating omitted movement costs as an implicit cost of `1`.
-- Make the required weighted algorithms independent of Swing so they can be tested and benchmarked deterministically.
-- Use a shared heuristic definition for Greedy Best-First Search and A*, with the minimum valid movement cost included in A*'s lower bound.
-
-## Component Relationships
-
-<!-- mermaid-checked: no \n, no em-dash/en-dash, no {} in labels, subgraphs are id["label"], arrows are -->|"label"|, all subgraphs closed by end, ids unique -->
-~~~mermaid
-flowchart LR
-    subgraph cPresentation["Presentation"]
-        cEntry["MS"]
-        cRenderer["MazeRenderer"]
-        cPaint["Paint based grid"]
-    end
-    subgraph cModelLayer["Model and IO"]
-        cMaze["Maze"]
-        cNode["Maze Node"]
-        cMapIO["Map import and export"]
-        cGenerator["Random maze generation"]
-    end
-    subgraph cSearchLayer["Search Engine"]
-        cSolver["MazeSolver"]
-        cUcs["Uniform Cost Search"]
-        cGreedy["Greedy Best First"]
-        cAStar["Cost aware A Star"]
-        cHeuristic["Weighted heuristic"]
-        cSearchResult["Search result"]
-    end
-    subgraph cEvaluationLayer["Evaluation"]
-        cExperimentGenerator["Seeded experiment generator"]
-        cExperimentRunner["Experiment runner"]
-        cMetricCollector["Metric collector"]
-        cCsvWriter["CSV writer"]
-        cTestSuite["Automated tests"]
-    end
-
-    cEntry -->|"launches"| cRenderer
-    cRenderer -->|"creates and controls"| cSolver
-    cRenderer -->|"renders"| cPaint
-    cRenderer -->|"loads and saves"| cMapIO
-    cRenderer -->|"requests"| cGenerator
-    cMapIO -->|"builds"| cMaze
-    cGenerator -->|"builds"| cMaze
-    cMaze -->|"contains"| cNode
-    cMaze -->|"supplies graph and costs"| cSolver
-    cSolver -->|"selects"| cUcs
-    cSolver -->|"selects"| cGreedy
-    cSolver -->|"selects"| cAStar
-    cHeuristic -->|"scores"| cGreedy
-    cHeuristic -->|"scores"| cAStar
-    cUcs -->|"returns"| cSearchResult
-    cGreedy -->|"returns"| cSearchResult
-    cAStar -->|"returns"| cSearchResult
-    cSearchResult -->|"updates"| cRenderer
-    cExperimentGenerator -->|"creates identical seeded inputs"| cExperimentRunner
-    cExperimentRunner -->|"invokes"| cUcs
-    cExperimentRunner -->|"invokes"| cGreedy
-    cExperimentRunner -->|"invokes"| cAStar
-    cExperimentRunner -->|"records"| cMetricCollector
-    cMetricCollector -->|"serializes"| cCsvWriter
-    cTestSuite -.->|"checks"| cMaze
-    cTestSuite -.->|"checks"| cUcs
-    cTestSuite -.->|"checks"| cGreedy
-    cTestSuite -.->|"checks"| cAStar
-
-    classDef current fill:#d9ecff,stroke:#2878b5,color:#111;
-    classDef plannedComponent fill:#ffe0b2,stroke:#d97706,color:#111;
-    class cEntry,cRenderer,cPaint,cMaze,cNode,cMapIO,cGenerator,cSolver current;
-    class cUcs,cGreedy,cAStar,cHeuristic,cSearchResult,cExperimentGenerator,cExperimentRunner,cMetricCollector,cCsvWriter,cTestSuite plannedComponent;
-~~~
-
-### Component Inventory
-
-| Component | Layer | Type | Responsibility |
-|---|---|---|---|
-| `MS` | Presentation | Existing entry point | Starts Swing on the event dispatch thread |
-| `MazeRenderer` | Presentation | Existing UI controller and renderer | Owns title flow, controls, visualization, and solve orchestration |
-| Paint-based grid | Presentation | Existing renderer | Efficiently paints visible maze cells |
-| `Maze` | Model and IO | Existing domain model | Stores dimensions, occupancy, neighbors, start, and goal |
-| `Maze.Node` | Model and IO | Existing graph node | Represents one traversable grid cell |
-| Map import/export | Model and IO | Existing file boundary | Reads and writes binary maze files; must be extended for costs |
-| Random maze generation | Model and IO | Existing generator | Creates traditional carved mazes with optional directional weights; seeded configurable generation remains pending |
-| `MazeSolver` | Search Engine | Existing search coordinator | Maintains incremental frontier state and dispatches the selected algorithm |
-| Uniform Cost Search | Search Engine | Planned algorithm | Finds the least-cost route using accumulated path cost |
-| Greedy Best-First | Search Engine | Planned algorithm | Uses only the heuristic and may sacrifice route cost for search effort |
-| Cost-aware A* | Search Engine | Planned algorithm | Combines accumulated cost and an admissible remaining-cost estimate |
-| Weighted heuristic | Search Engine | Implemented in `MazeSolver` | Computes an admissible Manhattan lower bound under the positive-cost convention |
-| Search result | Search Engine | Planned value object | Carries path, total cost, explored nodes, runtime, algorithm, and status |
-| Seeded experiment generator | Evaluation | Planned generator | Produces controlled maps with repeatable seeds and conditions |
-| Experiment runner | Evaluation | Planned orchestration layer | Runs all algorithms on identical instances without rendering |
-| Metric collector | Evaluation | Planned metrics component | Captures cost, explored nodes, runtime, and success |
-| CSV writer | Evaluation | Planned persistence component | Exports machine-readable experiment results |
-| Automated tests | Evaluation | Planned verification layer | Protects model, algorithm, heuristic, and reproducibility behavior |
-
-## Implementation Plan
-
-### 1. Define the Weighted Problem Model
-
-**Status: Completed.** The repository uses directional edge costs in `[North, East, South, West]` order. `0` disables movement on an adjacent edge, while positive values represent valid movement costs. Legacy maps default adjacent open-cell movement to cost `1`. Automated validation has passed; independent human confirmation is still pending.
-
-Before changing code, document one unambiguous cost convention. The recommended convention is:
-
-- Movement remains four-directional.
-- Every legal move has a positive integer cost.
-- A move pays the cost of the cell being entered.
-- Existing binary maps use cost `1` for every adjacent open-cell connection.
-- The maze is static during a solve.
-- The graph is undirected unless the project explicitly chooses directional costs later.
-
-Use `long` for accumulated route cost even if individual costs remain positive integers. This avoids overflow during large experiments.
-
-### 2. Extend Maze Data and File Handling
-
-**Status: Partially completed.** Items 1, 2, 4, 5, 6, and 8 are implemented in [Maze.java](../../../../../src/Maze.java). Seeded generation controls for obstacle density and cost distributions remain pending. Automated validation covers compilation, weighted import/export, validation, and legacy compatibility; human confirmation is pending.
-
-Update [Maze.java](../../../../../src/Maze.java) to:
-
-1. **Completed** - Store directional costs for every traversable node transition.
-2. **Completed** - Provide validated cost lookup for adjacent nodes.
-3. **Not required for the current cost convention** - Provide a minimum valid step cost only if the cost model changes; current valid costs are at least `1`, so Manhattan distance is already admissible.
-4. **Completed** - Preserve the existing binary format as a legacy format.
-5. **Completed** - Add an optional `WEIGHTS` section with explicit cost data.
-6. **Completed** - Export weighted maps without losing start, goal, dimensions, or costs.
-7. Add seeded generation controls for obstacle density and cost distribution.
-8. **Completed** - Keep neighbor validation independent from cost validation while validating weighted topology where appropriate.
-
-The import path rejects negative, malformed, non-numeric, and dimension-mismatched costs with clear `IllegalArgumentException` messages. Zero is intentionally valid as the no-movement sentinel, so it is rejected only where topology requires a valid positive edge.
-
-### 3. Implement the Required Search Algorithms
-
-**Status: Partially completed.** Weighted A* is implemented. Uniform Cost Search and Greedy Best-First Search remain pending.
-
-Refactor [MazeSolver.java](../../../../../src/MazeSolver.java) so algorithm-specific state is isolated and all algorithms use the same maze transition-cost API.
-
-#### Uniform Cost Search
-
-- Frontier: priority queue ordered by `g(n)`.
-- State: best known cost and parent per node.
-- Completion: stop when the goal is removed from the frontier.
-- Correctness: positive costs guarantee an optimal result.
-
-#### Greedy Best-First Search
-
-- Frontier: priority queue ordered by `h(n)`.
-- State: discovered or closed tracking and parent per node.
-- Completion: stop when the goal is removed from the frontier.
-- Limitation: explicitly report that it is not guaranteed to minimize route cost.
-
-#### Cost-aware A*
-
-**Status: Completed.** The current implementation uses `long` cumulative costs, skips stale entries, skips disabled edges, and uses a directly implemented Manhattan heuristic. Automated weighted-route validation has passed; human confirmation is pending.
-
-- Frontier: priority queue ordered by `g(n) + h(n)`.
-- Transition update: `tentativeG = currentG + transitionCost`.
-- Heuristic: Manhattan distance. This is admissible because the minimum valid movement cost is `1`.
-- Stale queue entries: skip entries whose stored cost no longer matches the best-known cost.
-
-Retain BFS and DFS as supplemental baselines if they remain useful, but do not use them as substitutes for UCS, Greedy, or A*.
-
-### 4. Introduce Structured Search Results
-
-**Status: Partially completed.** `MazeSolver` now exposes `getPathCost()` in addition to the existing solved state, path, visited-node count, and runtime. A dedicated result value object and start-to-goal path ordering remain pending. Automated validation has checked path costs; human confirmation is pending.
-
-Add a result type instead of requiring callers to reconstruct separate values from the solver. It should contain:
-
-- Algorithm name.
-- Solved flag.
-- Ordered start-to-goal path.
-- Total path cost.
-- Path length.
-- Nodes explored.
-- Search-only runtime.
-- Optional seed and map metadata.
-
-Make path ordering explicit. The current `getFinalPath()` documentation says the path begins at the goal and ends at the start, which is inconvenient for reporting and visualization. Prefer returning start-to-goal order and update the renderer accordingly.
-
-Define `nodes explored` consistently as nodes removed from the frontier and finalized or expanded. Use the same definition across all required algorithms.
-
-### 5. Update the Interactive UI
-
-Update [MazeRenderer.java](../../../../../src/MazeRenderer.java) to:
-
-- Add UCS, Greedy Best-First, and weighted A* to the algorithm selector.
-- Display total route cost beside runtime and explored nodes.
-- Display the active cost mode or a visible cost legend.
-- Allow start and goal selection, or expose a controlled coordinate/seed dialog.
-- Support importing and exporting weighted maps.
-- Keep instant mode from including rendering time in algorithm metrics.
-- Add a comparison action that runs all required algorithms on the same map.
-- Make verbose maze and neighbor diagnostics opt-in.
-
-Keep UI changes focused on demonstrating the AI system. The experiment runner should remain usable without opening Swing.
-
-### 6. Add Reproducible Experiment Execution
-
-Create a separate experiment package or set of plain Java classes. It should accept:
-
-- Map dimensions.
-- Obstacle density.
-- Cost mode.
-- Minimum and maximum cost.
-- Seed.
-- Start and goal policy.
-- Number of repetitions.
-- Algorithms to compare.
-
-For each generated instance:
-
-1. Freeze the map and cost data.
-2. Run UCS, Greedy Best-First, and A* on independent solver instances.
-3. Record results using the same map, start, goal, and seed.
-4. Exclude rendering, file dialogs, logging, and CSV writes from timed search sections.
-5. Preserve failed or unsolved runs as valid experiment results.
-
-At minimum, support the proposal matrix:
-
-- Sizes: 20x20, 50x50, and 100x100.
-- Obstacle density: 10%, 25%, 40%, and 75%.
-- Costs: uniform `1` and random positive costs.
-- Ten seeded maps per condition.
-
-Include deliberately contrasting maps where a shorter route has a higher cost than a longer route.
-
-### 7. Add Metrics Export and Analysis Inputs
-
-Export one CSV row per algorithm and map instance. Recommended fields:
-
-```text
-experiment_id,seed,rows,columns,obstacle_density,cost_mode,
-min_cost,max_cost,start_row,start_col,goal_row,goal_col,
-algorithm,solved,path_length,path_cost,nodes_explored,
-runtime_ns,runtime_ms
+    Entry[app.MS] --> Renderer[ui.MazeRenderer]
+    Renderer --> Maze[maze.map.Maze model]
+    Renderer --> Solver[maze.search.MazeSolver]
+    Maze --> MapIO[maze.map.MazeFileIO]
+    Solver --> Strategies[Search strategies]
+    Renderer --> SuiteWindow[ui.TestSuiteWindow]
+    SuiteWindow --> Suite[experiments.TestSuite]
+    SuiteWindow --> Runner[experiments.ExperimentRunner]
+    Runner --> Maze
+    Runner --> Solver
+    Runner --> Result[experiments.ExperimentResult]
+    SuiteWindow --> SuiteIO[experiments.TestSuiteIO]
+    SuiteIO --> Suite
+    SuiteIO --> CSV[CSV results]
+    Runner --> Maps[Unique .msmap exports]
+    SuiteIO --> Suites[.mstests files]
+    Result --> Review[Exact map snapshot review]
+    Review --> Renderer
+    Regression[test.RegressionTests] -. verifies .-> Maze
+    Regression -. verifies .-> Solver
+    Regression -. verifies .-> Runner
+    Regression -. verifies .-> SuiteIO
 ```
 
-The final analysis should explain causes, not only report values. It should address:
+### Runtime boundaries
 
-- Whether UCS and A* produce equal optimal costs.
-- Whether A* explores fewer nodes than UCS.
-- Whether Greedy explores fewer nodes and how often it sacrifices cost.
-- How cost variation affects the heuristic.
-- How obstacle density and map size affect each algorithm.
-- Which cases produce no route or unusually high search effort.
+- `maze.map.Maze` owns graph topology, occupancy, endpoints, costs, and generation.
+- `maze.map.MazeFileIO` owns `.msmap` parsing and serialization.
+- `maze.search.MazeSolver` remains the public incremental search facade and metrics owner;
+  focused strategy classes own algorithm-specific frontier behavior.
+- `MazeRenderer` owns Swing controls, painting, animation, and interactive
+  solve orchestration.
+- `TestSuite` owns validated experiment configuration.
+- `ExperimentRunner` owns non-Swing map generation and algorithm execution.
+- `ExperimentResult` is an immutable record of one algorithm/map run,
+  including the exact serialized map text.
+- `TestSuiteIO` owns suite persistence and CSV formatting.
+- `TestSuiteWindow` coordinates the experiment window; table models, editors,
+  renderers, and panels own focused Swing responsibilities.
 
-### 8. Add Automated Tests
+## Map Format
 
-Add tests for:
+Map files are UTF-8 human-readable `.msmap` files. The required header is:
 
-- Legacy binary map compatibility.
-- Weighted map parsing and round-trip export.
-- Invalid cost values and malformed dimensions.
-- Seed reproducibility.
-- Start and goal validity.
-- UCS optimality on a map with competing route costs.
-- Greedy's non-optimal behavior on a deliberately misleading map.
-- A* matching UCS on positive weighted maps.
-- Heuristic admissibility.
-- No-path and start-equals-goal cases.
-- Consistent explored-node counts.
-- Path-cost summation.
-- CSV schema and result determinism.
+```text
+<row count>
+<column count>
+start: <row>,<column>
+end: <row>,<column>
+<one 0/1 layout row per maze row>
+```
 
-If no test framework is desired, a small Java test harness can be added, but a standard test runner is preferable for repeatable progress-report evidence.
+An optional `WEIGHTS` section follows the layout:
 
-### 9. Update Documentation
+```text
+WEIGHTS
+<north>,<east>,<south>,<west>
+```
 
-**Status: Partially completed.** [README.md](../../../../../README.md), [Maze.java](../../../../../src/Maze.java), and [MazeSolver.java](../../../../../src/MazeSolver.java) now document weighted maps, directional costs, disabled edges, weighted A*, and path costs. Generated Doxygen output remains intentionally deferred.
+There is one weight row for every coordinate, including blocked cells, in
+row-major order. Blocked cells and invalid directions use `0`. Enabled costs
+must be in the inclusive range `1..100`. The importer validates dimensions,
+layout values, endpoints, weight count, ranges, and topology.
 
-Update [README.md](../../../../../README.md) with:
+Layout-only legacy files remain readable. Their adjacent open cells receive
+cost `1`. New exports always include the complete weighted representation.
 
-- The weighted route-planning problem definition.
-- State, action, transition cost, and objective definitions.
-- UCS, Greedy, and A* descriptions.
-- The heuristic formula and admissibility explanation.
-- Weighted map format and backward compatibility.
-- Experiment commands and seed behavior.
-- Metrics and CSV schema.
-- Known limitations and failure cases.
+## Experiment Workflow
 
-Regenerate the Doxygen output under [doc/](../../../../../doc/) after public APIs stabilize. Do not manually edit generated HTML or PDF files.
+1. Open **Configure Tests** from the title screen.
+2. Add one row per experimental condition.
+3. Select a map source:
+   - **Automatic seed**: a seed is assigned when the suite is saved.
+   - **Manual seed**: use the entered seed for deterministic generation.
+   - **Saved map**: import an `.msmap`; its contents are embedded in the suite.
+4. Select algorithms and iteration count.
+5. Save the suite as `.mstests` when persistence is needed.
+6. Run tests.
+7. Use **Review** beside a result to reopen its exact map in the animated
+   renderer.
+8. Use **Export Maps** to choose a parent directory. The application creates
+   `<suite-name>-maps` and exports only unique maps, grouping repeated
+   iterations in filenames.
+9. Use **Export CSV** for detailed metrics.
 
-## Recommended Build Order
+Generated maps are created once per row/iteration and shared by every selected
+algorithm. Saved maps are reused for every iteration. Warm-up executions are
+not included in results, progress, CSV output, or runtime measurements.
 
-1. Decide and document the transition-cost convention.
-2. Add weighted maze storage and compatibility parsing.
-3. Add cost-aware solver primitives and structured results.
-4. Implement UCS.
-5. Implement Greedy Best-First Search.
-6. Convert A* to weighted A*.
-7. Add model and algorithm tests.
-8. Update the interactive UI.
-9. Add seeded generation and the non-UI experiment runner.
-10. Add CSV export.
-11. Run the controlled experiment matrix.
-12. Update README, Doxygen, presentation material, and final analysis.
+## Search Behavior
 
-## Definition of Done
+| Algorithm | Priority | Guarantee |
+|---|---|---|
+| DFS | Most recently discovered node | No shortest-path guarantee |
+| BFS | Fewest edges | Shortest route only when enabled costs are equal |
+| UCS | `g(n)` | Minimum-cost route with positive costs |
+| Greedy | `h(n)` | Fast heuristic guidance; not minimum-cost guaranteed |
+| A* | `g(n) + h(n)` | Minimum-cost route with positive costs |
 
-- [x] Binary maps still load and solve with an implicit cost of `1`. Automated validation: Yes. Human confirmation: No.
-- [x] Weighted maps load, validate, export, and reload without data loss. Automated validation: Yes. Human confirmation: No.
-- [ ] UCS and Greedy Best-First run on the same weighted maze model. **Weighted A* is completed and smoke-tested. Human confirmation: No.**
-- [ ] UCS and A* return equal minimum route costs on positive weighted test maps. A* is implemented and smoke-tested; UCS is not yet implemented. Human confirmation: No.
-- [ ] Greedy's route cost can be compared against the optimal cost.
-- [x] The UI displays current route cost, final path cost, explored nodes, and runtime. Automated validation: compilation passed. Human confirmation: No.
-- [ ] Start and goal selection or seeded placement is configurable.
-- [ ] Experiments are reproducible from recorded seeds.
-- [ ] At least the proposed map sizes, densities, cost modes, and ten repetitions per condition are supported.
-- [ ] CSV results include route cost, explored nodes, runtime, and success status.
-- [ ] Automated tests cover the model, all required algorithms, heuristic behavior, and reproducibility. Current weighted-map and solver checks are smoke tests, not a committed automated test suite.
-- [ ] Benchmark timing excludes Swing rendering and UI delays. The solver's
-  displayed computation-time metric now excludes these concerns; the non-UI
-  benchmark runner is still pending.
-- [ ] README and generated API documentation match the final implementation. README and inline/Javadoc documentation are updated; generated Doxygen remains pending.
-- [ ] The final report explains algorithm behavior and trade-offs rather than only listing measurements.
+The Manhattan heuristic is admissible and consistent because each enabled move
+costs at least `1` and every move changes Manhattan distance by at most `1`.
+
+## Source Responsibilities
+
+| File | Responsibility |
+|---|---|
+| `src/app/MS.java` | Application entry point |
+| `src/maze/map/Maze.java` | Maze graph, costs, generation, and validation |
+| `src/maze/map/MazeFileIO.java` | `.msmap` parsing and serialization boundary |
+| `src/maze/search/MazeSolver.java` | Incremental search facade and metrics |
+| `src/maze/search/UninformedSearch.java`, `UCS.java`, `GreedySearch.java`, `Astar.java` | Focused search strategies; `UninformedSearch` handles both DFS and BFS |
+| `src/ui/MazeRenderer.java` | Swing UI, rendering, animation, and map controls |
+| `src/experiments/TestSuite.java` | Suite/test-row models and validation |
+| `src/experiments/ExperimentRunner.java` | Warm-up, seeded execution, results, map export |
+| `src/experiments/ExperimentResult.java` | Immutable run metrics and map snapshot |
+| `src/experiments/TestSuiteIO.java` | `.mstests` persistence and CSV export |
+| `src/ui/TestSuiteWindow.java` | Window coordination and experiment actions |
+| `src/ui/*TableModel.java` | Configuration and result table state |
+| `src/ui/*Editor.java` / `*Renderer.java` | Reusable experiment table controls |
+| `test/java/RegressionTests.java` | Dependency-free automated regression checks |
+
+## Validation
+
+From the repository root:
+
+```powershell
+New-Item -ItemType Directory -Force build\classes | Out-Null
+$sources = @(
+    (Get-ChildItem -Filter *.java src -Recurse).FullName
+    (Get-ChildItem -Filter *.java test\java -Recurse).FullName
+)
+javac -Xlint:all -d build\classes $sources
+java -cp build\classes test.RegressionTests
+git diff --check
+```
+
+The regression suite covers weighted round trips, all algorithms, seeded
+reproducibility, suite persistence, CSV output, embedded saved maps,
+cancellation, and unique map export.
+
+JavaDoc can be checked without generating the Doxygen/PDF artifacts:
+
+```powershell
+$files = (Get-ChildItem src -Filter *.java).FullName
+javadoc -quiet -Xdoclint:all -d "$env:TEMP\maze-javadoc" $files
+```
+
+## Refactor Roadmap
+
+This refactor reduces the size and coupling of the three largest classes while
+preserving their existing public behavior. Each phase is independently
+validated before the next boundary is changed.
+
+### Phase 1: Map persistence boundary
+
+- [x] Add `maze.map.MazeFileIO` for `.msmap` file/text parsing and serialization.
+- [x] Keep `Maze.importFromFile`, `Maze.importFromText`, `exportToFile`, and
+  `exportToText` as compatibility delegates.
+- [x] Preserve legacy layout-only files, `WEIGHTS` validation, directional
+  `[N,E,S,W]` costs, extension checks, and existing error behavior.
+- [x] Add round-trip and invalid-input regression coverage through the public
+  compatibility methods.
+
+### Phase 2: Search strategy boundary
+
+- [x] Add a package-private strategy abstraction for initialization and
+  one-node incremental steps.
+- [x] Extract DFS/BFS frontier behavior into focused strategy classes.
+- [x] Extract UCS and Greedy Best-First frontier behavior, including stale and
+  closed-entry handling.
+- [x] Extract weighted A* frontier behavior and priority entries.
+- [x] Keep `MazeSolver` responsible for algorithm selection, lifecycle,
+  metrics, parent-chain reconstruction, and the existing public API.
+- [x] Confirm identical path, cost, visited-count, completion, and incremental
+  update behavior with regression tests.
+
+### Phase 3: Experiment UI boundary
+
+- [x] Extract configuration and result table models from `TestSuiteWindow`.
+- [x] Extract context-sensitive configuration table editability and rendering.
+- [x] Extract reusable cell editors/renderers, including algorithm and saved-map
+  controls.
+- [x] Extract configuration/results panels while keeping window-level actions
+  and worker lifecycle centralized.
+- [x] Preserve endpoint/map-source enablement, review buttons, CSV export, map
+  export, suite persistence, and cancellation behavior.
+
+### Implementation order
+
+1. Phase 1 established the map I/O boundary shared by experiment and review
+   workflows.
+2. Phase 2 established the search-strategy boundary while preserving
+   `updateSolve()`.
+3. Phase 3 completed the UI extraction after the domain and solver boundaries
+   were stable.
+4. Future refactors should compile with `javac -Xlint:all`, run
+   `test.RegressionTests`, run JavaDoc validation, and run `git diff --check`.
+
+## Remaining Work
+
+- Add richer statistical analysis across repeated runs if required by the
+  course report.
+- Add optional benchmark charts or a separate analysis export.
+- Decide whether to add a dedicated application-level logging toggle in place
+  of verbose diagnostic console output.
+- Regenerate the release documentation after public API or package
+  documentation changes with `scripts\generate-documentation.ps1` on Windows
+  or `scripts/generate-documentation.sh` on Linux.
+- Add richer user-facing validation explanations for every disabled saved-map
+  configuration field if usability testing identifies confusion.
+
+These are follow-up improvements, not blockers for the current weighted
+route-planning agent implementation.

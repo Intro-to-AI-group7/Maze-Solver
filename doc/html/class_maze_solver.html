@@ -11,8 +11,6 @@
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript" src="navtreedata.js"></script>
-<script type="text/javascript" src="navtree.js"></script>
 <script type="text/javascript" src="resize.js"></script>
 <script type="text/javascript" src="cookie.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
@@ -29,7 +27,6 @@
   <td id="projectalign">
    <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.6</span>
    </div>
-   <div id="projectbrief">Weighted intelligent route-planning maze solver</div>
   </td>
  </tr>
  </tbody>
@@ -52,29 +49,17 @@ $(function() { codefold.init(0); });
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
 $(function() {
-  initMenu('',true,false,'search.php','Search',true);
+  initMenu('',true,false,'search.php','Search',false);
   $(function() { init_search(); });
 });
 /* @license-end */
 </script>
 <div id="main-nav"></div>
-</div><!-- top -->
-<div id="side-nav" class="ui-resizable side-nav-resizable">
-  <div id="nav-tree">
-    <div id="nav-tree-contents">
-      <div id="nav-sync" class="sync"></div>
-    </div>
-  </div>
-  <div id="splitbar" style="-moz-user-select:none;" 
-       class="ui-resizable-handle">
-  </div>
-</div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('class_maze_solver.html',''); initResizable(true); });
+$(function(){ initResizable(false); });
 /* @license-end */
 </script>
-<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -96,6 +81,8 @@ $(function(){initNavTree('class_maze_solver.html',''); initResizable(true); });
 </div>
 </div>
 
+</div><!-- top -->
+<div id="doc-content">
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
@@ -105,7 +92,7 @@ $(function(){initNavTree('class_maze_solver.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 
-<p>Incremental maze solver that supports DFS, BFS, and weighted A*.  
+<p>Incremental maze solver that supports DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and weighted A*.  
  <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
@@ -154,7 +141,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5f7895d3d944960d5c68b7b5d4e33471"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Incremental maze solver that supports DFS, BFS, and weighted A*. </p>
+<div class="textblock"><p>Incremental maze solver that supports DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and weighted A*. </p>
 <p>The solver keeps internal state between calls to <code><a class="el" href="#a4731d9d114db6ed8934c1bb5b5153355">updateSolve()</a></code>, so callers can visualize or inspect each step one node at a time. Reported solve time measures the elapsed time of each search-step call, excluding timer delays and UI repaint work.</p>
 <p>Typical usage: create a solver, set algorithm and maze, then call <code><a class="el" href="#a4731d9d114db6ed8934c1bb5b5153355">updateSolve()</a></code> repeatedly until <code><a class="el" href="#a1e2cd30b080991b73b0d717e1862b74d">isFinished()</a></code> returns true. Example: </p><div class="fragment"><div class="line"><a class="code hl_class" href="class_maze_solver.html">MazeSolver</a> solver = <span class="keyword">new</span> <a class="code hl_class" href="class_maze_solver.html">MazeSolver</a>();</div>
 <div class="line">solver.<a class="code hl_function" href="#a19e7e09b1cf169d44927f2fbb1a4a9f9">setMaze</a>(maze);</div>
@@ -165,13 +152,13 @@ Public Member Functions</h2></td></tr>
 <div class="line"><span class="keywordflow">if</span> (solver.<a class="code hl_function" href="#a976101159c6108d2600323fbd913f5d7">isSolved</a>()) {</div>
 <div class="line">    List&lt;Point&gt; path = solver.<a class="code hl_function" href="#a188a2b6d5e8776a4b0715ab74990d71b">getFinalPath</a>();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclass_maze_solver_html"><div class="ttname"><a href="class_maze_solver.html">MazeSolver</a></div><div class="ttdoc">Incremental maze solver that supports DFS, BFS, and weighted A*.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:31</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a188a2b6d5e8776a4b0715ab74990d71b"><div class="ttname"><a href="#a188a2b6d5e8776a4b0715ab74990d71b">MazeSolver.getFinalPath</a></div><div class="ttdeci">List&lt; Point &gt; getFinalPath()</div><div class="ttdoc">Gets the final path after a successful solve.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:217</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a19e7e09b1cf169d44927f2fbb1a4a9f9"><div class="ttname"><a href="#a19e7e09b1cf169d44927f2fbb1a4a9f9">MazeSolver.setMaze</a></div><div class="ttdeci">void setMaze(Maze maze)</div><div class="ttdoc">Assigns the maze instance to solve.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:106</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a1e2cd30b080991b73b0d717e1862b74d"><div class="ttname"><a href="#a1e2cd30b080991b73b0d717e1862b74d">MazeSolver.isFinished</a></div><div class="ttdeci">boolean isFinished()</div><div class="ttdoc">Indicates whether this run has terminated.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:150</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a4731d9d114db6ed8934c1bb5b5153355"><div class="ttname"><a href="#a4731d9d114db6ed8934c1bb5b5153355">MazeSolver.updateSolve</a></div><div class="ttdeci">Maze.Node updateSolve()</div><div class="ttdoc">Advances solving by exactly one visited node.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:117</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a976101159c6108d2600323fbd913f5d7"><div class="ttname"><a href="#a976101159c6108d2600323fbd913f5d7">MazeSolver.isSolved</a></div><div class="ttdeci">boolean isSolved()</div><div class="ttdoc">Indicates whether the current run found the goal.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:159</div></div>
-<div class="ttc" id="aclass_maze_solver_html_a9baf570c82f61e83d1e11e8bb8a93e3c"><div class="ttname"><a href="#a9baf570c82f61e83d1e11e8bb8a93e3c">MazeSolver.setAlg</a></div><div class="ttdeci">void setAlg(String alg)</div><div class="ttdoc">Sets which algorithm to run.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:70</div></div>
+<div class="ttc" id="aclass_maze_solver_html"><div class="ttname"><a href="class_maze_solver.html">MazeSolver</a></div><div class="ttdoc">Incremental maze solver that supports DFS, BFS, Uniform Cost Search, Greedy Best-First Search,...</div><div class="ttdef"><b>Definition</b> MazeSolver.java:32</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a188a2b6d5e8776a4b0715ab74990d71b"><div class="ttname"><a href="#a188a2b6d5e8776a4b0715ab74990d71b">MazeSolver.getFinalPath</a></div><div class="ttdeci">List&lt; Point &gt; getFinalPath()</div><div class="ttdoc">Gets the final path after a successful solve.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:235</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a19e7e09b1cf169d44927f2fbb1a4a9f9"><div class="ttname"><a href="#a19e7e09b1cf169d44927f2fbb1a4a9f9">MazeSolver.setMaze</a></div><div class="ttdeci">void setMaze(Maze maze)</div><div class="ttdoc">Assigns the maze instance to solve.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:120</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a1e2cd30b080991b73b0d717e1862b74d"><div class="ttname"><a href="#a1e2cd30b080991b73b0d717e1862b74d">MazeSolver.isFinished</a></div><div class="ttdeci">boolean isFinished()</div><div class="ttdoc">Indicates whether this run has terminated.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:168</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a4731d9d114db6ed8934c1bb5b5153355"><div class="ttname"><a href="#a4731d9d114db6ed8934c1bb5b5153355">MazeSolver.updateSolve</a></div><div class="ttdeci">Maze.Node updateSolve()</div><div class="ttdoc">Advances solving by exactly one visited node.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:131</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a976101159c6108d2600323fbd913f5d7"><div class="ttname"><a href="#a976101159c6108d2600323fbd913f5d7">MazeSolver.isSolved</a></div><div class="ttdeci">boolean isSolved()</div><div class="ttdoc">Indicates whether the current run found the goal.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:177</div></div>
+<div class="ttc" id="aclass_maze_solver_html_a9baf570c82f61e83d1e11e8bb8a93e3c"><div class="ttname"><a href="#a9baf570c82f61e83d1e11e8bb8a93e3c">MazeSolver.setAlg</a></div><div class="ttdeci">void setAlg(String alg)</div><div class="ttdoc">Sets which algorithm to run.</div><div class="ttdef"><b>Definition</b> MazeSolver.java:74</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a4223613a3ef49712b3a81d02931e998c" name="a4223613a3ef49712b3a81d02931e998c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4223613a3ef49712b3a81d02931e998c">&#9670;&#160;</a></span>getAlg()</h2>
@@ -256,7 +243,7 @@ Public Member Functions</h2></td></tr>
 <p>Gets the final path after a successful solve. </p>
 <p>The path is traced backward using the internal parent table, so the returned list begins at the goal and ends at the start.</p>
 <p>Typical UI code can iterate as-is for reverse painting, or reverse the list first if start-to-goal order is preferred.</p>
-<dl class="section return"><dt>Returns</dt><dd>list of path points where <code class="JavaDocCode">x=col, y=row</code>; empty if unsolved </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>goal-to-start path points where <code class="JavaDocCode">x=col, y=row</code>; empty if unsolved </dd></dl>
 
 </div>
 </div>
@@ -455,7 +442,7 @@ Public Member Functions</h2></td></tr>
 <p>Sets which algorithm to run. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">alg</td><td>algorithm label. Accepted values are DFS, BFS, A*, ASTAR, and A_STAR (case-insensitive) </td></tr>
+    <tr><td class="paramname">alg</td><td>algorithm label. Accepted values are DFS, BFS, UCS, Greedy, A*, ASTAR, and A_STAR (case-insensitive) </td></tr>
   </table>
   </dd>
 </dl>
@@ -539,13 +526,10 @@ Public Member Functions</h2></td></tr>
 <li>src/<a class="el" href="_maze_solver_8java.html">MazeSolver.java</a></li>
 </ul>
 </div><!-- contents -->
-</div><!-- doc-content -->
 <!-- start footer part -->
-<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
-  <ul>
-    <li class="navelem"><a class="el" href="class_maze_solver.html">MazeSolver</a></li>
-    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0 </li>
-  </ul>
-</div>
+<hr class="footer"/><address class="footer"><small>
+Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0
+</small></address>
+</div><!-- doc-content -->
 </body>
 </html>
