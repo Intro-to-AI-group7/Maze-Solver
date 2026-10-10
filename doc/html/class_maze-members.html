@@ -27,8 +27,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.5</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.6</span>
    </div>
+   <div id="projectbrief">Weighted intelligent route-planning maze solver</div>
   </td>
  </tr>
  </tbody>
@@ -102,22 +103,29 @@ $(function(){initNavTree('class_maze.html',''); initResizable(true); });
 
 <p>This is the complete list of members for <a class="el" href="class_maze.html">Maze</a>, including all inherited members.</p>
 <table class="directory">
-  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a87ee5eb9a8eac29ec2d4595877d9a0da">buildNeighborTableLines</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#ad96d7e5ccf65fe29e318bd0c39b39a6a">createCell</a>(int row, int col, int direction)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#ae20cb68cb5dc52cf20d04c669d0cde3e">exportToFile</a>(String filePath)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a1add35b9272410e8ac5ed4a0ed1bcb71">generateRandomMaze</a>(int length, int width)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">static</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a4abf627d4654079a2ab0e03b32df5173">getGoal</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a7bf4e7fb124ff2a0773f73b82af0ad73">getLength</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a9a7416a313203bf219987db2c0e25814">getNode</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a334073acb91f71281682945b37e82b60">getStart</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a5524b06dd2648f2f5fa5daf458ba9a9b">getWidth</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a262a0c154562ed47724604c0cc46bcab">importFromFile</a>(String filePath)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">static</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a5d449c5ff98fe08c078209ea45bd9824">isInBounds</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a7dc187bb000382efc20df7ff80b525be">isOccupied</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a64794a0b1cbed9d04736002da7ee62cb">Maze</a>(int length, int width)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#aad70719e52756a45e3c00a9c1ff30fbd">setGoal</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#ab06ebd4ce10a357460c2862fdfead186">setStart</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a164060b8ad4c0e102daa8aa2d23aeaa8">validateNeighborConnections</a>(int maxIssuesToCollect)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a87ee5eb9a8eac29ec2d4595877d9a0da">buildNeighborTableLines</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a35b968c5d80692b2f2bea517ffcd278a">canMove</a>(Node from, Dir direction)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#ad96d7e5ccf65fe29e318bd0c39b39a6a">createCell</a>(int row, int col, int direction)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a28462ea61135c939ade85dfdad11efe6">DISABLED_MOVEMENT_COST</a></td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">static</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#ae20cb68cb5dc52cf20d04c669d0cde3e">exportToFile</a>(String filePath)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a1add35b9272410e8ac5ed4a0ed1bcb71">generateRandomMaze</a>(int length, int width)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">static</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a8a3c5692835952c9555baf64892fd9a7">generateRandomMaze</a>(int length, int width, boolean weighted, int minWeight, int maxWeight)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">static</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#afa8fc8bb0b1d08e20d84dd5158735df4">generateRandomMaze</a>(int length, int width, boolean weighted, int minWeight, int maxWeight, boolean sameCostBothDirections)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">static</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a4abf627d4654079a2ab0e03b32df5173">getGoal</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a7bf4e7fb124ff2a0773f73b82af0ad73">getLength</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#ab3e3c9884e0028e817f4bd7b0aec437f">getMoveCost</a>(Node from, Node to)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a9a7416a313203bf219987db2c0e25814">getNode</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a334073acb91f71281682945b37e82b60">getStart</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a5524b06dd2648f2f5fa5daf458ba9a9b">getWidth</a>()</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a262a0c154562ed47724604c0cc46bcab">importFromFile</a>(String filePath)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">static</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a5d449c5ff98fe08c078209ea45bd9824">isInBounds</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a7dc187bb000382efc20df7ff80b525be">isOccupied</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a85c447a38ed9a434d086899148a8814c">MAX_MOVEMENT_COST</a></td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">static</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a64794a0b1cbed9d04736002da7ee62cb">Maze</a>(int length, int width)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#a8ee604ab8342f085648511cb31942ce2">MIN_MOVEMENT_COST</a></td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">static</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#aad70719e52756a45e3c00a9c1ff30fbd">setGoal</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="class_maze.html#ab06ebd4ce10a357460c2862fdfead186">setStart</a>(int row, int col)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_maze.html#a164060b8ad4c0e102daa8aa2d23aeaa8">validateNeighborConnections</a>(int maxIssuesToCollect)</td><td class="entry"><a class="el" href="class_maze.html">Maze</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
 </table></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
