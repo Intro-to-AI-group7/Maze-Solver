@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.Objects;
-import java.util.function.IntConsumer;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,7 +24,8 @@ final class TestSuiteConfigurationPanel extends JPanel {
             Runnable addRow,
             Runnable removeRow,
             Runnable saveSuite,
-            Runnable loadSuite) {
+            Runnable loadSuite,
+            Runnable back) {
         super(new BorderLayout(6, 6));
         Objects.requireNonNull(suiteNameField);
         Objects.requireNonNull(configTable);
@@ -37,6 +37,7 @@ final class TestSuiteConfigurationPanel extends JPanel {
         controls.add(button("Remove Row", removeRow));
         controls.add(button("Save Suite", saveSuite));
         controls.add(button("Load Suite", loadSuite));
+        controls.add(button("Back to Main Menu", back));
         add(controls, BorderLayout.NORTH);
 
         configTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

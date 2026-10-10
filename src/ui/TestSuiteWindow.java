@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -44,14 +42,19 @@ public final class TestSuiteWindow {
     private final JTable resultTable = new JTable(resultModel);
     private final List<ExperimentResult> resultRows = new java.util.ArrayList<>();
     private final JLabel statusLabel = new JLabel("Add or edit a test row.");
+    private final Runnable onBack;
     private SwingWorker<List<ExperimentResult>, ExperimentResult> worker;
 
-    private TestSuiteWindow() {
+    private TestSuiteWindow(Runnable onBack) {
+        this.onBack = onBack;
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent event) {
                 closeWindow();
+                if (TestSuiteWindow.this.onBack != null) {
+                    TestSuiteWindow.this.onBack.run();
+                }
             }
         });
         frame.setSize(1500, 750);
@@ -65,14 +68,26 @@ public final class TestSuiteWindow {
      * Opens a new test-suite window on the Swing event thread.
      */
     public static void showWindow() {
+        showWindow(null);
+    }
+
+    /**
+     * Opens the test-suite window and invokes the callback when the user
+     * navigates back to the previous screen.
+     *
+     * @param onBack callback invoked after this window is closed
+     */
+    public static void showWindow(Runnable onBack) {
         if (!javax.swing.SwingUtilities.isEventDispatchThread()) {
-            javax.swing.SwingUtilities.invokeLater(TestSuiteWindow::showWindow);
+            javax.swing.SwingUtilities.invokeLater(() -> showWindow(onBack));
             return;
         }
         if (activeWindow == null) {
-            activeWindow = new TestSuiteWindow();
+            activeWindow = new TestSuiteWindow(onBack);
         }
         activeWindow.frame.setVisible(true);
+        activeWindow.frame.toFront();
+        activeWindow.frame.requestFocus();
     }
 
     /**
@@ -97,7 +112,8 @@ public final class TestSuiteWindow {
                 this::addDefaultRow,
                 this::removeSelectedRow,
                 this::saveSuite,
-                this::loadSuite), BorderLayout.CENTER);
+                this::loadSuite,
+                this::returnToPreviousScreen), BorderLayout.CENTER);
         root.add(new ExperimentResultsPanel(
                 resultTable,
                 statusLabel,
@@ -107,6 +123,13 @@ public final class TestSuiteWindow {
                 this::exportMaps,
                 this::reviewResult), BorderLayout.SOUTH);
         return root;
+    }
+
+    private void returnToPreviousScreen() {
+        closeWindow();
+        if (onBack != null) {
+            onBack.run();
+        }
     }
 
     private void addDefaultRow() {
@@ -407,7 +430,9 @@ public final class TestSuiteWindow {
         ExperimentResult result = resultRows.get(row);
         try {
             MazeRenderer.reviewExperiment(
-                    Maze.importFromText(result.getMapText()), result.getAlgorithm());
+                    Maze.importFromText(result.getMapText()),
+                    result.getAlgorithm(),
+                    TestSuiteWindow::showWindow);
         } catch (Exception ex) {
             showError("Could not open result review: " + rootCause(ex).getMessage());
         }

@@ -101,6 +101,12 @@ Startup sequence:
    then optionally enable movement weights with a range from 1 through 100.
 4. Solve interactively.
 
+Use **Back to Main Menu** in the maze controls to leave an interactive session
+without exiting the application. The test-suite editor has the same navigation
+button, and closing either secondary window returns to the title screen. The
+title screen is hidden while a secondary screen is open so each menu is only
+shown once.
+
 To configure experiments, choose **Configure Tests** on the title screen. Add
 one row per test condition, edit the row values, select algorithms and
 iterations, then choose **Run Tests**. Each generated-map iteration creates

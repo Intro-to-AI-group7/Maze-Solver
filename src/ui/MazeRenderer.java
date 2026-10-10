@@ -102,6 +102,7 @@ public final class MazeRenderer {
 
     private static JFrame titleFrame;
     private static JFrame mazeFrame;
+    private static Runnable mazeBackAction;
 
     private static Maze renderedMaze;
     private static Color[][] renderedCellColors;
@@ -184,18 +185,54 @@ public final class MazeRenderer {
     }
 
     /**
+     * Returns to the main menu without terminating the application.
+     *
+     * <p>This is the navigation path used by secondary screens and their Back
+     * buttons. Active solving work is stopped before the menu is shown again.
+     */
+    static void returnToTitleScreen() {
+        if (shuttingDown) {
+            return;
+        }
+        stopTimerIfRunning();
+        if (instantSolveWorker != null) {
+            instantSolveWorker.interrupt();
+            instantSolveWorker = null;
+        }
+        if (mazeFrame != null) {
+            mazeFrame.dispose();
+            mazeFrame = null;
+        }
+        TestSuiteWindow.closeWindow();
+        showTitleScreen();
+    }
+
+    /**
      * Opens an animated review session for an experiment result.
      *
      * @param maze exact map used by the result
      * @param algorithm algorithm to select initially
      */
     public static void reviewExperiment(Maze maze, MazeSolver.Algorithm algorithm) {
+        reviewExperiment(maze, algorithm, null);
+    }
+
+    /**
+     * Opens an experiment result preview with a callback for returning to its
+     * owning screen.
+     *
+     * @param maze exact map used by the result
+     * @param algorithm algorithm to select initially
+     * @param onBack callback invoked when the preview is closed
+     */
+    public static void reviewExperiment(
+            Maze maze, MazeSolver.Algorithm algorithm, Runnable onBack) {
         if (maze == null || algorithm == null) {
             throw new IllegalArgumentException("Maze and algorithm are required.");
         }
         Runnable review = () -> runInteractiveSolveSession(
                 maze, algorithm == MazeSolver.Algorithm.A_STAR ? "A*" : algorithm.name(),
-                DEFAULT_SESSION_STEP_DELAY_MS, DEFAULT_VISITED_COLOR);
+                DEFAULT_SESSION_STEP_DELAY_MS, DEFAULT_VISITED_COLOR, onBack);
         if (SwingUtilities.isEventDispatchThread()) {
             review.run();
         } else {
@@ -247,7 +284,13 @@ public final class MazeRenderer {
 
         JButton configureTestsButton = new JButton("CONFIGURE TESTS");
         styleTitleButton(configureTestsButton);
-        configureTestsButton.addActionListener(e -> TestSuiteWindow.showWindow());
+        configureTestsButton.addActionListener(e -> {
+            if (titleFrame != null) {
+                titleFrame.dispose();
+                titleFrame = null;
+            }
+            TestSuiteWindow.showWindow(MazeRenderer::returnToTitleScreen);
+        });
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -518,11 +561,22 @@ public final class MazeRenderer {
             String initialAlgorithm,
             int initialStepDelayMs,
             Color visitedColor) {
+        runInteractiveSolveSession(
+                maze, initialAlgorithm, initialStepDelayMs, visitedColor, null);
+    }
+
+    private static void runInteractiveSolveSession(
+            Maze maze,
+            String initialAlgorithm,
+            int initialStepDelayMs,
+            Color visitedColor,
+            Runnable onBack) {
         if (maze == null) {
             throw new IllegalArgumentException("Maze cannot be null.");
         }
 
         stopTimerIfRunning();
+        mazeBackAction = onBack;
 
         sessionVisitedColor = visitedColor != null ? visitedColor : DEFAULT_VISITED_COLOR;
         buildMazeWindow(maze);
@@ -817,7 +871,7 @@ public final class MazeRenderer {
         mazeFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent event) {
-                shutdownApplication();
+                returnFromMazeWindow();
             }
         });
         mazeFrame.setLayout(new BorderLayout());
@@ -827,6 +881,28 @@ public final class MazeRenderer {
 
         clampAndCenterMazeFrame(rows, cols, controlPanel);
         mazeFrame.setVisible(true);
+    }
+
+    private static void returnFromMazeWindow() {
+        if (shuttingDown) {
+            return;
+        }
+        stopTimerIfRunning();
+        if (instantSolveWorker != null) {
+            instantSolveWorker.interrupt();
+            instantSolveWorker = null;
+        }
+        if (mazeFrame != null) {
+            mazeFrame.dispose();
+            mazeFrame = null;
+        }
+        Runnable onBack = mazeBackAction;
+        mazeBackAction = null;
+        if (onBack != null) {
+            onBack.run();
+        } else {
+            showTitleScreen();
+        }
     }
 
     /**
@@ -1180,6 +1256,7 @@ public final class MazeRenderer {
         JButton loadMapButton = new JButton("Load Map");
         JButton saveMapButton = new JButton("Save Map");
         JButton generateMapButton = new JButton("Generate Map");
+        JButton backButton = new JButton("Back to Main Menu");
         JButton zoomOutButton = new JButton("-");
         JButton zoomInButton = new JButton("+");
 
@@ -1225,6 +1302,7 @@ public final class MazeRenderer {
         loadMapButton.addActionListener(e -> handleLoadMapRequested());
         saveMapButton.addActionListener(e -> handleSaveMapRequested());
         generateMapButton.addActionListener(e -> handleGenerateMapRequested());
+        backButton.addActionListener(e -> returnFromMazeWindow());
         zoomOutButton.addActionListener(e -> adjustZoom(-1));
         zoomInButton.addActionListener(e -> adjustZoom(1));
 
@@ -1234,6 +1312,7 @@ public final class MazeRenderer {
         controlPanel.add(loadMapButton);
         controlPanel.add(saveMapButton);
         controlPanel.add(generateMapButton);
+        controlPanel.add(backButton);
         controlPanel.add(algorithmLabel);
         controlPanel.add(algorithmSelector);
         controlPanel.add(delayLabel);
