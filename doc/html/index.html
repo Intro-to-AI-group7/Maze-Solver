@@ -145,7 +145,7 @@ Features</h1>
 <h1><a class="anchor" id="autotoc_md4"></a>
 Requirements</h1>
 <ul>
-<li>Java JDK 17+ (11+ may work, but 17+ is recommended).</li>
+<li>Java JDK 21 (LTS) or newer, including the <code>jpackage</code> tool for executable generation.</li>
 <li>Windows, macOS, or Linux with desktop GUI support.</li>
 <li>No external dependencies required.</li>
 <li>Release version: <code>0.7</code> (also exposed by <code><a class="el" href="classapp_1_1_version.html#ad4214ed139ea8d6d0aab5683164d9d85" title="Current application release version.">app.Version.RELEASE</a></code>).</li>
@@ -414,7 +414,7 @@ API and Extension Notes</h1>
 Launch From Release JAR</h1>
 <p>If you downloaded a release artifact from GitHub (or received a provided prebuilt JAR), launch it as follows:</p>
 <ol type="1">
-<li>Install Java 17+.</li>
+<li>Install Java JDK 21 (LTS) or newer.</li>
 <li>Download the JAR and extract it first if it is packaged in a zip.</li>
 <li>Open a terminal in the folder containing the JAR.</li>
 <li>Run:</li>
@@ -467,25 +467,24 @@ Development Notes</h1>
 <div class="line">)</div>
 <div class="line">javac -Xlint:all -d build\classes $sources</div>
 <div class="line">java -cp build\classes app.MS</div>
-</div><!-- fragment --><p>Optional cleanup of compiled artifacts:</p>
+</div><!-- fragment --><p>Convenience scripts are available under <code>scripts\</code>:</p>
+<div class="fragment"><div class="line">.\scripts\compile-and-run.ps1</div>
+<div class="line">.\scripts\build-executable.ps1</div>
+</div><!-- fragment --><p>The first script compiles the application and regression tests, runs the regression suite, and launches the Swing application. The second creates a self-contained Windows application image at <code>dist\MazeSolver\MazeSolver.exe</code> using <code>jpackage</code>. It requires a JDK that includes <code>jpackage</code>. The build script uses the compiler and packaging tools from the same JDK installation and requires JDK 21 or newer.</p>
+<p>On Linux, make the equivalent scripts executable once and run:</p>
+<div class="fragment"><div class="line">chmod +x scripts/compile-and-run.sh scripts/build-executable.sh</div>
+<div class="line">./scripts/compile-and-run.sh</div>
+<div class="line">./scripts/build-executable.sh</div>
+</div><!-- fragment --><p>The Linux application image is created at <code>dist/MazeSolver/bin/MazeSolver</code>. The generated <code>build/</code> and <code>dist/</code> directories are ignored by Git.</p>
+<p>Optional cleanup of compiled artifacts:</p>
 <div class="fragment"><div class="line">Remove-Item -Recurse -Force build</div>
-</div><!-- fragment --><p>JavaDoc validation is documented in <code>TODO.md</code>. Doxygen is configured by <code>doc/Doxyfile</code>; regenerate the HTML reference from the repository root with:</p>
-<div class="fragment"><div class="line">Push-Location doc</div>
-<div class="line">doxygen Doxyfile</div>
-<div class="line">Pop-Location</div>
-</div><!-- fragment --><p>The generated reference is written to <code>doc/html</code>. The release PDF is saved as <code>doc/Maze-Solver-docs_V0.7.pdf</code>. If a TeX Live installation is available, the PDF can be generated from <code>doc\latex</code> with XeLaTeX:</p>
-<div class="fragment"><div class="line">Set-Location doc\latex</div>
-<div class="line">xelatex -interaction=nonstopmode refman.tex</div>
-<div class="line">xelatex -interaction=nonstopmode refman.tex</div>
-<div class="line">Set-Location ..\..</div>
-</div><!-- fragment --><p>Doxygen's JavaDoc conversion can join a line-break command to the following word in generated LaTeX. If XeLaTeX reports an undefined command such as <code>\newlinestart</code>, normalize the generated files before compiling:</p>
-<div class="fragment"><div class="line">Get-ChildItem doc\latex -Filter *.tex | ForEach-Object {</div>
-<div class="line">    $text = Get-Content $_.FullName -Raw</div>
-<div class="line">    $text = $text -replace &#39;\\newline(?=[A-Za-z])&#39;, &#39;\newline{}&#39;</div>
-<div class="line">    Set-Content $_.FullName $text -NoNewline</div>
-<div class="line">}</div>
-</div><!-- fragment --><p>After a successful build, copy <code>doc\latex\refman.pdf</code> to <code>doc\Maze-Solver-docs_V0.7.pdf</code>.</p>
-<h1><a class="anchor" id="autotoc_md17"></a>
+</div><!-- fragment --><p>JavaDoc validation is documented in <code>TODO.md</code>. Doxygen is configured by <code>doc/Doxyfile</code>. Generate the HTML reference and release PDF with the documentation script:</p>
+<div class="fragment"><div class="line">.\scripts\generate-documentation.ps1</div>
+</div><!-- fragment --><p>The script checks for Doxygen and XeLaTeX. If either is missing, it asks before installing it through an available package manager. It generates the HTML reference, builds the PDF, and removes only the generated <code>doc\latex</code> folder. The remaining documentation outputs are <code>doc\html</code>, <code>doc\Maze-Solver-docs_V0.7.pdf</code>, and <code>doc\Doxyfile</code>.</p>
+<p>On Linux, use the equivalent script:</p>
+<div class="fragment"><div class="line">chmod +x scripts/generate-documentation.sh</div>
+<div class="line">./scripts/generate-documentation.sh</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md17"></a>
 License</h1>
 <p>This project is licensed under the terms in LICENSE. </p>
 </div></div><!-- PageDoc -->

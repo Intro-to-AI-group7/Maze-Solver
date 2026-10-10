@@ -319,8 +319,8 @@ validated before the next boundary is changed.
 - Decide whether to add a dedicated application-level logging toggle in place
   of verbose diagnostic console output.
 - Regenerate the release documentation after public API or package
-  documentation changes by running `doxygen Doxyfile` from `doc`; build the
-  release PDF with the XeLaTeX commands documented in `README.md`.
+  documentation changes with `scripts\generate-documentation.ps1` on Windows
+  or `scripts/generate-documentation.sh` on Linux.
 - Add richer user-facing validation explanations for every disabled saved-map
   configuration field if usability testing identifies confusion.
 

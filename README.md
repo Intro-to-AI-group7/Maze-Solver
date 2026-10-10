@@ -62,7 +62,8 @@ Maze-Solver has six main responsibilities:
 
 ## Requirements
 
-- Java JDK 17+ (11+ may work, but 17+ is recommended).
+- Java JDK 21 (LTS) or newer, including the `jpackage` tool for executable
+  generation.
 - Windows, macOS, or Linux with desktop GUI support.
 - No external dependencies required.
 - Release version: `0.7` (also exposed by `app.Version.RELEASE`).
@@ -475,7 +476,7 @@ if (solver.isSolved()) {
 
 If you downloaded a release artifact from GitHub (or received a provided prebuilt JAR), launch it as follows:
 
-1. Install Java 17+.
+1. Install Java JDK 21 (LTS) or newer.
 2. Download the JAR and extract it first if it is packaged in a zip.
 3. Open a terminal in the folder containing the JAR.
 4. Run:
@@ -545,9 +546,21 @@ Convenience scripts are available under `scripts\`:
 
 The first script compiles the application and regression tests, runs the
 regression suite, and launches the Swing application. The second creates a
-self-contained Windows application image at
-`dist\MazeSolver\MazeSolver.exe` using `jpackage`. It requires a JDK that
-includes `jpackage`.
+self-extracting single-file Windows executable:
+`dist\MazeSolver-0.7.exe`. The executable embeds the complete application
+image and Java runtime, extracts to a temporary directory when launched,
+waits for the application to close, and removes its temporary files. It can
+be distributed as one file and does not require Java on the target machine.
+Normal launches do not open a terminal window. For troubleshooting, launch
+the executable with the optional debug flag:
+
+```powershell
+.\dist\MazeSolver-0.7.exe --debug
+```
+
+Debug mode opens a terminal window while the application runs.
+Building it requires JDK 21 or newer, `jpackage`, and the .NET 8 SDK for the
+native self-extractor wrapper.
 
 On Linux, make the equivalent scripts executable once and run:
 
@@ -557,9 +570,11 @@ chmod +x scripts/compile-and-run.sh scripts/build-executable.sh
 ./scripts/build-executable.sh
 ```
 
-The Linux application image is created at
-`dist/MazeSolver/bin/MazeSolver`. The generated `build/` and `dist/`
-directories are ignored by Git.
+The Linux application image is created at `dist/MazeSolver/bin/MazeSolver`,
+and the portable bundle is `dist/MazeSolver-portable-linux.zip`. These
+bundles include the Java runtime and do not require Java to be installed on
+the target machine. The generated `build/` and `dist/` directories are
+ignored by Git.
 
 Optional cleanup of compiled artifacts:
 
@@ -568,39 +583,25 @@ Remove-Item -Recurse -Force build
 ```
 
 JavaDoc validation is documented in `TODO.md`. Doxygen is configured by
-`doc/Doxyfile`; regenerate the HTML reference from the repository root with:
+`doc/Doxyfile`. Generate the HTML reference and release PDF with the
+documentation script:
 
 ```powershell
-Push-Location doc
-doxygen Doxyfile
-Pop-Location
+.\scripts\generate-documentation.ps1
 ```
 
-The generated reference is written to `doc/html`. The release PDF is saved as
-`doc/Maze-Solver-docs_V0.7.pdf`. If a TeX Live installation is available, the
-PDF can be generated from `doc\latex` with XeLaTeX:
+The script checks for Doxygen and XeLaTeX. If either is missing, it asks before
+installing it through an available package manager. It generates the HTML
+reference, builds the PDF, and removes only the generated `doc\latex` folder.
+The remaining documentation outputs are `doc\html`,
+`doc\Maze-Solver-docs_V0.7.pdf`, and `doc\Doxyfile`.
 
-```powershell
-Set-Location doc\latex
-xelatex -interaction=nonstopmode refman.tex
-xelatex -interaction=nonstopmode refman.tex
-Set-Location ..\..
+On Linux, use the equivalent script:
+
+```bash
+chmod +x scripts/generate-documentation.sh
+./scripts/generate-documentation.sh
 ```
-
-Doxygen's JavaDoc conversion can join a line-break command to the following
-word in generated LaTeX. If XeLaTeX reports an undefined command such as
-`\newlinestart`, normalize the generated files before compiling:
-
-```powershell
-Get-ChildItem doc\latex -Filter *.tex | ForEach-Object {
-    $text = Get-Content $_.FullName -Raw
-    $text = $text -replace '\\newline(?=[A-Za-z])', '\newline{}'
-    Set-Content $_.FullName $text -NoNewline
-}
-```
-
-After a successful build, copy `doc\latex\refman.pdf` to
-`doc\Maze-Solver-docs_V0.7.pdf`.
 
 ## License
 
