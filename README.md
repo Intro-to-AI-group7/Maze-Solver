@@ -1,6 +1,6 @@
 # Maze-Solver
 
-Maze-Solver is a Java Swing desktop app for loading, visualizing, and solving grid mazes using DFS, BFS, and A*.
+Maze-Solver is a Java Swing desktop app for loading, visualizing, and solving grid mazes using DFS, BFS, and A*. Maze files now support optional per-direction movement costs while preserving the original unweighted format.
 
 It is designed for both interactive exploration and large-map performance testing, with a paint-based renderer that supports very large mazes efficiently.
 
@@ -28,7 +28,7 @@ Maze-Solver has four main responsibilities:
 
 1. Load maze files from disk.
 2. Validate and visualize the maze graph.
-3. Run DFS, BFS, or A* incrementally or instantly.
+3. Run DFS, BFS, or weighted A* incrementally or instantly.
 4. Show traversal progress and final path with clear visual semantics.
 
 ## Features
@@ -44,6 +44,9 @@ Maze-Solver has four main responsibilities:
 - Gridline overlay for easier node-by-node visibility.
 - Start/goal color preservation after final path draw.
 - Debug diagnostics for maze import and neighbor consistency checks.
+- Optional weighted movement data using a compact `[North, East, South, West]` format.
+- Optional grid overlay for viewing directional movement costs. Equal opposite
+  costs share one edge label; asymmetric costs show separate directional labels.
 - Default startup solve settings: A* algorithm and 200 ms step delay.
 
 ## Requirements
@@ -56,10 +59,10 @@ Maze-Solver has four main responsibilities:
 
 From the repository root:
 
-1. Compile
+1. Compile (PowerShell)
 
 ```bash
-javac src/*.java
+javac src\*.java
 ```
 
 2. Run
@@ -72,7 +75,8 @@ Startup sequence:
 
 1. Title screen appears.
 2. Choose Import Maze or Generate Random.
-3. If importing, select a maze text file; if generating, enter rows/columns.
+3. If importing, select a maze text file. If generating, enter rows and columns,
+   then optionally enable movement weights with a range from 1 through 100.
 4. Solve interactively.
 
 ## How to Use
@@ -85,11 +89,34 @@ After loading or generating a maze:
 - Load Map: replace the current session maze with another file.
 - Save Map: export the currently loaded maze to a text file.
 - Generate Map: create and load a new random maze without leaving the solver window.
-- Algorithm: choose DFS, BFS, or A*.
+- Algorithm: choose DFS, BFS, or weighted A*.
 - Step Delay (ms): set timer delay for step-by-step mode (1..5000).
 - Instant: solve to completion immediately (async worker).
+- Show Weights: overlay movement costs on grid edges. Labels appear when zoom is
+  at least 20 pixels per cell and use a slightly larger font for readability.
+  Equal opposite-direction costs use one number;
+  different costs use direction markers (`>`, `<`, `v`, `^`) and two numbers.
+  During solving, labels next to visited nodes use a subdued gray style. Once
+  solved, only the exact consecutive edges in the final path use an orange-on-gold highlight. Solver
+  updates repaint only the changed cells and adjacent edge-label area; the
+  entire grid is not redrawn for each visited node. The localized repaint
+  includes a small pixel margin because labels are centered on cell boundaries.
+- Current Cost: the cost from the start to the most recently visited node.
+  This tracks only that node's selected parent route, not all explored branches.
+- Final Cost: the total movement cost of the returned route, or `--` when no
+  solution has been found.
+- Solve Time: elapsed time spent inside solver search-step calls. Timer delays,
+  UI repainting, and animation intervals are outside those measurements, so
+  animated and instant solving times are directly comparable. The console also
+  prints a diagnostic line containing compute time, wall-clock session time,
+  interval, algorithm, and visited-node count after each completed solve.
 - Zoom +/-: adjust cell size.
 - Ctrl + Mouse Wheel: zoom while cursor is over the maze viewport.
+
+Saved maze files automatically receive a `.txt` extension when one is not
+provided. The import dialog filters for `.txt` maze files; reopening the dialog
+is sufficient to see a newly saved file, and restarting the application is not
+required.
 
 Random generation details:
 
@@ -97,6 +124,13 @@ Random generation details:
 - Keeps the outer border blocked.
 - Ensures the configured goal cell is connected to the carved maze.
 - Extends carving into final interior row/column on even dimensions to avoid persistent right/bottom wall strips.
+- The generator can optionally enable movement weights and accepts an inclusive
+  minimum and maximum range from `1` through `100`. These limits are centralized
+  in `Maze.MIN_MOVEMENT_COST` and `Maze.MAX_MOVEMENT_COST`.
+- The default maximum in the generator dialog is `10`.
+- The generator defaults to using the same positive integer cost in both
+  directions of each connection. Clear the same-cost checkbox to generate
+  independent integer costs for reverse directions.
 
 ## Maze File Format
 
@@ -109,6 +143,7 @@ Expected format:
 5. One row per maze row using:
 	- 1 for traversable/open
 	- 0 for blocked/wall
+6. Optional `WEIGHTS` section with one four-value row per grid coordinate.
 
 Example:
 
@@ -123,6 +158,65 @@ end: 0,4
 11111
 ```
 
+Legacy files without a `WEIGHTS` section remain valid. Every adjacent open-cell
+connection receives a default movement cost of `1`.
+
+### Weighted map format
+
+The optional section follows the complete binary layout:
+
+```text
+4
+5
+start: 3,0
+end: 0,4
+11111
+10001
+10101
+11111
+
+WEIGHTS
+0,1,1,0
+0,1,0,1
+0,1,0,1
+0,1,0,1
+0,0,1,1
+1,0,1,0
+0,0,0,0
+0,0,0,0
+0,0,0,0
+1,0,1,0
+1,1,0,0
+0,1,0,1
+0,1,0,1
+0,1,0,1
+1,0,0,1
+1,1,0,0
+1,1,0,1
+1,1,0,1
+1,1,0,1
+1,0,0,1
+0,0,0,0
+0,0,0,0
+```
+
+There is one weight row for every coordinate in row-major order, including
+blocked cells. Each row is ordered `[North, East, South, West]` and uses:
+
+- `0`: no permitted movement in that direction.
+- `1` or greater: the positive cost of moving in that direction.
+
+For an open cell, a direction leading outside the maze or into a blocked cell
+must have cost `0`. Blocked cells must contain four zero values. Costs may be
+asymmetric, so the cost from A to B does not have to equal the cost from B to A.
+The current map model preserves geometric neighbor references separately from
+movement availability: a neighboring node is traversable only when its movement
+cost is greater than zero.
+
+`MazeSolver` now uses movement costs when determining whether an edge is
+traversable and when calculating weighted A* scores. Uniform Cost Search and
+Greedy Best-First Search remain planned additions.
+
 Validation rules enforced by import:
 
 - Dimensions must be positive.
@@ -130,6 +224,11 @@ Validation rules enforced by import:
 - Each layout row width must match declared column count.
 - Only 0 and 1 are valid cell values.
 - Start and end must be in bounds and on traversable cells.
+- If `WEIGHTS` is present, it must contain exactly `rows * columns` rows.
+- Each weight row must contain exactly four integer values. Enabled movement
+  costs must be in the range `1..100`; `0` is reserved for disabled or
+  non-existent directions.
+- Weight rows must match the layout topology.
 
 ## Included Maze Files
 
@@ -139,14 +238,26 @@ Located in src:
 - test_100x100.txt: medium map for standard performance checks.
 - test_346x346.txt: larger map for stress testing.
 - test_1000x1000.txt: very large map for renderer scalability tests.
+- test_weighted_100x100.txt: weighted 100x100 example with directional costs.
 
 ## Algorithms
 
 The solver supports:
 
-- DFS: depth-first exploration, memory-light but not shortest-path guaranteed.
-- BFS: breadth-first exploration, shortest path in unweighted grids.
-- A*: informed search using Manhattan distance heuristic.
+- DFS: depth-first exploration, memory-light but not shortest-path or
+  minimum-cost guaranteed.
+- BFS: breadth-first exploration, shortest by number of moves when all enabled
+  moves have equal cost; it respects disabled edges but does not optimize
+  weighted path cost.
+- A*: weighted informed search using cumulative directional movement costs and
+  the Manhattan-distance heuristic. Since valid movement costs are at least
+  `1`, the heuristic remains an admissible lower bound and A* returns a
+  minimum-cost path when one exists.
+
+All algorithms use the `[North, East, South, West]` movement costs from the
+loaded maze. A neighboring cell with cost `0` is treated as an unavailable
+edge. A* stores cumulative costs as `long` values to avoid narrowing the sum
+of many individual movement costs.
 
 A* heuristic used:
 
@@ -173,6 +284,12 @@ Color semantics:
 - Visited: configurable (default yellow)
 - Final path: cyan
 
+When the weight overlay is enabled, `0` means movement is disabled and positive
+numbers are movement costs. The overlay preserves directional asymmetry: for a
+horizontal connection, `>` is movement to the east and `<` is movement to the
+west; for a vertical connection, `v` is movement to the south and `^` is
+movement to the north.
+
 After a solved run, start and goal are restored to semantic colors.
 
 ## Project Structure
@@ -180,6 +297,7 @@ After a solved run, start and goal are restored to semantic colors.
 ```text
 Maze-Solver/
 ├─ README.md
+├─ TODO.md
 ├─ LICENSE
 ├─ src/
 │  ├─ MS.java
@@ -190,6 +308,7 @@ Maze-Solver/
 │  ├─ test_100x100.txt
 │  ├─ test_346x346.txt
 │  ├─ test_1000x1000.txt
+│  ├─ test_weighted_100x100.txt
 │  └─ images/
 └─ doc/
 ```
@@ -197,7 +316,7 @@ Maze-Solver/
 Core classes:
 
 - MS: application entry point.
-- Maze: model for occupancy, neighbors, start, goal, import/export.
+- Maze: model for occupancy, neighbors, directional costs, start, goal, import/export.
 - MazeSolver: incremental solver engine and path reconstruction.
 - MazeRenderer: UI flow, controls, rendering, and solve orchestration.
 
@@ -215,6 +334,10 @@ Typical programmatic solve usage:
 
 ```java
 Maze maze = Maze.importFromFile("src/test_346x346.txt");
+Maze.Node next = maze.getStart().getNeighbor(Maze.Dir.EAST);
+if (next != null && maze.getMoveCost(maze.getStart(), next) > 0) {
+	System.out.println("East movement is enabled.");
+}
 MazeSolver solver = new MazeSolver();
 solver.setMaze(maze);
 solver.setAlg("A*");
@@ -226,6 +349,7 @@ while (!solver.isFinished()) {
 if (solver.isSolved()) {
 	 java.util.List<java.awt.Point> path = solver.getFinalPath();
 	 System.out.println("Path nodes: " + path.size());
+	 System.out.println("Path cost: " + solver.getPathCost());
 }
 ```
 
@@ -260,7 +384,7 @@ If the app starts but the title image does not appear, ensure the `images` folde
 1. App does not start
 
 - Confirm javac and java are on PATH.
-- Rebuild with javac src/*.java from repo root.
+- Rebuild with javac src\*.java from the repository root.
 
 2. Maze fails to load
 
@@ -282,7 +406,7 @@ If the app starts but the title image does not appear, ensure the `images` folde
 Useful commands from repo root:
 
 ```bash
-javac src/*.java
+javac src\*.java
 java -cp src MS
 ```
 
