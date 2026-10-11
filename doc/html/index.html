@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Maze-Solver: Maze-Solver 0.7</title>
+<title>Maze-Solver: Maze-Solver 0.8.0</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;0.7</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;0.8.0</span>
    </div>
   </td>
  </tr>
@@ -84,11 +84,11 @@ $(function(){ initResizable(false); });
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Maze-Solver 0.7 </div></div>
+  <div class="headertitle"><div class="title">Maze-Solver 0.8.0 </div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md__b_1_2_github_2_maze-_solver_2_r_e_a_d_m_e"></a></p>
-<p>Maze-Solver 0.7 is a Java Swing desktop app for loading, visualizing, and solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and weighted A*. Maze files support optional per-direction movement costs while preserving the original unweighted format.</p>
+<p>Maze-Solver 0.8.0 is a Java Swing desktop app for loading, visualizing, and solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and weighted A*. Maze files support optional per-direction movement costs while preserving the original unweighted format.</p>
 <p>It is designed for both interactive exploration and large-map performance testing, with a paint-based renderer that supports very large mazes efficiently.</p>
 <h1><a class="anchor" id="autotoc_md1"></a>
 Table of Contents</h1>
@@ -137,6 +137,7 @@ Features</h1>
 <li>Optional weighted movement data using a compact <code>[North, East, South, West]</code> format.</li>
 <li>Optional grid overlay for viewing directional movement costs. Equal opposite costs share one edge label; asymmetric costs show separate directional labels.</li>
 <li>Default startup solve settings: A* algorithm and 200 ms step delay.</li>
+<li>Application Settings can configure the maximum JVM heap for the next launch. Java cannot increase the heap limit of an already-running process; the launcher reads the saved setting and starts Java with the corresponding <code>-Xmx</code> option.</li>
 <li>Configurable test-suite workflow from the title screen.</li>
 <li>Seeded experiment generation with adjustable map size, interior obstacle density, reachability, endpoint placement, and movement-cost policies.</li>
 <li>Shared-map comparisons across any selected subset of the five algorithms.</li>
@@ -148,7 +149,7 @@ Requirements</h1>
 <li>Java JDK 21 (LTS) or newer, including the <code>jpackage</code> tool for executable generation.</li>
 <li>Windows, macOS, or Linux with desktop GUI support.</li>
 <li>No external dependencies required.</li>
-<li>Release version: <code>0.7</code> (also exposed by <code><a class="el" href="classapp_1_1_version.html#ad4214ed139ea8d6d0aab5683164d9d85" title="Current application release version.">app.Version.RELEASE</a></code>).</li>
+<li>Release version: <code>0.8.0</code> (also exposed by <code><a class="el" href="classapp_1_1_version.html#ad4214ed139ea8d6d0aab5683164d9d85" title="Current application release version.">app.Version.RELEASE</a></code>).</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md5"></a>
 Quick Start</h1>
@@ -166,17 +167,30 @@ Quick Start</h1>
 <div class="fragment"><div class="line">java -cp build\classes app.MS</div>
 </div><!-- fragment --><p>Run the dependency-free regression suite with:</p>
 <div class="fragment"><div class="line">java -cp build\classes test.RegressionTests</div>
-</div><!-- fragment --><p>Startup sequence:</p>
+</div><!-- fragment --><p>Run an experiment suite without opening Swing:</p>
+<div class="fragment"><div class="line">java -cp build\classes experiments.ExperimentCli `</div>
+<div class="line">    --suite test\resources\suites\test_testSuiteExample.mstests `</div>
+<div class="line">    --mode SEQUENTIAL `</div>
+<div class="line">    --monitor-ms 1000 `</div>
+<div class="line">    --csv build\results\cli-results.csv</div>
+</div><!-- fragment --><p>The command-line runner prints periodic progress, heap usage, active worker counts, and interval worker peaks. Use <code>FIXED_PARALLEL</code> or <code>ADAPTIVE_PARALLEL</code> to benchmark the execution modes, and <code>--repeat N</code> to repeat the same seeded suite. Press Ctrl+C to request cooperative cancellation. Use <code>--quiet</code> when only the final timing summary is needed. This runner uses the same <code>ExperimentRunner</code> as the application, so command line runs exercise the production scheduler without UI rendering overhead.</p>
+<p>Startup sequence:</p>
 <ol type="1">
 <li>Title screen appears.</li>
 <li>Choose Import Maze or Generate Random.</li>
 <li>If importing, select a maze text file. If generating, enter rows and columns, then optionally enable movement weights with a range from 1 through 100.</li>
 <li>Solve interactively.</li>
 </ol>
+<p>Use <b>Back to Main Menu</b> in the maze controls to leave an interactive session without exiting the application. The test-suite editor has the same navigation button, and closing either secondary window returns to the title screen. The title screen is hidden while a secondary screen is open so each menu is only shown once.</p>
 <p>To configure experiments, choose <b>Configure Tests</b> on the title screen. Add one row per test condition, edit the row values, select algorithms and iterations, then choose <b>Run Tests</b>. Each generated-map iteration creates one map and uses that same map for every selected algorithm. Saved-map rows reuse their embedded map for every iteration. Automatic seeds are materialized when a suite is saved so later generated-map runs can be reproduced. Results can be exported manually or automatically to CSV, and unique maps can be exported for later inspection.</p>
 <p>The test editor uses dropdowns for reachability, cost, endpoint, and map-source preferences. The Algorithms cell provides a checkbox multi-select, and boolean options use checkboxes. Numeric values are normalized to integers when editing ends. In <code>RANDOM</code> and <code>DISTANCE</code> endpoint modes, start and goal coordinates are disabled; <code>DISTANCE</code> enables the target-distance field.</p>
-<p>Each row can use an automatic seed, a manually entered seed, or a saved map. Saved maps are imported through the row editor and embedded in the suite file using UTF-8-safe encoding, so the suite does not depend on the original map file remaining available. Saved-map results identify the source as <code>SAVED_MAP</code> and display <code>N/A (saved map)</code> instead of a generated seed. Test suites use the human-readable <code>.mstests</code> extension; individual maps use the human-readable <code>.msmap</code> extension. Import and save dialogs filter and normalize to their corresponding extension and open in the application directory. A saved suite contains <code>applicationVersion=0.7</code> and <code>version=1</code>; the former identifies the application release and the latter is the stable suite schema version. Older schema-version-1 suites remain readable.</p>
+<p>Each row can use an automatic seed, a manually entered seed, or a saved map. Saved maps are imported through the row editor and embedded in the suite file using UTF-8-safe encoding, so the suite does not depend on the original map file remaining available. Saved-map results identify the source as <code>SAVED_MAP</code> and display <code>N/A (saved map)</code> instead of a generated seed. Test suites use the human-readable <code>.mstests</code> extension; individual maps use the human-readable <code>.msmap</code> extension. Import and save dialogs filter and normalize to their corresponding extension and open in the application directory. A saved suite contains <code>applicationVersion=0.8.0</code> and <code>version=1</code>; the former identifies the application release and the latter is the stable suite schema version. Older schema-version-1 suites remain readable.</p>
 <p>Before measured runs begin, the experiment runner performs a short JVM warm-up using each selected algorithm. Warm-up solves are excluded from the results, progress count, and timing metrics so class loading and JIT compilation are less likely to skew the first measured iteration.</p>
+<p>Experiment suites run sequentially by default. Select <b>Fixed parallel</b> or <b>Adaptive parallel</b> in the test-suite editor to run independent algorithms for each generated map concurrently. Sequential mode remains available for compatibility checks and comparisons. Each generated map is shared by the selected algorithms for that iteration, and results remain ordered by test condition, iteration, and algorithm.</p>
+<p>Parallel execution is most useful for larger maps or suites with several selected algorithms. Small suites may show little improvement because there is not enough work to keep all workers busy. Select <b>Sequential</b> to retain the original execution path for comparison and compatibility testing. Parallel execution improves throughput primarily for larger maps; small maps may show little memory or elapsed-time difference because they do not create enough work to saturate the workers.</p>
+<p>Experiment results retain only measurements, configuration metadata, and the effective map seed. Generated maps are recreated from that seed only when a result is reviewed, which avoids retaining large serialized maps for every algorithm run. The results table is paged with selectable page sizes of 10, 25, 50, or 100 rows. The footer shows live JVM memory utilization, supports direct page-number entry, and supports jumps of 1, 10, or 100 pages in either direction. The progress status identifies the most recently completed test condition, and heap exhaustion reports the active condition so large suites can be split into smaller batches. Enable <b>Follow latest results</b> in the results footer to keep the table on the dynamically growing final page while a suite runs. Using any paging control pauses following so earlier result pages can be inspected; enable it again to resume following the newest page. The <b>Results view</b> selector can switch between the paged table and a live solve log. The live log appends each completed solve with its condition, iteration, algorithm, solved status, path cost, explored-node count, and runtime, and automatically follows the newest entry. It is intentionally bounded to the most recent 500 solve entries; the complete results remain available in the table and exported result data. The live log is split into a wide solver-activity pane and a narrower map-generation pane. The map pane records map readiness, solver dispatch, and map completion events, along with the number of generated maps currently loaded in memory waiting for solver work. That loaded-map count is distinct from maps still being generated and is also shown on the map progress bar. During a run, <b>Pause</b> cooperatively stops new map generation and solver work at task boundaries; <b>Resume</b> continues the same run. <b>Cancel</b> stops the run and clears retained maps, scheduler state, and completion queues so large generated maps can be reclaimed promptly. While solves are active, the log places live worker lines above the completed history and updates their nodes explored, current path cost, and elapsed time in place. Progress notifications are throttled so the diagnostic view does not receive one UI event per visited node. A future small-suite race view may make this comparison more visual.</p>
+<p>Seed behavior is stable for the complete execution of each test case. Manual seed mode reuses the configured seed for every iteration, while automatic seed mode generates one seed once and reuses it for every iteration. Consequently, generated iterations in the same row recreate the same map; repeated solver runs are directly comparable rather than independent random samples. Saved-map mode reuses the embedded map and does not use a generated seed. Every selected algorithm in an iteration receives the same read-only map.</p>
+<p>Approximate-distance endpoint selection first uses seeded random sampling for speed. If sampling misses a valid pair, the generator performs a deterministic distance-offset search before rejecting the layout. This keeps results reproducible while avoiding failures caused only by random endpoint sampling.</p>
 <p>The test-suite results tab includes a <b>Review</b> button for each result. It reimports the exact map snapshot used by that result and opens the animated MazeRenderer with the result's algorithm selected. <b>Export Maps</b> creates a <code>&lt;suite-name&gt;-maps</code> folder under the selected directory and writes one complete saveable map file for each unique map. Repeated iterations are grouped in the filename, such as <code>iterations-1-3</code>, while distinct maps retain their iteration numbers. Seed-generated maps are converted into the same format used by imported maps, making them portable for later inspection or reuse.</p>
 <h1><a class="anchor" id="autotoc_md6"></a>
 How to Use</h1>
@@ -361,7 +375,7 @@ Project Structure</h1>
 <div class="line">└─ doc/                       generated Doxygen HTML documentation</div>
 </div><!-- fragment --><p>Core packages and classes:</p>
 <ul>
-<li><code><a class="el" href="classapp_1_1_m_s.html" title="Demo application entry point.">app.MS</a></code>: application entry point for release 0.7.</li>
+<li><code><a class="el" href="classapp_1_1_m_s.html" title="Demo application entry point.">app.MS</a></code>: application entry point for release 0.8.0.</li>
 <li><code><a class="el" href="classapp_1_1_version.html" title="Release metadata for the Maze-Solver application.">app.Version</a></code>: authoritative application release metadata.</li>
 <li><code><a class="el" href="classmaze_1_1map_1_1_maze.html" title="Core maze model storing occupancy, neighbor links, and start/goal nodes.">maze.map.Maze</a></code>: model for occupancy, neighbors, directional costs, start, goal, generation, and validation.</li>
 <li><code><a class="el" href="classmaze_1_1map_1_1_maze_file_i_o.html" title="Reads and writes the human-readable .msmap format.">maze.map.MazeFileIO</a></code>: dedicated <code>.msmap</code> parser and serializer used by the compatibility import/export methods on <code><a class="el" href="classmaze_1_1map_1_1_maze.html" title="Core maze model storing occupancy, neighbor links, and start/goal nodes.">maze.map.Maze</a></code>.</li>
@@ -375,7 +389,7 @@ Project Structure</h1>
 <li><code><a class="el" href="classui_1_1_test_suite_window.html" title="Swing editor and execution window for configurable experiment suites.">ui.TestSuiteWindow</a></code>: Swing configuration, execution, results, map review, and export workflow and coordination.</li>
 <li><code>ui.TestConfigurationTableModel</code> and <code>ui.ExperimentResultTableModel</code>: extracted configuration/result table state.</li>
 <li><code>ui.TestConfigurationTable</code>: context-sensitive saved-map and endpoint editability behavior.</li>
-<li><code>ui.TestSuiteTableComponents</code>: reusable experiment-table editors and renderers, including algorithm selection, saved-map import, and Review actions.</li>
+<li><code>ui.TestSuiteTableComponents</code>: package-private reusable experiment-table editors and renderers, including algorithm selection, saved-map import, and Review actions. These components are wired by the Swing table classes.</li>
 <li><code>ui.TestSuiteConfigurationPanel</code> and <code>ui.ExperimentResultsPanel</code>: extracted Swing layout and action wiring for configuration and result areas.</li>
 <li><code>test.RegressionTests</code>: dependency-free checks for weighted maps, all algorithms, reproducibility, persistence, CSV export, and cancellation.</li>
 </ul>
@@ -470,21 +484,32 @@ Development Notes</h1>
 </div><!-- fragment --><p>Convenience scripts are available under <code>scripts\</code>:</p>
 <div class="fragment"><div class="line">.\scripts\compile-and-run.ps1</div>
 <div class="line">.\scripts\build-executable.ps1</div>
-</div><!-- fragment --><p>The first script compiles the application and regression tests, runs the regression suite, and launches the Swing application. The second creates a self-contained Windows application image at <code>dist\MazeSolver\MazeSolver.exe</code> using <code>jpackage</code>. It requires a JDK that includes <code>jpackage</code>. The build script uses the compiler and packaging tools from the same JDK installation and requires JDK 21 or newer.</p>
+</div><!-- fragment --><p>The first script compiles the application and regression tests, runs the regression suite, and launches the Swing application. The second creates a self-extracting single-file Windows executable: <code>dist\MazeSolver-0.8.0.exe</code>. The executable embeds the complete application image and Java runtime, extracts to a temporary directory when launched, waits for the application to close, and removes its temporary files. It can be distributed as one file and does not require Java on the target machine. Normal launches do not open a terminal window. For troubleshooting, launch the executable with the optional debug flag:</p>
+<div class="fragment"><div class="line">.\dist\MazeSolver-0.8.0.exe --debug</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md17"></a>
+Developer Notes: experiment execution</h2>
+<p><code>ExperimentRunner</code> keeps the UI-independent execution path separate from Swing and preserves deterministic result ordering. Sequential mode executes one map and its algorithms directly. Fixed parallel mode uses the processor-aware worker cap; adaptive mode adjusts that cap from CPU load and heap headroom.</p>
+<p>Parallel execution uses one priority executor. Map-generation tasks are prioritized while the memory frontier is open, but ready maps and queued solver tasks are bounded to approximately two worker-widths. This bound is important: queued solver tasks capture their shared map, so an unbounded queue would retain large maps even after generation has finished.</p>
+<p>The coordinator is completion-driven. Worker completion releases a notification permit, avoiding fixed polling delays. A map is removed from scheduler state after its final selected algorithm completes; the resulting <code>ExperimentResult</code> contains measurements and metadata, not the map object. Clearing scheduler collections during cancellation and shutdown makes those maps eligible for garbage collection promptly. The JVM may retain committed heap for reuse, so process working-set size is not the same as live object usage.</p>
+<p>Admission reservations estimate map cells, solver tables, and transient solver overhead with a safety factor. They are a scheduling guard, not a heap measurement. Diagnostics therefore expose both reservation state and JVM heap state. On hybrid CPUs, <code>Runtime.availableProcessors()</code> reflects processors exposed to the JVM; process affinity can be used for controlled comparisons.</p>
+<p>Debug mode opens a terminal window while the application runs. Building it requires JDK 21 or newer, <code>jpackage</code>, and the .NET 8 SDK for the native self-extractor wrapper.</p>
 <p>On Linux, make the equivalent scripts executable once and run:</p>
 <div class="fragment"><div class="line">chmod +x scripts/compile-and-run.sh scripts/build-executable.sh</div>
 <div class="line">./scripts/compile-and-run.sh</div>
 <div class="line">./scripts/build-executable.sh</div>
-</div><!-- fragment --><p>The Linux application image is created at <code>dist/MazeSolver/bin/MazeSolver</code>. The generated <code>build/</code> and <code>dist/</code> directories are ignored by Git.</p>
+</div><!-- fragment --><p>The Linux application image is created at <code>dist/MazeSolver/bin/MazeSolver</code>, and the portable bundle is <code>dist/MazeSolver-portable-linux.zip</code>. These bundles include the Java runtime and do not require Java to be installed on the target machine. The generated <code>build/</code> and <code>dist/</code> directories are ignored by Git.</p>
 <p>Optional cleanup of compiled artifacts:</p>
 <div class="fragment"><div class="line">Remove-Item -Recurse -Force build</div>
-</div><!-- fragment --><p>JavaDoc validation is documented in <code>TODO.md</code>. Doxygen is configured by <code>doc/Doxyfile</code>. Generate the HTML reference and release PDF with the documentation script:</p>
+</div><!-- fragment --><p>Validate JavaDoc without generating the Doxygen/PDF artifacts:</p>
+<div class="fragment"><div class="line">$files = (Get-ChildItem src -Filter *.java -Recurse).FullName</div>
+<div class="line">javadoc -quiet -Xdoclint:all -d &quot;$env:TEMP\maze-javadoc&quot; $files</div>
+</div><!-- fragment --><p>Doxygen is configured by <code>doc/Doxyfile</code>. Generate the HTML reference and release PDF with the documentation script:</p>
 <div class="fragment"><div class="line">.\scripts\generate-documentation.ps1</div>
-</div><!-- fragment --><p>The script checks for Doxygen and XeLaTeX. If either is missing, it asks before installing it through an available package manager. It generates the HTML reference, builds the PDF, and removes only the generated <code>doc\latex</code> folder. The remaining documentation outputs are <code>doc\html</code>, <code>doc\Maze-Solver-docs_V0.7.pdf</code>, and <code>doc\Doxyfile</code>.</p>
+</div><!-- fragment --><p>The script checks for Doxygen and XeLaTeX. If either is missing, it asks before installing it through an available package manager. It generates the HTML reference, builds the PDF, and removes only the generated <code>doc\latex</code> folder. The remaining documentation outputs are <code>doc\html</code>, <code>doc\Maze-Solver-docs_V0.8.0.pdf</code>, and <code>doc\Doxyfile</code>.</p>
 <p>On Linux, use the equivalent script:</p>
 <div class="fragment"><div class="line">chmod +x scripts/generate-documentation.sh</div>
 <div class="line">./scripts/generate-documentation.sh</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md17"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md18"></a>
 License</h1>
 <p>This project is licensed under the terms in LICENSE. </p>
 </div></div><!-- PageDoc -->

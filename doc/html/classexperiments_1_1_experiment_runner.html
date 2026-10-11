@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;0.7</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;0.8.0</span>
    </div>
   </td>
  </tr>
@@ -105,8 +105,22 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html">CancellationToken</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows a caller to stop a long-running experiment.  <a href="interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_execution_control.html">ExecutionControl</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds cooperative pausing to cancellation for interactive runs.  <a href="interfaceexperiments_1_1_experiment_runner_1_1_execution_control.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_map_progress_listener.html">MapProgressListener</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receives progress after each map has finished generating.  <a href="interfaceexperiments_1_1_experiment_runner_1_1_map_progress_listener.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html">ProgressListener</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receives progress after each completed algorithm run.  <a href="interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classexperiments_1_1_experiment_runner_1_1_solve_progress.html">SolveProgress</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Immutable diagnostic snapshot for one active solver worker.  <a href="classexperiments_1_1_experiment_runner_1_1_solve_progress.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html">SolveProgressListener</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receives throttled progress from solver workers while they are active.  <a href="interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enumexperiments_1_1_experiment_runner_1_1_task_priority.html">TaskPriority</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
@@ -117,6 +131,33 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a8f364c3854c43d70ed29b25df372f8c4" id="r_a8f364c3854c43d70ed29b25df372f8c4"><td class="memItemLeft" align="right" valign="top">static List&lt; <a class="el" href="classexperiments_1_1_experiment_result.html">ExperimentResult</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8f364c3854c43d70ed29b25df372f8c4">run</a> (<a class="el" href="classexperiments_1_1_test_suite.html">TestSuite</a> suite, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html">ProgressListener</a> listener, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html">CancellationToken</a> cancellation)</td></tr>
 <tr class="memdesc:a8f364c3854c43d70ed29b25df372f8c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs a suite with progress and cancellation support.  <br /></td></tr>
 <tr class="separator:a8f364c3854c43d70ed29b25df372f8c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a180db19e7b97b769507fdda344c29ac6" id="r_a180db19e7b97b769507fdda344c29ac6"><td class="memItemLeft" align="right" valign="top">static List&lt; <a class="el" href="classexperiments_1_1_experiment_result.html">ExperimentResult</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a180db19e7b97b769507fdda344c29ac6">run</a> (<a class="el" href="classexperiments_1_1_test_suite.html">TestSuite</a> suite, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html">ProgressListener</a> listener, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html">CancellationToken</a> cancellation, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html">SolveProgressListener</a> solveProgress)</td></tr>
+<tr class="memdesc:a180db19e7b97b769507fdda344c29ac6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs a suite with completed-result and throttled solver diagnostics.  <br /></td></tr>
+<tr class="separator:a180db19e7b97b769507fdda344c29ac6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f77355006f0d7d73c3da77db0bd2f2f" id="r_a1f77355006f0d7d73c3da77db0bd2f2f"><td class="memItemLeft" align="right" valign="top">static List&lt; <a class="el" href="classexperiments_1_1_experiment_result.html">ExperimentResult</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f77355006f0d7d73c3da77db0bd2f2f">run</a> (<a class="el" href="classexperiments_1_1_test_suite.html">TestSuite</a> suite, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html">ProgressListener</a> listener, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html">CancellationToken</a> cancellation, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html">SolveProgressListener</a> solveProgress, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_map_progress_listener.html">MapProgressListener</a> mapProgress)</td></tr>
+<tr class="memdesc:a1f77355006f0d7d73c3da77db0bd2f2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs a suite with solver and generated-map progress diagnostics.  <br /></td></tr>
+<tr class="separator:a1f77355006f0d7d73c3da77db0bd2f2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd422499d9c4713f03632c805ffdb400" id="r_acd422499d9c4713f03632c805ffdb400"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd422499d9c4713f03632c805ffdb400">getParallelWorkerCount</a> ()</td></tr>
+<tr class="memdesc:acd422499d9c4713f03632c805ffdb400"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the configured worker capacity for the currently running suite.  <br /></td></tr>
+<tr class="separator:acd422499d9c4713f03632c805ffdb400"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfc93d2c28a68577b0903a14d6ca1963" id="r_abfc93d2c28a68577b0903a14d6ca1963"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abfc93d2c28a68577b0903a14d6ca1963">getAdaptiveWorkerCount</a> ()</td></tr>
+<tr class="memdesc:abfc93d2c28a68577b0903a14d6ca1963"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects workers conservatively from available heap and system CPU load.  <br /></td></tr>
+<tr class="separator:abfc93d2c28a68577b0903a14d6ca1963"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86070d1974042578a8f544f5a591083c" id="r_a86070d1974042578a8f544f5a591083c"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a86070d1974042578a8f544f5a591083c">getActiveWorkerCount</a> ()</td></tr>
+<tr class="memdesc:a86070d1974042578a8f544f5a591083c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the worker capacity currently assigned to the active suite.  <br /></td></tr>
+<tr class="separator:a86070d1974042578a8f544f5a591083c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a357666713d7b35c8c65c161923a0e466" id="r_a357666713d7b35c8c65c161923a0e466"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a357666713d7b35c8c65c161923a0e466">getActiveMapWorkerCount</a> ()</td></tr>
+<tr class="memdesc:a357666713d7b35c8c65c161923a0e466"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the currently executing map-generation worker count.  <br /></td></tr>
+<tr class="separator:a357666713d7b35c8c65c161923a0e466"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77ff7e9804f0b426e2fe2592f79949b6" id="r_a77ff7e9804f0b426e2fe2592f79949b6"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77ff7e9804f0b426e2fe2592f79949b6">getActiveSolverWorkerCount</a> ()</td></tr>
+<tr class="memdesc:a77ff7e9804f0b426e2fe2592f79949b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the currently executing solver worker count.  <br /></td></tr>
+<tr class="separator:a77ff7e9804f0b426e2fe2592f79949b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0826361b65a95c9fd4bb3994f2d975d" id="r_ab0826361b65a95c9fd4bb3994f2d975d"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab0826361b65a95c9fd4bb3994f2d975d">getIntervalPeakMapWorkerCount</a> ()</td></tr>
+<tr class="memdesc:ab0826361b65a95c9fd4bb3994f2d975d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns and resets the maximum map-worker count observed since the previous call.  <br /></td></tr>
+<tr class="separator:ab0826361b65a95c9fd4bb3994f2d975d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e8d78a3b820328d9eb79ff2d3255371" id="r_a9e8d78a3b820328d9eb79ff2d3255371"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9e8d78a3b820328d9eb79ff2d3255371">getIntervalPeakSolverWorkerCount</a> ()</td></tr>
+<tr class="memdesc:a9e8d78a3b820328d9eb79ff2d3255371"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns and resets the maximum solver-worker count observed since the previous call.  <br /></td></tr>
+<tr class="separator:a9e8d78a3b820328d9eb79ff2d3255371"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad107d505aa0da4a988105ae78f3bf660" id="r_ad107d505aa0da4a988105ae78f3bf660"><td class="memItemLeft" align="right" valign="top">static String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad107d505aa0da4a988105ae78f3bf660">formatSummary</a> (List&lt; <a class="el" href="classexperiments_1_1_experiment_result.html">ExperimentResult</a> &gt; results)</td></tr>
 <tr class="memdesc:ad107d505aa0da4a988105ae78f3bf660"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formats a compact terminal summary for completed results.  <br /></td></tr>
 <tr class="separator:ad107d505aa0da4a988105ae78f3bf660"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -132,7 +173,7 @@ Static Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Executes configured experiment rows without Swing or rendering overhead. </p>
-<p>One map is generated per row iteration and reused by every selected algorithm. Solver timing therefore excludes map generation, result construction, callbacks, and console output. </p>
+<p>One map is generated per row iteration and reused by every selected algorithm. Solver timing therefore excludes map generation, result construction, callbacks, and console output. Parallel execution uses bounded admission so queued solver work cannot retain an unbounded number of generated maps. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a376ce229dd1602d343a8e077e4286f16" name="a376ce229dd1602d343a8e077e4286f16"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a376ce229dd1602d343a8e077e4286f16">&#9670;&#160;</a></span>exportMaps()</h2>
@@ -212,8 +253,204 @@ Static Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a357666713d7b35c8c65c161923a0e466" name="a357666713d7b35c8c65c161923a0e466"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a357666713d7b35c8c65c161923a0e466">&#9670;&#160;</a></span>getActiveMapWorkerCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int experiments.ExperimentRunner.getActiveMapWorkerCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the currently executing map-generation worker count. </p>
+<dl class="section return"><dt>Returns</dt><dd>currently executing map-generation workers </dd></dl>
+
+</div>
+</div>
+<a id="a77ff7e9804f0b426e2fe2592f79949b6" name="a77ff7e9804f0b426e2fe2592f79949b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77ff7e9804f0b426e2fe2592f79949b6">&#9670;&#160;</a></span>getActiveSolverWorkerCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int experiments.ExperimentRunner.getActiveSolverWorkerCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the currently executing solver worker count. </p>
+<dl class="section return"><dt>Returns</dt><dd>currently executing solver workers </dd></dl>
+
+</div>
+</div>
+<a id="a86070d1974042578a8f544f5a591083c" name="a86070d1974042578a8f544f5a591083c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86070d1974042578a8f544f5a591083c">&#9670;&#160;</a></span>getActiveWorkerCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int experiments.ExperimentRunner.getActiveWorkerCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the worker capacity currently assigned to the active suite. </p>
+<dl class="section return"><dt>Returns</dt><dd>worker capacity, one for sequential mode, or zero while idle </dd></dl>
+
+</div>
+</div>
+<a id="abfc93d2c28a68577b0903a14d6ca1963" name="abfc93d2c28a68577b0903a14d6ca1963"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abfc93d2c28a68577b0903a14d6ca1963">&#9670;&#160;</a></span>getAdaptiveWorkerCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int experiments.ExperimentRunner.getAdaptiveWorkerCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Selects workers conservatively from available heap and system CPU load. </p>
+<dl class="section return"><dt>Returns</dt><dd>adaptive worker count for the next map </dd></dl>
+
+</div>
+</div>
+<a id="ab0826361b65a95c9fd4bb3994f2d975d" name="ab0826361b65a95c9fd4bb3994f2d975d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0826361b65a95c9fd4bb3994f2d975d">&#9670;&#160;</a></span>getIntervalPeakMapWorkerCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int experiments.ExperimentRunner.getIntervalPeakMapWorkerCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns and resets the maximum map-worker count observed since the previous call. </p>
+<dl class="section return"><dt>Returns</dt><dd>interval peak map-worker count </dd></dl>
+
+</div>
+</div>
+<a id="a9e8d78a3b820328d9eb79ff2d3255371" name="a9e8d78a3b820328d9eb79ff2d3255371"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e8d78a3b820328d9eb79ff2d3255371">&#9670;&#160;</a></span>getIntervalPeakSolverWorkerCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int experiments.ExperimentRunner.getIntervalPeakSolverWorkerCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns and resets the maximum solver-worker count observed since the previous call. </p>
+<dl class="section return"><dt>Returns</dt><dd>interval peak solver-worker count </dd></dl>
+
+</div>
+</div>
+<a id="acd422499d9c4713f03632c805ffdb400" name="acd422499d9c4713f03632c805ffdb400"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd422499d9c4713f03632c805ffdb400">&#9670;&#160;</a></span>getParallelWorkerCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int experiments.ExperimentRunner.getParallelWorkerCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the configured worker capacity for the currently running suite. </p>
+<dl class="section return"><dt>Returns</dt><dd>worker capacity, one for sequential mode, or zero while idle </dd></dl>
+
+</div>
+</div>
 <a id="a1d797ae0b9b4c29fb729bf3be94dfdd8" name="a1d797ae0b9b4c29fb729bf3be94dfdd8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d797ae0b9b4c29fb729bf3be94dfdd8">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d797ae0b9b4c29fb729bf3be94dfdd8">&#9670;&#160;</a></span>run() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -253,7 +490,7 @@ Static Public Attributes</h2></td></tr>
 </div>
 </div>
 <a id="a8f364c3854c43d70ed29b25df372f8c4" name="a8f364c3854c43d70ed29b25df372f8c4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8f364c3854c43d70ed29b25df372f8c4">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f364c3854c43d70ed29b25df372f8c4">&#9670;&#160;</a></span>run() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -301,6 +538,114 @@ Static Public Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a180db19e7b97b769507fdda344c29ac6" name="a180db19e7b97b769507fdda344c29ac6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a180db19e7b97b769507fdda344c29ac6">&#9670;&#160;</a></span>run() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static List&lt; <a class="el" href="classexperiments_1_1_experiment_result.html">ExperimentResult</a> &gt; experiments.ExperimentRunner.run </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classexperiments_1_1_test_suite.html">TestSuite</a></td>          <td class="paramname"><span class="paramname"><em>suite</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html">ProgressListener</a></td>          <td class="paramname"><span class="paramname"><em>listener</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html">CancellationToken</a></td>          <td class="paramname"><span class="paramname"><em>cancellation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html">SolveProgressListener</a></td>          <td class="paramname"><span class="paramname"><em>solveProgress</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Runs a suite with completed-result and throttled solver diagnostics. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">suite</td><td>validated suite to execute </td></tr>
+    <tr><td class="paramname">listener</td><td>optional completed-result listener </td></tr>
+    <tr><td class="paramname">cancellation</td><td>optional cancellation token </td></tr>
+    <tr><td class="paramname">solveProgress</td><td>optional active-solver listener </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>immutable completed results </dd></dl>
+
+</div>
+</div>
+<a id="a1f77355006f0d7d73c3da77db0bd2f2f" name="a1f77355006f0d7d73c3da77db0bd2f2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f77355006f0d7d73c3da77db0bd2f2f">&#9670;&#160;</a></span>run() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static List&lt; <a class="el" href="classexperiments_1_1_experiment_result.html">ExperimentResult</a> &gt; experiments.ExperimentRunner.run </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classexperiments_1_1_test_suite.html">TestSuite</a></td>          <td class="paramname"><span class="paramname"><em>suite</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html">ProgressListener</a></td>          <td class="paramname"><span class="paramname"><em>listener</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html">CancellationToken</a></td>          <td class="paramname"><span class="paramname"><em>cancellation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html">SolveProgressListener</a></td>          <td class="paramname"><span class="paramname"><em>solveProgress</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_map_progress_listener.html">MapProgressListener</a></td>          <td class="paramname"><span class="paramname"><em>mapProgress</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Runs a suite with solver and generated-map progress diagnostics. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">suite</td><td>validated suite to execute </td></tr>
+    <tr><td class="paramname">listener</td><td>optional completed-result listener </td></tr>
+    <tr><td class="paramname">cancellation</td><td>optional cancellation token </td></tr>
+    <tr><td class="paramname">solveProgress</td><td>optional active-solver listener </td></tr>
+    <tr><td class="paramname">mapProgress</td><td>optional generated-map listener </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>immutable completed results </dd></dl>
 
 </div>
 </div>

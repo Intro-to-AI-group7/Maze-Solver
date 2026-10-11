@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;0.7</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;0.8.0</span>
    </div>
   </td>
  </tr>
@@ -103,6 +103,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a23903c3daa8dc0e36854486c295ea808" id="r_a23903c3daa8dc0e36854486c295ea808"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a23903c3daa8dc0e36854486c295ea808">showWindow</a> ()</td></tr>
 <tr class="memdesc:a23903c3daa8dc0e36854486c295ea808"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens a new test-suite window on the Swing event thread.  <br /></td></tr>
 <tr class="separator:a23903c3daa8dc0e36854486c295ea808"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17c311c2b9756836b95f3eb922872987" id="r_a17c311c2b9756836b95f3eb922872987"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17c311c2b9756836b95f3eb922872987">showWindow</a> (Runnable onBack)</td></tr>
+<tr class="memdesc:a17c311c2b9756836b95f3eb922872987"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens the test-suite window and invokes the callback when the user navigates back to the previous screen.  <br /></td></tr>
+<tr class="separator:a17c311c2b9756836b95f3eb922872987"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf6d91161572751b605060a235796647" id="r_adf6d91161572751b605060a235796647"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adf6d91161572751b605060a235796647">closeWindow</a> ()</td></tr>
 <tr class="memdesc:adf6d91161572751b605060a235796647"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cancels any active experiment and closes the test-suite window.  <br /></td></tr>
 <tr class="separator:adf6d91161572751b605060a235796647"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -140,7 +143,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="a23903c3daa8dc0e36854486c295ea808" name="a23903c3daa8dc0e36854486c295ea808"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a23903c3daa8dc0e36854486c295ea808">&#9670;&#160;</a></span>showWindow()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a23903c3daa8dc0e36854486c295ea808">&#9670;&#160;</a></span>showWindow() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -163,6 +166,39 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Opens a new test-suite window on the Swing event thread. </p>
+
+</div>
+</div>
+<a id="a17c311c2b9756836b95f3eb922872987" name="a17c311c2b9756836b95f3eb922872987"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17c311c2b9756836b95f3eb922872987">&#9670;&#160;</a></span>showWindow() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ui.TestSuiteWindow.showWindow </td>
+          <td>(</td>
+          <td class="paramtype">Runnable</td>          <td class="paramname"><span class="paramname"><em>onBack</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Opens the test-suite window and invokes the callback when the user navigates back to the previous screen. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">onBack</td><td>callback invoked after this window is closed </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

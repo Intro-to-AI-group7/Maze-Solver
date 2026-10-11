@@ -16,7 +16,7 @@ public class MS {
     }
 
     /**
-     * Starts the Maze-Solver 0.7 demo.
+     * Starts the Maze-Solver 0.8.0 demo.
      *
      * <p>Delegates application flow to {@link ui.MazeRenderer}, including title
      * screen mode selection, maze import or generation, and interactive solve

@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;0.7</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;0.8.0</span>
    </div>
   </td>
  </tr>
@@ -107,6 +107,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enumexperiments_1_1_test_suite_1_1_endpoint_mode.html">EndpointMode</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">How an experiment row chooses its start and goal coordinates.  <a href="enumexperiments_1_1_test_suite_1_1_endpoint_mode.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enumexperiments_1_1_test_suite_1_1_execution_mode.html">ExecutionMode</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execution strategy for experiment solver runs.  <a href="enumexperiments_1_1_test_suite_1_1_execution_mode.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enumexperiments_1_1_test_suite_1_1_map_source.html">MapSource</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Source used to obtain the map for an experiment row.  <a href="enumexperiments_1_1_test_suite_1_1_map_source.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,6 +152,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6686f9ab610028619744689e137218b3" id="r_a6686f9ab610028619744689e137218b3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6686f9ab610028619744689e137218b3">setExportDirectory</a> (String exportDirectory)</td></tr>
 <tr class="memdesc:a6686f9ab610028619744689e137218b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the automatic-export directory.  <br /></td></tr>
 <tr class="separator:a6686f9ab610028619744689e137218b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8538899759542ac3cc02b1044fb66cbe" id="r_a8538899759542ac3cc02b1044fb66cbe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="enumexperiments_1_1_test_suite_1_1_execution_mode.html">ExecutionMode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8538899759542ac3cc02b1044fb66cbe">getExecutionMode</a> ()</td></tr>
+<tr class="memdesc:a8538899759542ac3cc02b1044fb66cbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates whether independent algorithm runs may execute concurrently.  <br /></td></tr>
+<tr class="separator:a8538899759542ac3cc02b1044fb66cbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a728487b59a400cf56a4054ebf612777b" id="r_a728487b59a400cf56a4054ebf612777b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a728487b59a400cf56a4054ebf612777b">setExecutionMode</a> (<a class="el" href="enumexperiments_1_1_test_suite_1_1_execution_mode.html">ExecutionMode</a> executionMode)</td></tr>
+<tr class="memdesc:a728487b59a400cf56a4054ebf612777b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the execution strategy for this suite.  <br /></td></tr>
+<tr class="separator:a728487b59a400cf56a4054ebf612777b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31bdf9c09243fec507e39150d9b3634d" id="r_a31bdf9c09243fec507e39150d9b3634d"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a31bdf9c09243fec507e39150d9b3634d">isParallelExecution</a> ()</td></tr>
+<tr class="memdesc:a31bdf9c09243fec507e39150d9b3634d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compatibility accessor for callers using the original boolean option.  <br /></td></tr>
+<tr class="separator:a31bdf9c09243fec507e39150d9b3634d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1285c490a6910ff6a2dbfae970465536" id="r_a1285c490a6910ff6a2dbfae970465536"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1285c490a6910ff6a2dbfae970465536">setParallelExecution</a> (boolean parallelExecution)</td></tr>
+<tr class="memdesc:a1285c490a6910ff6a2dbfae970465536"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compatibility setter for the original boolean option.  <br /></td></tr>
+<tr class="separator:a1285c490a6910ff6a2dbfae970465536"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9426ca37452c358492055c24f2ae53a2" id="r_a9426ca37452c358492055c24f2ae53a2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9426ca37452c358492055c24f2ae53a2">validate</a> ()</td></tr>
 <tr class="memdesc:a9426ca37452c358492055c24f2ae53a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates the complete suite.  <br /></td></tr>
 <tr class="separator:a9426ca37452c358492055c24f2ae53a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -221,6 +236,35 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a8538899759542ac3cc02b1044fb66cbe" name="a8538899759542ac3cc02b1044fb66cbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8538899759542ac3cc02b1044fb66cbe">&#9670;&#160;</a></span>getExecutionMode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="enumexperiments_1_1_test_suite_1_1_execution_mode.html">ExecutionMode</a> experiments.TestSuite.getExecutionMode </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Indicates whether independent algorithm runs may execute concurrently. </p>
+<p>The default is false so existing suites retain sequential execution.</p>
+<dl class="section return"><dt>Returns</dt><dd>the configured execution strategy </dd></dl>
 
 </div>
 </div>
@@ -336,6 +380,34 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a31bdf9c09243fec507e39150d9b3634d" name="a31bdf9c09243fec507e39150d9b3634d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31bdf9c09243fec507e39150d9b3634d">&#9670;&#160;</a></span>isParallelExecution()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">boolean experiments.TestSuite.isParallelExecution </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compatibility accessor for callers using the original boolean option. </p>
+<dl class="section return"><dt>Returns</dt><dd>true for either parallel execution mode </dd></dl>
+
+</div>
+</div>
 <a id="accd1e0861c0784936280b69e00d9342a" name="accd1e0861c0784936280b69e00d9342a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#accd1e0861c0784936280b69e00d9342a">&#9670;&#160;</a></span>removeTestCase()</h2>
 
@@ -397,6 +469,39 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">automaticExport</td><td>export setting </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a728487b59a400cf56a4054ebf612777b" name="a728487b59a400cf56a4054ebf612777b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a728487b59a400cf56a4054ebf612777b">&#9670;&#160;</a></span>setExecutionMode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void experiments.TestSuite.setExecutionMode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="enumexperiments_1_1_test_suite_1_1_execution_mode.html">ExecutionMode</a></td>          <td class="paramname"><span class="paramname"><em>executionMode</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sets the execution strategy for this suite. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">executionMode</td><td>execution mode </td></tr>
   </table>
   </dd>
 </dl>
@@ -469,6 +574,39 @@ Public Member Functions</h2></td></tr>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
     <tr><td class="paramname">IllegalArgumentException</td><td>if the name is blank </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1285c490a6910ff6a2dbfae970465536" name="a1285c490a6910ff6a2dbfae970465536"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1285c490a6910ff6a2dbfae970465536">&#9670;&#160;</a></span>setParallelExecution()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void experiments.TestSuite.setParallelExecution </td>
+          <td>(</td>
+          <td class="paramtype">boolean</td>          <td class="paramname"><span class="paramname"><em>parallelExecution</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compatibility setter for the original boolean option. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parallelExecution</td><td>whether fixed parallel execution should be used </td></tr>
   </table>
   </dd>
 </dl>

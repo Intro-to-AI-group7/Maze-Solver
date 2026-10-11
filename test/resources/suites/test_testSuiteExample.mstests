@@ -13,7 +13,7 @@
 automaticExport=false
 exportDirectory=
 format=maze-solver-test-suite
-applicationVersion=0.7
+applicationVersion=0.8.0
 name=experiment-suite
 row.0.algorithms=UCS,GREEDY,A_STAR
 row.0.blockedPercent=25.0

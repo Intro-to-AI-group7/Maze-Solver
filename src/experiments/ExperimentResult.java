@@ -13,7 +13,6 @@ public final class ExperimentResult {
     private final long effectiveSeed;
     private final TestSuite.MapSource mapSource;
     private final String savedMapName;
-    private final String mapText;
     private final int rows;
     private final int columns;
     private final double requestedBlockedPercent;
@@ -46,7 +45,6 @@ public final class ExperimentResult {
      * @param effectiveSeed seed used for this generated map
      * @param mapSource source used to obtain the map
      * @param savedMapName saved-map filename, or null for generated maps
-     * @param mapText exact map used for this result
      * @param rows total map row count
      * @param columns total map column count
      * @param requestedBlockedPercent requested interior blocked percentage
@@ -78,7 +76,6 @@ public final class ExperimentResult {
             long effectiveSeed,
             TestSuite.MapSource mapSource,
             String savedMapName,
-            String mapText,
             int rows,
             int columns,
             double requestedBlockedPercent,
@@ -135,7 +132,6 @@ public final class ExperimentResult {
         this.effectiveSeed = effectiveSeed;
         this.mapSource = mapSource;
         this.savedMapName = savedMapName;
-        this.mapText = mapText;
         this.rows = rows;
         this.columns = columns;
         this.requestedBlockedPercent = requestedBlockedPercent;
@@ -191,10 +187,6 @@ public final class ExperimentResult {
      * @return filename, or null when unavailable
      */
     public String getSavedMapName() { return savedMapName; }
-    /** Gets the exact saveable map used for this result.
-     * @return serialized map text
-     */
-    public String getMapText() { return mapText; }
     /** Gets a display value for the seed column.
      * @return seed value, or {@code N/A} for an embedded saved map
      */

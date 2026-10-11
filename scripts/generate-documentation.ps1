@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $doc = Join-Path $root "doc"
 $latexDir = Join-Path $doc "latex"
-$pdf = Join-Path $doc "Maze-Solver-docs_V0.7.pdf"
+$pdf = Join-Path $doc "Maze-Solver-docs_V0.8.0.pdf"
 
 function Install-MissingTool {
     param(

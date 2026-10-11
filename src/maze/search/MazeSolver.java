@@ -272,16 +272,24 @@ public class MazeSolver {
             throw new IllegalStateException("Maze goal is not set.");
         }
 
-        if (algorithm == Algorithm.DFS || algorithm == Algorithm.BFS) {
-            strategy = new UninformedSearch(algorithm == Algorithm.DFS
-                    ? UninformedSearch.TraversalMode.DFS
-                    : UninformedSearch.TraversalMode.BFS);
-        } else if (algorithm == Algorithm.UCS || algorithm == Algorithm.GREEDY) {
-            strategy = algorithm == Algorithm.UCS ? new UCS() : new GreedySearch();
-        } else if (algorithm == Algorithm.A_STAR) {
-            strategy = new Astar();
-        } else {
-            throw new IllegalStateException("Unsupported algorithm state: " + algorithm);
+        switch (algorithm) {
+            case DFS:
+                strategy = new UninformedSearch(UninformedSearch.TraversalMode.DFS);
+                break;
+            case BFS:
+                strategy = new UninformedSearch(UninformedSearch.TraversalMode.BFS);
+                break;
+            case UCS:
+                strategy = new UCS();
+                break;
+            case GREEDY:
+                strategy = new GreedySearch();
+                break;
+            case A_STAR:
+                strategy = new Astar();
+                break;
+            default:
+                throw new IllegalStateException("Unsupported algorithm state: " + algorithm);
         }
         strategy.initialize(this);
 

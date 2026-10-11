@@ -1,6 +1,7 @@
 package ui;
 
 import java.awt.Component;
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -68,6 +69,10 @@ final class WrappedHeaderRenderer extends DefaultTableCellRenderer {
         label.setHorizontalAlignment(CENTER);
         label.setVerticalAlignment(CENTER);
         label.setText("<html><div style='text-align:center'>" + value + "</div></html>");
+        if (table.getModel() instanceof TestConfigurationTableModel) {
+            label.setToolTipText(TestConfigurationTableModel.tooltipForColumn(
+                    table.convertColumnIndexToModel(column)));
+        }
         return label;
     }
 }
@@ -78,6 +83,7 @@ final class JComboBoxEditor<T> extends AbstractCellEditor implements TableCellEd
 
     JComboBoxEditor(T[] values) {
         comboBox = new JComboBox<>(values);
+        UITheme.styleComboBox(comboBox);
     }
 
     @Override
@@ -100,6 +106,7 @@ final class IntegerEditor extends JTextField implements TableCellEditor {
     IntegerEditor() {
         delegate = new javax.swing.DefaultCellEditor(this);
         delegate.setClickCountToStart(1);
+        UITheme.styleTextField(this);
     }
 
     @Override
@@ -147,6 +154,7 @@ final class EnumComboBoxEditor<T extends Enum<T>>
     EnumComboBoxEditor(T[] values, String[] labels) {
         this.values = values;
         comboBox = new JComboBox<>(labels);
+        UITheme.styleComboBox(comboBox);
     }
 
     @Override
@@ -181,7 +189,8 @@ final class EnumLabelRenderer extends DefaultTableCellRenderer {
             int row, int column) {
         JLabel label = (JLabel) super.getTableCellRendererComponent(
                 table, value, selected, focused, row, column);
-        label.setText(labels[((Enum<?>) value).ordinal()]);
+        int ordinal = ((Enum<?>) value).ordinal();
+        label.setText(ordinal < labels.length ? labels[ordinal] : value.toString());
         return label;
     }
 }
@@ -229,13 +238,19 @@ final class BooleanRenderer extends JCheckBox implements TableCellRenderer {
 
 final class MapValueEditor extends AbstractCellEditor implements TableCellEditor {
     private static final long serialVersionUID = 1L;
-    private final JButton button = new JButton();
+    private final JPanel editorPanel = new JPanel(new BorderLayout(2, 0));
+    private final JTextField seedField = new JTextField();
+    private final JButton button = new JButton("Import map...");
     private JTable table;
     private int row;
 
     MapValueEditor() {
+        UITheme.styleTextField(seedField);
+        editorPanel.setOpaque(true);
+        editorPanel.add(seedField, BorderLayout.CENTER);
+        editorPanel.add(button, BorderLayout.EAST);
         button.addActionListener(event -> {
-            if (table.getValueAt(row, 17) != TestSuite.MapSource.SAVED_MAP) {
+            if (table.getValueAt(row, 3) != TestSuite.MapSource.SAVED_MAP) {
                 fireEditingStopped();
                 return;
             }
@@ -252,11 +267,10 @@ final class MapValueEditor extends AbstractCellEditor implements TableCellEditor
                     String contents = java.nio.file.Files.readString(
                             chooser.getSelectedFile().toPath());
                     Maze imported = Maze.importFromText(contents);
-                    table.getModel().setValueAt(imported.getLength(), row, 1);
-                    table.getModel().setValueAt(imported.getWidth(), row, 2);
+                    table.getModel().setValueAt(imported.getLength(), row, 5);
+                    table.getModel().setValueAt(imported.getWidth(), row, 6);
                     table.getModel().setValueAt(contents, row, 20);
-                    table.getModel().setValueAt(name, row, 16);
-                    button.setText(name);
+                    table.getModel().setValueAt(name, row, 4);
                     fireEditingStopped();
                 } catch (java.io.IOException | IllegalArgumentException ex) {
                     JOptionPane.showMessageDialog(table, "Could not read map: "
@@ -272,14 +286,17 @@ final class MapValueEditor extends AbstractCellEditor implements TableCellEditor
             JTable table, Object value, boolean selected, int row, int column) {
         this.table = table;
         this.row = row;
-        button.setText(table.getValueAt(row, 17) == TestSuite.MapSource.SAVED_MAP
-                ? "Import map..." : String.valueOf(value));
-        return button;
+        boolean savedMap = table.getValueAt(row, 3) == TestSuite.MapSource.SAVED_MAP;
+        seedField.setText(String.valueOf(value));
+        seedField.selectAll();
+        button.setVisible(savedMap);
+        seedField.setVisible(!savedMap);
+        return editorPanel;
     }
 
     @Override
     public Object getCellEditorValue() {
-        return button.getText();
+        return seedField.isVisible() ? seedField.getText().trim() : button.getText();
     }
 }
 
@@ -296,7 +313,7 @@ final class MapValueRenderer extends JButton implements TableCellRenderer {
     public Component getTableCellRendererComponent(
             JTable table, Object value, boolean selected, boolean focused,
             int row, int column) {
-        boolean savedMap = table.getValueAt(row, 17) == TestSuite.MapSource.SAVED_MAP;
+        boolean savedMap = table.getValueAt(row, 3) == TestSuite.MapSource.SAVED_MAP;
         String text = String.valueOf(value);
         if (savedMap) {
             setText(text);
@@ -306,7 +323,7 @@ final class MapValueRenderer extends JButton implements TableCellRenderer {
             return this;
         }
         label.setText(text);
-        label.setEnabled(table.getValueAt(row, 17) != TestSuite.MapSource.AUTOMATIC_SEED);
+        label.setEnabled(table.getValueAt(row, 3) != TestSuite.MapSource.AUTOMATIC_SEED);
         label.setBackground(selected ? table.getSelectionBackground() : table.getBackground());
         label.setForeground(selected ? table.getSelectionForeground() : table.getForeground());
         return label;
@@ -319,6 +336,7 @@ final class ReviewButtonRenderer extends JButton implements TableCellRenderer {
     ReviewButtonRenderer() {
         setText("Review");
         setOpaque(true);
+        setFocusPainted(false);
     }
 
     @Override
@@ -327,6 +345,11 @@ final class ReviewButtonRenderer extends JButton implements TableCellRenderer {
             int row, int column) {
         setText("Review");
         setEnabled(true);
+        setBackground(selected ? UITheme.selectionBackground() : UITheme.surface());
+        setForeground(selected ? UITheme.selectionText() : UITheme.text());
+        setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                javax.swing.BorderFactory.createLineBorder(UITheme.border()),
+                javax.swing.BorderFactory.createEmptyBorder(3, 8, 3, 8)));
         return this;
     }
 }
@@ -340,6 +363,8 @@ final class ReviewButtonEditor extends AbstractCellEditor implements TableCellEd
 
     ReviewButtonEditor(IntConsumer reviewAction) {
         this.reviewAction = reviewAction;
+        button.setOpaque(true);
+        button.setFocusPainted(false);
         button.addActionListener(event -> {
             reviewAction.accept(row);
             fireEditingStopped();
@@ -350,6 +375,11 @@ final class ReviewButtonEditor extends AbstractCellEditor implements TableCellEd
     public Component getTableCellEditorComponent(
             JTable table, Object value, boolean selected, int row, int column) {
         this.row = table.convertRowIndexToModel(row);
+        button.setBackground(UITheme.selectionBackground());
+        button.setForeground(UITheme.selectionText());
+        button.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                javax.swing.BorderFactory.createLineBorder(UITheme.border()),
+                javax.swing.BorderFactory.createEmptyBorder(3, 8, 3, 8)));
         return button;
     }
 
