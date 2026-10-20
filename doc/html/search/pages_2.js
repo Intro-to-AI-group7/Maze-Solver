@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['maze_20solver_200_207_0',['Maze-Solver 0.7',['../index.html',1,'']]]
+  ['8_201_0',['Maze-Solver 0.8.1',['../index.html',1,'']]]
 ];

@@ -19,6 +19,27 @@ import maze.map.Maze;
  * this configuration class.
  */
 public final class TestSuite {
+    /** Execution strategy for experiment solver runs. */
+    public enum ExecutionMode {
+        /** Run solver algorithms one at a time. */
+        SEQUENTIAL,
+        /** Use a fixed bounded worker pool. */
+        FIXED_PARALLEL,
+        /** Select a bounded worker count from current CPU and heap headroom. */
+        ADAPTIVE_PARALLEL;
+
+        @Override
+        public String toString() {
+            switch (this) {
+                case FIXED_PARALLEL:
+                    return "Fixed parallel";
+                case ADAPTIVE_PARALLEL:
+                    return "Adaptive parallel";
+                default:
+                    return "Sequential";
+            }
+        }
+    }
 
     /** Source used to obtain the map for an experiment row. */
     public enum MapSource {
@@ -35,7 +56,9 @@ public final class TestSuite {
         /** Assigns the same unit cost to every enabled movement. */
         UNIFORM,
         /** Assigns seeded positive costs within the configured range. */
-        RANDOM
+        RANDOM,
+        /** Uses the directional movement costs embedded in a saved map. */
+        FROM_MAP
     }
 
     /** Whether generated maps must contain a route between their endpoints. */
@@ -54,6 +77,8 @@ public final class TestSuite {
         FIXED,
         /** Selects endpoints using the iteration's seeded random source. */
         RANDOM,
+        /** Uses the two opposite interior corners of the map. */
+        OPPOSITE_CORNERS,
         /** Selects endpoints near a requested Manhattan distance. */
         APPROXIMATE_DISTANCE
     }
@@ -62,6 +87,7 @@ public final class TestSuite {
     private final List<TestCase> testCases = new ArrayList<>();
     private boolean automaticExport;
     private String exportDirectory;
+    private ExecutionMode executionMode = ExecutionMode.SEQUENTIAL;
 
     /**
      * Creates an empty suite with default export settings.
@@ -171,6 +197,48 @@ public final class TestSuite {
     }
 
     /**
+     * Indicates whether independent algorithm runs may execute concurrently.
+     *
+     * <p>The default is false so existing suites retain sequential execution.
+     *
+     * @return the configured execution strategy
+     */
+    public ExecutionMode getExecutionMode() {
+        return executionMode;
+    }
+
+    /**
+     * Sets the execution strategy for this suite.
+     *
+     * @param executionMode execution mode
+     */
+    public void setExecutionMode(ExecutionMode executionMode) {
+        if (executionMode == null) {
+            throw new IllegalArgumentException("Execution mode cannot be null.");
+        }
+        this.executionMode = executionMode;
+    }
+
+    /**
+     * Compatibility accessor for callers using the original boolean option.
+     *
+     * @return true for either parallel execution mode
+     */
+    public boolean isParallelExecution() {
+        return executionMode != ExecutionMode.SEQUENTIAL;
+    }
+
+    /**
+     * Compatibility setter for the original boolean option.
+     *
+     * @param parallelExecution whether fixed parallel execution should be used
+     */
+    public void setParallelExecution(boolean parallelExecution) {
+        executionMode = parallelExecution
+                ? ExecutionMode.FIXED_PARALLEL : ExecutionMode.SEQUENTIAL;
+    }
+
+    /**
      * Validates the complete suite.
      *
      * @throws IllegalArgumentException if the suite has no valid test rows
@@ -206,21 +274,21 @@ public final class TestSuite {
      */
     public static final class TestCase {
         private String id = "test-1";
-        private int rows = 20;
-        private int columns = 20;
-        private double blockedPercent = 25.0;
+        private int rows = 100;
+        private int columns = 100;
+        private double blockedPercent = 50.0;
         private ReachabilityMode reachabilityMode = ReachabilityMode.GUARANTEED_SOLVABLE;
         private CostMode costMode = CostMode.RANDOM;
         private int minimumCost = Maze.MIN_MOVEMENT_COST;
         private int maximumCost = 5;
         private boolean sameCostBothDirections = true;
-        private EndpointMode endpointMode = EndpointMode.RANDOM;
+        private EndpointMode endpointMode = EndpointMode.OPPOSITE_CORNERS;
         private int startRow = 1;
         private int startColumn = 1;
-        private int goalRow = 18;
-        private int goalColumn = 18;
-        private int targetManhattanDistance = 34;
-        private int distanceTolerance = 1;
+        private int goalRow = 98;
+        private int goalColumn = 98;
+        private int targetManhattanDistance = 194;
+        private int distanceTolerance = 3;
         private long seed;
         private MapSource mapSource = MapSource.AUTOMATIC_SEED;
         private String savedMapText;
@@ -594,6 +662,11 @@ public final class TestSuite {
                 throw new IllegalArgumentException("Map source cannot be null.");
             }
             this.mapSource = mapSource;
+            if (mapSource == MapSource.SAVED_MAP) {
+                this.costMode = CostMode.FROM_MAP;
+            } else if (this.costMode == CostMode.FROM_MAP) {
+                this.costMode = CostMode.RANDOM;
+            }
         }
 
         /**
@@ -625,6 +698,7 @@ public final class TestSuite {
             }
             this.savedMapText = savedMapText;
             this.mapSource = MapSource.SAVED_MAP;
+            this.costMode = CostMode.FROM_MAP;
         }
 
         /**
@@ -705,8 +779,25 @@ public final class TestSuite {
             if (reachabilityMode == null) {
                 throw new IllegalArgumentException("Reachability mode is required.");
             }
+            if (mapSource == null) {
+                throw new IllegalArgumentException("Map source is required.");
+            }
             if (costMode == null) {
                 throw new IllegalArgumentException("Cost mode is required.");
+            }
+            if (mapSource == MapSource.SAVED_MAP && costMode != CostMode.FROM_MAP) {
+                throw new IllegalArgumentException(
+                        "Saved maps must use movement costs from the map.");
+            }
+            if (mapSource != MapSource.SAVED_MAP && costMode == CostMode.FROM_MAP) {
+                throw new IllegalArgumentException(
+                        "From Map cost mode requires a saved map.");
+            }
+            if (mapSource == MapSource.SAVED_MAP
+                    && (savedMapText == null || !savedMapText.matches(
+                            "(?s).*\\RWEIGHTS\\R.*"))) {
+                throw new IllegalArgumentException(
+                        "Saved maps must include a WEIGHTS section.");
             }
             if (minimumCost < Maze.MIN_MOVEMENT_COST
                     || maximumCost > Maze.MAX_MOVEMENT_COST
@@ -727,9 +818,6 @@ public final class TestSuite {
                 validateInteriorCoordinate(goalRow, goalColumn, "Goal");
                 if (startRow == goalRow && startColumn == goalColumn) {
                     throw new IllegalArgumentException("Start and goal must be different.");
-                }
-                if (mapSource == null) {
-                    throw new IllegalArgumentException("Map source is required.");
                 }
                 if (mapSource == MapSource.SAVED_MAP
                         && (savedMapText == null || savedMapText.trim().isEmpty())) {

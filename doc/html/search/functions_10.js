@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['validate_0',['validate',['../classexperiments_1_1_test_suite.html#a9426ca37452c358492055c24f2ae53a2',1,'experiments.TestSuite.validate()'],['../classexperiments_1_1_test_suite_1_1_test_case.html#a561d6ed029a4a31510263532f85edc55',1,'experiments.TestSuite.TestCase.validate()']]],
-  ['validateneighborconnections_1',['validateNeighborConnections',['../classmaze_1_1map_1_1_maze.html#a0a3180154e1d22d2640dcd5ea401f178',1,'maze::map::Maze']]]
+  ['updatesolve_0',['updateSolve',['../classmaze_1_1search_1_1_maze_solver.html#a961567555b5f713d5adc9e2858a96b23',1,'maze::search::MazeSolver']]]
 ];

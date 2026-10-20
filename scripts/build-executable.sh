@@ -34,7 +34,7 @@ mapfile -t SOURCES < <(find "$ROOT/src" -type f -name '*.java' -print)
         --main-jar "$(basename "$JAR")" \
         --main-class app.MS \
         --dest "$DIST" \
-        --app-version 0.7 \
+        --app-version 0.8.1 \
         --vendor "Intro-to-AI-group7"
     if ! command -v zip >/dev/null 2>&1; then
         echo "The zip command is required to create the portable bundle." >&2
