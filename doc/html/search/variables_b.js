@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['saved_5fmap_0',['SAVED_MAP',['../enumexperiments_1_1_test_suite_1_1_map_source.html#aaa68d85421e074e2603538351543090f',1,'experiments::TestSuite::MapSource']]],
-  ['south_1',['SOUTH',['../enummaze_1_1map_1_1_maze_1_1_dir.html#a8f205018f4303f1ddd08b357c32dcb57',1,'maze::map::Maze::Dir']]],
-  ['suite_5fextension_2',['SUITE_EXTENSION',['../classexperiments_1_1_test_suite_i_o.html#a87bd35f52835911fee781f5c826de010',1,'experiments::TestSuiteIO']]],
-  ['suite_5fformat_5fversion_3',['SUITE_FORMAT_VERSION',['../classexperiments_1_1_test_suite_i_o.html#a16744fa9efe922e2564abbf8017e71d4',1,'experiments::TestSuiteIO']]]
+  ['random_0',['RANDOM',['../enumexperiments_1_1_test_suite_1_1_cost_mode.html#a67c719f62131109e9e10f4646ea41f50',1,'experiments.TestSuite.CostMode.RANDOM'],['../enumexperiments_1_1_test_suite_1_1_endpoint_mode.html#a82a4a42bde7dcfe8b1c4c2b08af719f9',1,'experiments.TestSuite.EndpointMode.RANDOM']]],
+  ['release_1',['RELEASE',['../classapp_1_1_version.html#ad4214ed139ea8d6d0aab5683164d9d85',1,'app::Version']]],
+  ['row_2',['row',['../classmaze_1_1map_1_1_maze_1_1_node.html#a01c84d752c253a6cb7aa4d99a3a9922e',1,'maze::map::Maze::Node']]]
 ];

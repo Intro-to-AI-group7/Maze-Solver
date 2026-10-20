@@ -52,6 +52,8 @@ import experiments.TestSuite;
  * }</pre>
  */
 public class Maze {
+    /** Maximum seeded samples before approximate-distance fallback search. */
+    private static final int APPROXIMATE_DISTANCE_RANDOM_SAMPLES = 5000;
     /** Extension used for editable maze map files. */
     public static final String MAP_EXTENSION = ".msmap";
 
@@ -286,99 +288,6 @@ public class Maze {
         return MazeFileIO.importFromText(contents);
     }
 
-    private static Maze importFromLines(List<String> lines) throws IOException {
-
-        if (lines.size() < 4) {
-            throw new IllegalArgumentException("Maze file must contain at least 4 header lines.");
-        }
-
-        int length = Integer.parseInt(lines.get(0).trim());
-        int width = Integer.parseInt(lines.get(1).trim());
-
-        if (length <= 0 || width <= 0) {
-            throw new IllegalArgumentException("Maze dimensions must be positive.");
-        }
-
-        int layoutStart = 4;
-        int layoutEnd = layoutStart + length;
-        if (lines.size() < layoutEnd) {
-            throw new IllegalArgumentException("Maze file does not contain the expected number of layout rows.");
-        }
-
-        int[] startPos = parseCoordinateLine(lines.get(2), "start");
-        int[] endPos = parseCoordinateLine(lines.get(3), "end");
-
-        Maze maze = new Maze(length, width);
-
-        for (int row = 0; row < length; row++) {
-            String layoutRow = lines.get(layoutStart + row).trim();
-            if (layoutRow.length() != width) {
-                throw new IllegalArgumentException("Layout row " + row + " has width " + layoutRow.length() + " but expected " + width + ".");
-            }
-
-            for (int col = 0; col < width; col++) {
-                char cell = layoutRow.charAt(col);
-                if (cell == '1') {
-                    maze.createCell(row, col, 0);
-                } else if (cell == '0') {
-                    maze.grid[row][col] = null;
-                } else {
-                    throw new IllegalArgumentException("Invalid cell character '" + cell + "' at row " + row + ", col " + col + ". Use only 0 or 1.");
-                }
-            }
-        }
-
-        int weightsMarker = findWeightsMarker(lines, layoutEnd);
-        if (weightsMarker >= 0) {
-            int firstWeightLine = weightsMarker + 1;
-            int expectedWeightRows = length * width;
-            if (lines.size() < firstWeightLine + expectedWeightRows) {
-                throw new IllegalArgumentException("WEIGHTS section must contain exactly "
-                        + expectedWeightRows + " rows.");
-            }
-
-            for (int row = 0; row < length; row++) {
-                for (int col = 0; col < width; col++) {
-                    int lineIndex = firstWeightLine + row * width + col;
-                    int[] costs = parseWeightRow(lines.get(lineIndex), row, col);
-                    validateWeightRow(maze, row, col, costs);
-
-                    Node node = maze.getNode(row, col);
-                    if (node != null) {
-                        for (Dir dir : Dir.values()) {
-                            node.setMoveCost(dir, costs[dir.idx()]);
-                        }
-                    }
-                }
-            }
-
-            for (int lineIndex = firstWeightLine + expectedWeightRows; lineIndex < lines.size(); lineIndex++) {
-                if (!lines.get(lineIndex).trim().isEmpty()) {
-                    throw new IllegalArgumentException("Unexpected data after the WEIGHTS section at line "
-                            + (lineIndex + 1) + ".");
-                }
-            }
-        } else {
-            for (int lineIndex = layoutEnd; lineIndex < lines.size(); lineIndex++) {
-                if (!lines.get(lineIndex).trim().isEmpty()) {
-                    throw new IllegalArgumentException("Unexpected data after the maze layout at line "
-                            + (lineIndex + 1) + ". Expected WEIGHTS.");
-                }
-            }
-        }
-
-        if (!maze.isInBounds(startPos[0], startPos[1]) || !maze.isOccupied(startPos[0], startPos[1])) {
-            throw new IllegalArgumentException("Start position must be in bounds and on a path cell (1).");
-        }
-        if (!maze.isInBounds(endPos[0], endPos[1]) || !maze.isOccupied(endPos[0], endPos[1])) {
-            throw new IllegalArgumentException("End position must be in bounds and on a path cell (1).");
-        }
-
-        maze.setStart(startPos[0], startPos[1]);
-        maze.setGoal(endPos[0], endPos[1]);
-        return maze;
-    }
-
     /**
      * Builds a random, guaranteed-solvable maze with the given dimensions.
      *
@@ -478,12 +387,16 @@ public class Maze {
      * Generates a seeded experiment map from a validated test configuration.
      *
      * <p>The outside border is always blocked and is excluded from the
-     * requested density calculation. The generated map uses one effective
-     * seed for its layout, endpoint selection, and movement costs. Algorithms
-     * should run against the returned maze without regenerating it.
+     * requested density calculation. The interior starts as a seeded,
+     * one-cell-wide traditional corridor maze. The requested density is then
+     * applied by opening additional cells or removing suitable dead ends,
+     * preserving the corridor structure instead of producing independent
+     * cell noise. The generated map uses one effective seed for its layout,
+     * endpoint selection, and movement costs. Algorithms should run against
+     * the returned maze without regenerating it.
      *
      * @param testCase validated experiment configuration
-     * @param effectiveSeed seed for this specific iteration
+     * @param effectiveSeed seed resolved for the containing test-case row
      * @return generated map and metadata used to describe the instance
      * @throws IllegalArgumentException if the configuration is invalid or a
      *         valid endpoint pair cannot be selected
@@ -516,7 +429,8 @@ public class Maze {
             if (testCase.getReachabilityMode() == TestSuite.ReachabilityMode.GUARANTEED_SOLVABLE
                     && !connected) {
                 if (attempt == maxAttempts - 1) {
-                    carveDirectConnection(open, startRow, startCol, goalRow, goalCol);
+                    carveRandomConnection(
+                            open, startRow, startCol, goalRow, goalCol, random);
                     connected = true;
                 } else {
                     continue;
@@ -552,33 +466,106 @@ public class Maze {
     private static boolean[][] createDensityLayout(TestSuite.TestCase testCase, Random random) {
         int length = testCase.getRows();
         int width = testCase.getColumns();
+        int interiorCells = (length - 2) * (width - 2);
+        TestSuite.EndpointMode endpointMode = testCase.getEndpointMode();
         boolean[][] open = new boolean[length][width];
-        List<int[]> candidates = new ArrayList<>();
+        List<int[]> candidates = new ArrayList<>(interiorCells);
+
+        /*
+         * Start from a connected corridor backbone. Density changes are made
+         * afterward so obstacle percentages do not destroy the maze-like
+         * visual structure.
+         */
+        carveTraditionalMaze(open, 1, 1, random);
+        extendEvenInteriorEdges(open, random);
+
+        if (endpointMode == TestSuite.EndpointMode.FIXED) {
+            open[testCase.getStartRow()][testCase.getStartColumn()] = true;
+            open[testCase.getGoalRow()][testCase.getGoalColumn()] = true;
+        }
+
+        if (endpointMode == TestSuite.EndpointMode.FIXED) {
+            int startRow = testCase.getStartRow();
+            int startColumn = testCase.getStartColumn();
+            int goalRow = testCase.getGoalRow();
+            int goalColumn = testCase.getGoalColumn();
+            candidates.removeIf(coordinate ->
+                    (coordinate[0] == startRow && coordinate[1] == startColumn)
+                    || (coordinate[0] == goalRow && coordinate[1] == goalColumn));
+        }
 
         for (int row = 1; row < length - 1; row++) {
             for (int col = 1; col < width - 1; col++) {
-                open[row][col] = true;
-                candidates.add(new int[] {row, col});
+                if (!open[row][col]) {
+                    candidates.add(new int[] {row, col});
+                }
             }
         }
-
-        if (testCase.getEndpointMode() == TestSuite.EndpointMode.FIXED) {
-            candidates.removeIf(coordinate ->
-                    (coordinate[0] == testCase.getStartRow()
-                            && coordinate[1] == testCase.getStartColumn())
-                    || (coordinate[0] == testCase.getGoalRow()
-                            && coordinate[1] == testCase.getGoalColumn()));
-        }
-
         Collections.shuffle(candidates, random);
-        int interiorCells = (length - 2) * (width - 2);
         int requestedBlocked = (int) Math.round(
                 interiorCells * testCase.getBlockedPercent() / 100.0);
-        for (int index = 0; index < requestedBlocked && index < candidates.size(); index++) {
-            int[] coordinate = candidates.get(index);
-            open[coordinate[0]][coordinate[1]] = false;
+        int currentBlocked = countBlockedInterior(open);
+        if (requestedBlocked < currentBlocked) {
+            Collections.shuffle(candidates, random);
+            for (int index = 0; index < candidates.size()
+                    && currentBlocked > requestedBlocked; index++) {
+                int[] coordinate = candidates.get(index);
+                open[coordinate[0]][coordinate[1]] = true;
+                currentBlocked--;
+            }
+        } else if (requestedBlocked > currentBlocked) {
+            List<int[]> removable = new ArrayList<>();
+            for (int row = 1; row < length - 1; row++) {
+                for (int col = 1; col < width - 1; col++) {
+                    if (open[row][col]
+                            && !(endpointMode == TestSuite.EndpointMode.OPPOSITE_CORNERS
+                            && ((row == 1 && col == 1)
+                            || (row == length - 2 && col == width - 2)))
+                            && !(endpointMode == TestSuite.EndpointMode.FIXED
+                            && ((row == testCase.getStartRow()
+                            && col == testCase.getStartColumn())
+                            || (row == testCase.getGoalRow()
+                            && col == testCase.getGoalColumn())))) {
+                        removable.add(new int[] {row, col});
+                    }
+                }
+            }
+            Collections.shuffle(removable, random);
+            boolean changed = true;
+            while (changed && currentBlocked < requestedBlocked) {
+                changed = false;
+                for (int[] coordinate : removable) {
+                    if (open[coordinate[0]][coordinate[1]]
+                            && countOpenNeighbors(open, coordinate[0], coordinate[1]) <= 1) {
+                        open[coordinate[0]][coordinate[1]] = false;
+                        currentBlocked++;
+                        changed = true;
+                        if (currentBlocked >= requestedBlocked) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (endpointMode == TestSuite.EndpointMode.OPPOSITE_CORNERS) {
+            open[1][1] = true;
+            open[length - 2][width - 2] = true;
         }
         return open;
+    }
+
+    private static int countOpenNeighbors(boolean[][] open, int row, int col) {
+        int count = 0;
+        for (Dir direction : Dir.values()) {
+            int neighborRow = row + rowDelta(direction);
+            int neighborColumn = col + colDelta(direction);
+            if (neighborRow >= 1 && neighborRow < open.length - 1
+                    && neighborColumn >= 1 && neighborColumn < open[0].length - 1
+                    && open[neighborRow][neighborColumn]) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static int[][] selectEndpoints(
@@ -615,16 +602,21 @@ public class Maze {
             return sameCoordinate(start, goal) ? null : new int[][] {start, goal};
         }
 
+        if (testCase.getEndpointMode() == TestSuite.EndpointMode.OPPOSITE_CORNERS) {
+            return new int[][] {
+                    {1, 1},
+                    {open.length - 2, open[0].length - 2}
+            };
+        }
+
         int target = testCase.getTargetManhattanDistance();
         int tolerance = testCase.getDistanceTolerance();
         int[] bestStart = null;
         int[] bestGoal = null;
         int bestDifference = Integer.MAX_VALUE;
-        for (int attempt = 0; attempt < 5000; attempt++) {
+        for (int attempt = 0; attempt < APPROXIMATE_DISTANCE_RANDOM_SAMPLES; attempt++) {
             int[] start = openCells.get(random.nextInt(openCells.size()));
-            List<int[]> goals = testCase.getReachabilityMode()
-                    == TestSuite.ReachabilityMode.GUARANTEED_SOLVABLE
-                    ? getReachableCells(open, start[0], start[1]) : openCells;
+            List<int[]> goals = openCells;
             if (goals.size() < 2) {
                 continue;
             }
@@ -647,8 +639,74 @@ public class Maze {
                 return new int[][] {start, goal};
             }
         }
-        return bestDifference <= tolerance
-                ? new int[][] {bestStart, bestGoal} : null;
+        if (bestDifference <= tolerance) {
+            return new int[][] {bestStart, bestGoal};
+        }
+        /*
+         * Random sampling is normally much faster, but it can miss a valid
+         * pair on dense or highly constrained layouts. The deterministic
+         * fallback makes endpoint selection depend on the layout rather than
+         * on another probabilistic failure.
+         */
+        return findDistancePair(open, target, tolerance);
+    }
+
+    /**
+     * Finds the first open pair in row-major start-cell order whose Manhattan
+     * distance is within the requested tolerance.
+     *
+     * <p>The search checks coordinate offsets instead of comparing every pair
+     * of open cells. This keeps the fallback bounded by the requested distance
+     * range and avoids allocating a candidate array for every offset.
+     *
+     * @param open layout whose interior cells are candidates
+     * @param target requested Manhattan distance
+     * @param tolerance inclusive distance tolerance
+     * @return a matching pair, or null when no pair exists
+     */
+    private static int[][] findDistancePair(boolean[][] open, int target, int tolerance) {
+        List<int[]> openCells = getOpenInteriorCells(open);
+        int minimumDistance = Math.max(1, target - tolerance);
+        int maximumDistance = target + tolerance;
+        for (int[] start : openCells) {
+            for (int distance = minimumDistance; distance <= maximumDistance; distance++) {
+                for (int rowDelta = 0; rowDelta <= distance; rowDelta++) {
+                    int columnDelta = distance - rowDelta;
+                    int[][] pair = matchingPair(
+                            open, start, start[0] + rowDelta, start[1] + columnDelta);
+                    if (pair != null) {
+                        return pair;
+                    }
+                    pair = matchingPair(
+                            open, start, start[0] + rowDelta, start[1] - columnDelta);
+                    if (pair != null) {
+                        return pair;
+                    }
+                    pair = matchingPair(
+                            open, start, start[0] - rowDelta, start[1] + columnDelta);
+                    if (pair != null) {
+                        return pair;
+                    }
+                    pair = matchingPair(
+                            open, start, start[0] - rowDelta, start[1] - columnDelta);
+                    if (pair != null) {
+                        return pair;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static int[][] matchingPair(
+            boolean[][] open, int[] start, int goalRow, int goalColumn) {
+        if (goalRow < 1 || goalRow >= open.length - 1
+                || goalColumn < 1 || goalColumn >= open[0].length - 1
+                || !open[goalRow][goalColumn]
+                || (start[0] == goalRow && start[1] == goalColumn)) {
+            return null;
+        }
+        return new int[][] {start, new int[] {goalRow, goalColumn}};
     }
 
     private static Maze createMazeFromLayout(boolean[][] open) {
@@ -717,17 +775,55 @@ public class Maze {
         return false;
     }
 
-    private static void carveDirectConnection(
-            boolean[][] open, int startRow, int startCol, int goalRow, int goalCol) {
+    /**
+     * Carves a seeded randomized Manhattan connection between two endpoints.
+     *
+     * <p>This is used only after the density generator has exhausted its
+     * connectivity retries. Choosing each available axis randomly avoids
+     * turning opposite-corner endpoints into the same left-wall/bottom-wall
+     * corridor for every fallback map.
+     *
+     * @param open mutable occupancy matrix
+     * @param startRow start row coordinate
+     * @param startCol start column coordinate
+     * @param goalRow goal row coordinate
+     * @param goalCol goal column coordinate
+     * @param random seeded random source
+     */
+    private static void carveRandomConnection(
+            boolean[][] open, int startRow, int startCol,
+            int goalRow, int goalCol, Random random) {
         int row = startRow;
         int col = startCol;
         open[row][col] = true;
-        while (row != goalRow) {
-            row += Integer.signum(goalRow - row);
-            open[row][col] = true;
+        int waypointCount = Math.max(2,
+                Math.min(8, (Math.abs(goalRow - startRow) + Math.abs(goalCol - startCol)) / 32));
+        for (int waypoint = 0; waypoint < waypointCount; waypoint++) {
+            int waypointRow = 1 + random.nextInt(open.length - 2);
+            int waypointCol = 1 + random.nextInt(open[0].length - 2);
+            carveManhattanSegment(open, row, col, waypointRow, waypointCol, random);
+            row = waypointRow;
+            col = waypointCol;
         }
-        while (col != goalCol) {
-            col += Integer.signum(goalCol - col);
+        carveManhattanSegment(open, row, col, goalRow, goalCol, random);
+    }
+
+    private static void carveManhattanSegment(
+            boolean[][] open, int startRow, int startCol,
+            int goalRow, int goalCol, Random random) {
+        int row = startRow;
+        int col = startCol;
+        open[row][col] = true;
+        while (row != goalRow || col != goalCol) {
+            boolean canChangeRow = row != goalRow;
+            boolean canChangeColumn = col != goalCol;
+            if (canChangeRow && canChangeColumn && random.nextBoolean()) {
+                row += Integer.signum(goalRow - row);
+            } else if (canChangeColumn) {
+                col += Integer.signum(goalCol - col);
+            } else {
+                row += Integer.signum(goalRow - row);
+            }
             open[row][col] = true;
         }
     }
@@ -766,6 +862,10 @@ public class Maze {
 
     /**
      * Metadata for one generated experiment map.
+     *
+     * <p>The wrapped maze is shared read-only by the solver jobs for one
+     * iteration. Each job creates its own {@code MazeSolver}, so search state
+     * is never shared between algorithms.
      */
     public static final class GeneratedExperimentMap {
         private final Maze maze;
@@ -1138,124 +1238,6 @@ public class Maze {
         return from != null
                 && from.getNeighbor(direction) != null
                 && from.getMoveCost(direction) > 0;
-    }
-
-
-    /**
-     * Parses a coordinate line with the format label: row,col.
-     *
-     * @param line full line text to parse
-     * @param label expected label prefix (for example start or end)
-     * @return two-element array containing row at index 0 and col at index 1
-     * @throws IllegalArgumentException if the line is missing or malformed
-     */
-    private static int[] parseCoordinateLine(String line, String label) {
-        if (line == null) {
-            throw new IllegalArgumentException("Missing line for " + label + " coordinates.");
-        }
-
-        String trimmed = line.trim();
-        String prefix = label + ":";
-        if (!trimmed.toLowerCase().startsWith(prefix)) {
-            throw new IllegalArgumentException("Expected '" + prefix + " row,col' but got: " + line);
-        }
-
-        String coordinateText = trimmed.substring(prefix.length()).trim();
-        String[] parts = coordinateText.split(",");
-        if (parts.length != 2) {
-            throw new IllegalArgumentException("Expected coordinates as row,col for " + label + ".");
-        }
-
-        int row = Integer.parseInt(parts[0].trim());
-        int col = Integer.parseInt(parts[1].trim());
-        return new int[] { row, col };
-    }
-
-    /**
-     * Finds the optional WEIGHTS marker after the layout.
-     *
-     * @param lines complete file contents
-     * @param layoutEnd first line after the layout
-     * @return marker line index, or -1 when the optional section is absent
-     */
-    private static int findWeightsMarker(List<String> lines, int layoutEnd) {
-        int index = layoutEnd;
-        while (index < lines.size() && lines.get(index).trim().isEmpty()) {
-            index++;
-        }
-
-        if (index < lines.size() && "WEIGHTS".equalsIgnoreCase(lines.get(index).trim())) {
-            return index;
-        }
-        return -1;
-    }
-
-    /**
-     * Parses one row of four movement costs in [N,E,S,W] order.
-     *
-     * @param line source line
-     * @param row row coordinate represented by the line
-     * @param col column coordinate represented by the line
-     * @return parsed movement costs
-     */
-    private static int[] parseWeightRow(String line, int row, int col) {
-        if (line == null || line.trim().isEmpty()) {
-            throw new IllegalArgumentException("Missing weights at (" + row + "," + col + ").");
-        }
-
-        String[] values = line.trim().split(",", -1);
-        if (values.length != Dir.values().length) {
-            throw new IllegalArgumentException("Expected four weights at (" + row + "," + col + ").");
-        }
-
-        int[] costs = new int[Dir.values().length];
-        for (int index = 0; index < values.length; index++) {
-            try {
-                costs[index] = Integer.parseInt(values[index].trim());
-            } catch (NumberFormatException ex) {
-                throw new IllegalArgumentException("Invalid movement cost at (" + row + "," + col
-                        + "), direction index " + index + ".", ex);
-            }
-
-            if (costs[index] < DISABLED_MOVEMENT_COST
-                    || costs[index] > MAX_MOVEMENT_COST) {
-                throw new IllegalArgumentException("Movement costs must be 0 or an integer from "
-                        + MIN_MOVEMENT_COST + " to " + MAX_MOVEMENT_COST + " at ("
-                        + row + "," + col + ").");
-            }
-        }
-        return costs;
-    }
-
-    /**
-     * Validates weighted movement against the binary layout.
-     *
-     * @param maze maze whose layout is being validated
-     * @param row row coordinate
-     * @param col column coordinate
-     * @param costs four costs in [N,E,S,W] order
-     */
-    private static void validateWeightRow(Maze maze, int row, int col, int[] costs) {
-        if (!maze.isOccupied(row, col)) {
-            for (int cost : costs) {
-                if (cost != 0) {
-                    throw new IllegalArgumentException("Blocked cell (" + row + "," + col
-                            + ") must have four zero movement costs.");
-                }
-            }
-            return;
-        }
-
-        for (Dir dir : Dir.values()) {
-            int neighborRow = row + rowDelta(dir);
-            int neighborCol = col + colDelta(dir);
-            boolean hasNeighbor = maze.isInBounds(neighborRow, neighborCol)
-                    && maze.isOccupied(neighborRow, neighborCol);
-            if (!hasNeighbor && costs[dir.idx()] != 0) {
-                throw new IllegalArgumentException("Movement cost at (" + row + "," + col + ") for "
-                        + dir + " points outside the traversable layout.");
-            }
-        }
     }
 
 

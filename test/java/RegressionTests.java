@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import experiments.ExperimentResult;
 import experiments.ExperimentRunner;
@@ -31,7 +32,12 @@ public final class RegressionTests {
     public static void main(String[] args) throws Exception {
         testWeightedMapRoundTrip();
         testAllAlgorithmsOnGeneratedMap();
+        testGeneratedMapConfigurationValidation();
         testReproducibleExperimentRuns();
+        testSequentialAndParallelExperimentRunsMatch();
+        testSuiteWideParallelQueuePreservesRowOrder();
+        testParallelMapGenerationUsesMultipleWorkers();
+        testAdaptiveExperimentRunCompletes();
         testSuitePersistenceAndCsvExport();
         testEmbeddedSavedMap();
         testUniqueMapExport();
@@ -72,6 +78,68 @@ public final class RegressionTests {
         }
     }
 
+    private static void testGeneratedMapConfigurationValidation() {
+        TestSuite.TestCase testCase = baseCase("configuration-validation");
+        testCase.setRows(20);
+        testCase.setColumns(24);
+        testCase.setBlockedPercent(20.0);
+        testCase.setEndpointMode(TestSuite.EndpointMode.FIXED);
+        testCase.setStartRow(1);
+        testCase.setStartColumn(1);
+        testCase.setGoalRow(18);
+        testCase.setGoalColumn(22);
+        testCase.setMinimumCost(3);
+        testCase.setMaximumCost(7);
+        testCase.setSameCostBothDirections(false);
+
+        Maze.GeneratedExperimentMap generated =
+                Maze.generateExperimentMap(testCase, 9876L);
+        Maze maze = generated.getMaze();
+        int interiorCells = (testCase.getRows() - 2) * (testCase.getColumns() - 2);
+        int expectedBlocked = (int) Math.round(
+                interiorCells * testCase.getBlockedPercent() / 100.0);
+
+        require(maze.getLength() == testCase.getRows()
+                && maze.getWidth() == testCase.getColumns(),
+                "Generated map dimensions did not match the test case.");
+        require(generated.getBlockedCellCount() == expectedBlocked,
+                "Generated map did not honor the blocked-cell percentage.");
+        require(generated.getStartRow() == testCase.getStartRow()
+                && generated.getStartColumn() == testCase.getStartColumn()
+                && generated.getGoalRow() == testCase.getGoalRow()
+                && generated.getGoalColumn() == testCase.getGoalColumn(),
+                "Generated map did not honor fixed endpoints.");
+        require(generated.isSolvable(), "Guaranteed-solvable map was not connected.");
+        require(maze.validateNeighborConnections(0).isValid(),
+                "Generated map had invalid neighbor connections.");
+
+        boolean foundMinimumCost = false;
+        boolean foundMaximumCost = false;
+        for (int row = 0; row < maze.getLength(); row++) {
+            for (int col = 0; col < maze.getWidth(); col++) {
+                Maze.Node node = maze.getNode(row, col);
+                if (node == null) {
+                    continue;
+                }
+                for (Maze.Dir direction : Maze.Dir.values()) {
+                    int cost = node.getMoveCost(direction);
+                    if (cost == testCase.getMinimumCost()) {
+                        foundMinimumCost = true;
+                    }
+                    if (cost == testCase.getMaximumCost()) {
+                        foundMaximumCost = true;
+                    }
+                    require(cost == 0
+                            || (cost >= testCase.getMinimumCost()
+                            && cost <= testCase.getMaximumCost()),
+                            "Generated movement cost was outside the configured range.");
+                }
+            }
+        }
+        require(foundMinimumCost && foundMaximumCost,
+                "Generated map did not exercise the configured movement-cost range.");
+    }
+
     private static void testReproducibleExperimentRuns() {
         TestSuite suite = new TestSuite("reproducibility");
         TestSuite.TestCase testCase = baseCase("repeatable");
@@ -92,6 +160,7 @@ public final class RegressionTests {
                     && left.getPathCost() == right.getPathCost(),
                     "Seeded experiment results were not reproducible.");
         }
+
         require(first.get(0).getEffectiveSeed() == first.get(2).getEffectiveSeed()
                 && first.get(0).getEffectiveSeed() == first.get(4).getEffectiveSeed(),
                 "Manual seed changed between iterations.");
@@ -107,6 +176,112 @@ public final class RegressionTests {
                 && automaticResults.get(1).getEffectiveSeed()
                 == automaticResults.get(2).getEffectiveSeed(),
                 "Automatic seed changed between iterations.");
+    }
+
+    private static void testSequentialAndParallelExperimentRunsMatch() {
+        TestSuite sequentialSuite = new TestSuite("execution-mode");
+        TestSuite.TestCase sequentialCase = baseCase("same-results");
+        sequentialCase.setIterations(2);
+        sequentialCase.setAlgorithms(EnumSet.allOf(MazeSolver.Algorithm.class));
+        sequentialSuite.addTestCase(sequentialCase);
+
+        TestSuite parallelSuite = new TestSuite("execution-mode");
+        TestSuite.TestCase parallelCase = baseCase("same-results");
+        parallelCase.setIterations(2);
+        parallelCase.setAlgorithms(EnumSet.allOf(MazeSolver.Algorithm.class));
+        parallelSuite.setExecutionMode(TestSuite.ExecutionMode.FIXED_PARALLEL);
+        parallelSuite.addTestCase(parallelCase);
+
+        List<ExperimentResult> sequential = ExperimentRunner.run(sequentialSuite);
+        List<ExperimentResult> parallel = ExperimentRunner.run(parallelSuite);
+        require(sequential.size() == parallel.size(),
+                "Execution modes returned different result counts.");
+        for (int index = 0; index < sequential.size(); index++) {
+            ExperimentResult left = sequential.get(index);
+            ExperimentResult right = parallel.get(index);
+            require(left.getConfigurationId().equals(right.getConfigurationId())
+                    && left.getIteration() == right.getIteration()
+                    && left.getAlgorithm() == right.getAlgorithm()
+                    && left.isSolved() == right.isSolved()
+                    && left.getPathCost() == right.getPathCost()
+                    && left.getNodesExplored() == right.getNodesExplored(),
+                    "Parallel execution changed deterministic solver results.");
+        }
+    }
+
+    private static void testAdaptiveExperimentRunCompletes() {
+        TestSuite suite = new TestSuite("adaptive-execution");
+        TestSuite.TestCase testCase = baseCase("adaptive-row");
+        testCase.setIterations(2);
+        testCase.setAlgorithms(EnumSet.of(
+                MazeSolver.Algorithm.UCS, MazeSolver.Algorithm.A_STAR));
+        suite.setExecutionMode(TestSuite.ExecutionMode.ADAPTIVE_PARALLEL);
+        suite.addTestCase(testCase);
+
+        List<ExperimentResult> results = ExperimentRunner.run(suite);
+        require(results.size() == 4, "Adaptive execution returned an unexpected result count.");
+        require(results.get(0).getIteration() == 1
+                && results.get(2).getIteration() == 2,
+                "Adaptive execution changed deterministic iteration ordering.");
+        require(ExperimentRunner.getActiveWorkerCount() == 0,
+                "Adaptive execution did not reset worker state after completion.");
+    }
+
+    private static void testParallelMapGenerationUsesMultipleWorkers() throws Exception {
+        TestSuite suite = new TestSuite("parallel-map-workers");
+        TestSuite.TestCase testCase = baseCase("parallel-map-row");
+        testCase.setRows(220);
+        testCase.setColumns(220);
+        testCase.setIterations(12);
+        testCase.setAlgorithms(EnumSet.of(MazeSolver.Algorithm.GREEDY));
+        suite.setExecutionMode(TestSuite.ExecutionMode.FIXED_PARALLEL);
+        suite.addTestCase(testCase);
+
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        Thread runner = new Thread(() -> {
+            try {
+                List<ExperimentResult> results = ExperimentRunner.run(suite);
+                require(results.size() == 12,
+                        "Parallel map worker test returned an unexpected result count.");
+            } catch (Throwable throwable) {
+                failure.set(throwable);
+            }
+        }, "regression-parallel-map-workers");
+        runner.start();
+        int peakMapWorkers = 0;
+        while (runner.isAlive()) {
+            peakMapWorkers = Math.max(
+                    peakMapWorkers, ExperimentRunner.getActiveMapWorkerCount());
+            Thread.sleep(1L);
+        }
+        runner.join();
+        if (failure.get() != null) {
+            throw new AssertionError(
+                    "Parallel map worker test failed.", failure.get());
+        }
+        require(peakMapWorkers > 1,
+                "Parallel scheduler never ran more than one map worker.");
+    }
+
+    private static void testSuiteWideParallelQueuePreservesRowOrder() {
+        TestSuite suite = new TestSuite("suite-wide-queue");
+        TestSuite.TestCase first = baseCase("first-row");
+        first.setIterations(2);
+        first.setAlgorithms(EnumSet.of(MazeSolver.Algorithm.BFS));
+        TestSuite.TestCase second = baseCase("second-row");
+        second.setIterations(2);
+        second.setAlgorithms(EnumSet.of(MazeSolver.Algorithm.UCS));
+        suite.setExecutionMode(TestSuite.ExecutionMode.FIXED_PARALLEL);
+        suite.addTestCase(first);
+        suite.addTestCase(second);
+
+        List<ExperimentResult> results = ExperimentRunner.run(suite);
+        require(results.size() == 4, "Suite-wide queue returned an unexpected result count.");
+        require(results.get(0).getConfigurationId().equals("first-row")
+                && results.get(1).getConfigurationId().equals("first-row")
+                && results.get(2).getConfigurationId().equals("second-row")
+                && results.get(3).getConfigurationId().equals("second-row"),
+                "Suite-wide queue changed test-case result ordering.");
     }
 
     private static void testSuitePersistenceAndCsvExport() throws Exception {

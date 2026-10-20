@@ -45,7 +45,41 @@ try {
         throw "Regression tests failed."
     }
 
-    & $java -cp $classes app.MS
+    $javaOptions = @()
+    $preferencesPath = Join-Path $env:USERPROFILE ".maze-solver\preferences.properties"
+    $configuredHeapGb = 0
+    if (Test-Path -LiteralPath $preferencesPath) {
+        $preferenceLine = Get-Content -LiteralPath $preferencesPath |
+            Where-Object { $_ -match '^maxHeapGb=(\d+)$' } |
+            Select-Object -First 1
+        if ($null -ne $preferenceLine -and $preferenceLine -match '^maxHeapGb=(\d+)$') {
+            $configuredHeapGb = [int]$Matches[1]
+        }
+    }
+    if ($configuredHeapGb -ge 1 -and $configuredHeapGb -le 64) {
+        $javaOptions += "-Xmx${configuredHeapGb}g"
+        Write-Host "Using configured maximum heap: ${configuredHeapGb} GB"
+    } else {
+        $memory = Get-CimInstance -ClassName Win32_OperatingSystem
+        $availableGb = [double]$memory.FreePhysicalMemory / 1048576.0
+        $totalGb = [double]$memory.TotalVisibleMemorySize / 1048576.0
+        # Keep room for Windows and other applications while adapting to
+        # memory already in use when the launcher starts.
+        $automaticHeapGb = [math]::Floor([math]::Min(
+                $availableGb * 0.70,
+                $totalGb * 0.75))
+        if ($automaticHeapGb -lt 1) {
+            $automaticHeapGb = 1
+        }
+        if ($automaticHeapGb -gt 64) {
+            $automaticHeapGb = 64
+        }
+        $javaOptions += "-Xmx${automaticHeapGb}g"
+        Write-Host ("Using automatic maximum heap: {0} GB " +
+                "(available system memory: {1:N1} GB)" -f
+                $automaticHeapGb, $availableGb)
+    }
+    & $java @javaOptions -cp $classes app.MS
     if ($LASTEXITCODE -ne 0) {
         throw "Maze-Solver exited with code $LASTEXITCODE."
     }

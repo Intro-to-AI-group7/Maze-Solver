@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 import app.Version;
-import maze.map.Maze;
 import maze.search.MazeSolver;
 
 /**
@@ -58,6 +57,7 @@ public final class TestSuiteIO {
         properties.setProperty("automaticExport", Boolean.toString(suite.isAutomaticExport()));
         properties.setProperty("exportDirectory",
                 suite.getExportDirectory() == null ? "" : suite.getExportDirectory());
+        properties.setProperty("executionMode", suite.getExecutionMode().name());
         properties.setProperty("rowCount", Integer.toString(suite.getTestCases().size()));
 
         for (int index = 0; index < suite.getTestCases().size(); index++) {
@@ -103,6 +103,16 @@ public final class TestSuiteIO {
         suite.setAutomaticExport(parseBoolean(properties, "automaticExport"));
         String exportDirectory = properties.getProperty("exportDirectory", "");
         suite.setExportDirectory(exportDirectory.isEmpty() ? null : exportDirectory);
+        String executionMode = properties.getProperty("executionMode");
+        if (executionMode == null) {
+            suite.setParallelExecution(parseOptionalBoolean(properties, "parallelExecution", false));
+        } else {
+            try {
+                suite.setExecutionMode(TestSuite.ExecutionMode.valueOf(executionMode));
+            } catch (IllegalArgumentException exception) {
+                throw new IOException("Invalid executionMode.", exception);
+            }
+        }
         int rowCount = parseInt(properties, "rowCount");
         if (rowCount < 1) {
             throw new IOException("Suite must contain at least one row.");
@@ -202,6 +212,7 @@ public final class TestSuiteIO {
                     Base64.getEncoder().encodeToString(
                             row.getSavedMapText().getBytes(StandardCharsets.UTF_8)));
         }
+
         if (row.getSavedMapName() != null) {
             properties.setProperty(prefix + "savedMapName", row.getSavedMapName());
         }
@@ -211,6 +222,12 @@ public final class TestSuiteIO {
             algorithms.add(algorithm.name());
         }
         properties.setProperty(prefix + "algorithms", algorithms.toString());
+    }
+
+    private static boolean parseOptionalBoolean(
+            Properties properties, String key, boolean defaultValue) throws IOException {
+        String value = properties.getProperty(key);
+        return value == null ? defaultValue : parseBoolean(properties, key);
     }
 
     private static TestSuite.TestCase readRow(Properties properties, int index) throws IOException {
