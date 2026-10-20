@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DOC="$ROOT/doc"
 LATEX="$DOC/latex"
-PDF="$DOC/Maze-Solver-docs_V0.7.pdf"
+PDF="$DOC/Maze-Solver-docs_V0.8.1.pdf"
 
 install_missing() {
     local command_name="$1"
@@ -44,7 +44,7 @@ trap cleanup EXIT
 (cd "$DOC" && doxygen Doxyfile)
 
 while IFS= read -r -d '' file; do
-    sed -i -E 's/\\newline([A-Za-z])/\\newline{}\\1/g' "$file"
+    sed -i 's/\\newline/\\newline{}/g' "$file"
 done < <(find "$LATEX" -maxdepth 1 -type f -name '*.tex' -print0)
 
 (cd "$LATEX" && xelatex -interaction=nonstopmode refman.tex)
