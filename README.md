@@ -702,6 +702,20 @@ bundles include the Java runtime and do not require Java to be installed on
 the target machine. The generated `build/` and `dist/` directories are
 ignored by Git.
 
+On macOS, build the native installer on a Mac with JDK 21 or newer:
+
+```bash
+chmod +x scripts/build-executable-macos.sh
+./scripts/build-executable-macos.sh
+```
+
+This creates `dist/MazeSolver-0.8.1.dmg`. The package architecture matches
+the installed JDK: use an Intel JDK for Intel Macs or an Apple-silicon JDK for
+Apple-silicon Macs. `jpackage` does not cross-build native macOS packages from
+Windows or Linux. The generated application is unsigned by default; public
+distribution may require an Apple Developer ID certificate, code signing, and
+notarization.
+
 Optional cleanup of compiled artifacts:
 
 ```powershell
