@@ -1,5 +1,6 @@
 package ui;
 
+import app.ApplicationPreferences;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -7,6 +8,8 @@ import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
@@ -15,14 +18,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -74,7 +75,6 @@ public final class MazeRenderer {
     // Application defaults and theme
     // ---------------------------------------------------------------------
 
-    private static final String TITLE_SCREEN_IMAGE_PATH = "images/TitleImage.jpg";
     private static final String DEFAULT_SESSION_ALGORITHM = "A*";
     private static final boolean DEFAULT_SHOW_NEIGHBORS = true;
     private static final boolean DEFAULT_SHOW_WEIGHTS = false;
@@ -153,6 +153,7 @@ public final class MazeRenderer {
      * <p>This is the recommended public entrypoint for GUI startup.
      */
     public static void launchFromTitleScreen() {
+        UITheme.install();
         showTitleScreen();
     }
 
@@ -263,7 +264,7 @@ public final class MazeRenderer {
         titleFrame.setSize(1280, 720);
         titleFrame.setLocationRelativeTo(null);
 
-        JPanel mainPanel = new BackgroundImagePanel(TITLE_SCREEN_IMAGE_PATH);
+        JPanel mainPanel = new TitlePanel();
         mainPanel.setLayout(new GridBagLayout());
 
         JButton importButton = new JButton("IMPORT MAZE");
@@ -291,12 +292,21 @@ public final class MazeRenderer {
             }
             TestSuiteWindow.showWindow(MazeRenderer::returnToTitleScreen);
         });
+        JButton themeButton = new JButton(UITheme.isDark() ? "LIGHT MODE" : "DARK MODE");
+        styleTitleButton(themeButton);
+        themeButton.addActionListener(e -> {
+            UITheme.toggle();
+            themeButton.setText(UITheme.isDark() ? "LIGHT MODE" : "DARK MODE");
+        });
+        JButton settingsButton = new JButton("SETTINGS");
+        styleTitleButton(settingsButton);
+        settingsButton.addActionListener(e -> showApplicationSettings());
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(270, 0, 12, 0);
+        gbc.insets = new Insets(150, 0, 12, 0);
 
         mainPanel.add(importButton, gbc);
 
@@ -306,8 +316,110 @@ public final class MazeRenderer {
         gbc.gridy = 2;
         gbc.insets = new Insets(12, 0, 0, 0);
         mainPanel.add(configureTestsButton, gbc);
+        gbc.gridy = 3;
+        gbc.insets = new Insets(18, 0, 0, 0);
+        mainPanel.add(themeButton, gbc);
+        gbc.gridy = 4;
+        gbc.insets = new Insets(12, 0, 0, 0);
+        mainPanel.add(settingsButton, gbc);
         titleFrame.add(mainPanel);
+        UITheme.apply(titleFrame);
         titleFrame.setVisible(true);
+    }
+
+    private static void showApplicationSettings() {
+        int configuredHeapGb = ApplicationPreferences.getMaxHeapGb();
+        String currentHeap = formatBytes(Runtime.getRuntime().maxMemory());
+        JSpinner heapSpinner = new JSpinner(new SpinnerNumberModel(
+                configuredHeapGb, 0, 64, 1));
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.insets = new Insets(4, 4, 4, 4);
+        panel.add(new JLabel("Maximum heap for next launch (GB, 0 = automatic):"), constraints);
+        constraints.gridx = 1;
+        panel.add(heapSpinner, constraints);
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.gridwidth = 2;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(new JLabel("<html>Current JVM limit: " + currentHeap
+                + "<br>Automatic mode uses current available system memory and reserves room for Windows and other applications."
+                + "<br>This process cannot change its heap limit. The new value applies after relaunch.</html>"),
+                constraints);
+
+        int result = JOptionPane.showConfirmDialog(
+                titleFrame, panel, "Application Settings",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+        try {
+            ApplicationPreferences.setMaxHeapGb((Integer) heapSpinner.getValue());
+            int restart = JOptionPane.showConfirmDialog(
+                    titleFrame,
+                    "The memory setting was saved. Restart Maze-Solver now to apply it?",
+                    "Restart Required",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE);
+            if (restart == JOptionPane.YES_OPTION) {
+                restartApplication();
+            }
+        } catch (IOException | IllegalArgumentException exception) {
+            JOptionPane.showMessageDialog(
+                    titleFrame,
+                    "Could not save settings: " + exception.getMessage(),
+                    "Settings Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static void restartApplication() {
+        File launcher = new File(System.getProperty("user.dir"),
+                "scripts" + File.separator + "compile-and-run.ps1");
+        String javaExecutable = System.getProperty("java.home")
+                + File.separator + "bin" + File.separator + "java"
+                + (System.getProperty("os.name").toLowerCase().contains("win")
+                        ? ".exe" : "");
+        String classPath = System.getProperty("java.class.path");
+        try {
+            if (launcher.isFile()) {
+                new ProcessBuilder(
+                        "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass",
+                        "-File", launcher.getAbsolutePath()).start();
+            } else {
+                int configuredHeapGb = ApplicationPreferences.getMaxHeapGb();
+                List<String> command = new ArrayList<>();
+                command.add(javaExecutable);
+                if (configuredHeapGb > 0) {
+                    command.add("-Xmx" + configuredHeapGb + "g");
+                }
+                command.add("-cp");
+                command.add(classPath);
+                command.add("app.MS");
+                new ProcessBuilder(command).start();
+            }
+            if (titleFrame != null) {
+                titleFrame.dispose();
+            }
+            if (mazeFrame != null) {
+                mazeFrame.dispose();
+            }
+            TestSuiteWindow.closeWindow();
+            System.exit(0);
+        } catch (IOException exception) {
+            JOptionPane.showMessageDialog(
+                    titleFrame,
+                    "Could not restart Maze-Solver: " + exception.getMessage(),
+                    "Restart Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static String formatBytes(long bytes) {
+        return String.format("%.1f GB", bytes / 1024.0 / 1024.0 / 1024.0);
     }
 
     /**
@@ -376,8 +488,8 @@ public final class MazeRenderer {
      */
     private static RandomMazeOptions promptForRandomMazeDimensions() {
         while (true) {
-            JSpinner rowSpinner = new JSpinner(new SpinnerNumberModel(60, 3, 5000, 1));
-            JSpinner colSpinner = new JSpinner(new SpinnerNumberModel(60, 3, 5000, 1));
+            JSpinner rowSpinner = new JSpinner(new SpinnerNumberModel(100, 3, 5000, 1));
+            JSpinner colSpinner = new JSpinner(new SpinnerNumberModel(100, 3, 5000, 1));
             JCheckBox weightedCheckBox = new JCheckBox("Enable movement weights");
             JCheckBox sameDirectionCheckBox =
                     new JCheckBox("Use the same cost in both directions", true);
@@ -421,9 +533,15 @@ public final class MazeRenderer {
             addLabeledControl(panel, gbc, 4, "Minimum weight:", minWeightSpinner);
             addLabeledControl(panel, gbc, 5, "Maximum weight:", maxWeightSpinner);
 
-            int result = JOptionPane.showConfirmDialog(
-                    null, panel, "Generate Random Maze",
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            UITheme.apply(panel);
+            JOptionPane optionPane = new JOptionPane(
+                    panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+            javax.swing.JDialog dialog = optionPane.createDialog(null, "Generate Random Maze");
+            UITheme.apply(dialog);
+            dialog.setVisible(true);
+            int result = optionPane.getValue() instanceof Integer
+                    ? (Integer) optionPane.getValue() : JOptionPane.CANCEL_OPTION;
+            dialog.dispose();
             if (result != JOptionPane.OK_OPTION) {
                 return null;
             }
@@ -532,12 +650,12 @@ public final class MazeRenderer {
      * @param button title action button
      */
     private static void styleTitleButton(JButton button) {
-        button.setPreferredSize(new Dimension(200, 60));
+        button.setPreferredSize(new Dimension(220, 48));
         button.setFont(button.getFont().deriveFont(20f));
-        button.setBackground(new Color(65, 180, 220));
-        button.setForeground(Color.BLACK);
+        button.setBackground(UITheme.ACCENT);
+        button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        button.setBorder(BorderFactory.createEmptyBorder(8, 18, 8, 18));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
@@ -878,6 +996,7 @@ public final class MazeRenderer {
         mazeFrame.add(renderedGridScrollPane, BorderLayout.CENTER);
         mazeFrame.add(controlPanel, BorderLayout.SOUTH);
         mazeFrame.pack();
+        UITheme.apply(mazeFrame);
 
         clampAndCenterMazeFrame(rows, cols, controlPanel);
         mazeFrame.setVisible(true);
@@ -975,7 +1094,8 @@ public final class MazeRenderer {
                 }
 
                 // Draw subtle grid lines so individual nodes are easier to identify.
-                graphics.setColor(GRID_LINE_COLOR);
+                graphics.setColor(UITheme.isDark()
+                        ? new Color(255, 255, 255, 28) : GRID_LINE_COLOR);
                 int minX = startCol * cellSizePx;
                 int maxX = (endCol + 1) * cellSizePx;
                 int minY = startRow * cellSizePx;
@@ -1248,7 +1368,7 @@ public final class MazeRenderer {
      * @return constructed control panel
      */
     private static JPanel buildControlPanel() {
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 8));
 
         JButton startButton = new JButton("Start");
         JButton pauseButton = new JButton("Pause");
@@ -1259,6 +1379,7 @@ public final class MazeRenderer {
         JButton backButton = new JButton("Back to Main Menu");
         JButton zoomOutButton = new JButton("-");
         JButton zoomInButton = new JButton("+");
+        JButton themeButton = new JButton(UITheme.isDark() ? "Light" : "Dark");
 
         JLabel algorithmLabel = new JLabel("Algorithm:");
         JLabel delayLabel = new JLabel("Step Delay (ms):");
@@ -1303,6 +1424,10 @@ public final class MazeRenderer {
         saveMapButton.addActionListener(e -> handleSaveMapRequested());
         generateMapButton.addActionListener(e -> handleGenerateMapRequested());
         backButton.addActionListener(e -> returnFromMazeWindow());
+        themeButton.addActionListener(e -> {
+            UITheme.toggle();
+            themeButton.setText(UITheme.isDark() ? "Light" : "Dark");
+        });
         zoomOutButton.addActionListener(e -> adjustZoom(-1));
         zoomInButton.addActionListener(e -> adjustZoom(1));
 
@@ -1313,6 +1438,7 @@ public final class MazeRenderer {
         controlPanel.add(saveMapButton);
         controlPanel.add(generateMapButton);
         controlPanel.add(backButton);
+        controlPanel.add(themeButton);
         controlPanel.add(algorithmLabel);
         controlPanel.add(algorithmSelector);
         controlPanel.add(delayLabel);
@@ -1873,9 +1999,31 @@ public final class MazeRenderer {
             return GOAL_CELL_COLOR;
         }
         if (!maze.isOccupied(row, col) || node == null) {
-            return BLOCKED_CELL_COLOR;
+            return UITheme.isDark() ? new Color(0x263449) : BLOCKED_CELL_COLOR;
         }
-        return OPEN_CELL_COLOR;
+        return UITheme.isDark() ? new Color(0xD9E5F2) : new Color(0xF8FAFC);
+    }
+
+    static void refreshTheme() {
+        if (renderedMaze == null || renderedCellColors == null) {
+            return;
+        }
+        for (int row = 0; row < renderedMaze.getLength(); row++) {
+            for (int col = 0; col < renderedMaze.getWidth(); col++) {
+                Color current = renderedCellColors[row][col];
+                if (current == null || current.equals(OPEN_CELL_COLOR)
+                        || current.equals(new Color(0xF8FAFC))
+                        || current.equals(new Color(0xD9E5F2))
+                        || current.equals(new Color(0x243447))
+                        || current.equals(BLOCKED_CELL_COLOR)
+                        || current.equals(new Color(0x263449))) {
+                    renderedCellColors[row][col] = getDefaultCellColor(renderedMaze, row, col);
+                }
+            }
+        }
+        if (renderedGridPanel != null) {
+            renderedGridPanel.repaint();
+        }
     }
 
     /**
@@ -2034,78 +2182,46 @@ public final class MazeRenderer {
     // Internal UI support classes
     // ---------------------------------------------------------------------
 
-    /**
-     * @brief JPanel that paints a stretched background image.
-     */
-    private static class BackgroundImagePanel extends JPanel {
+    private static class TitlePanel extends JPanel {
         private static final long serialVersionUID = 1L;
-        private final transient BufferedImage backgroundImage;
 
-        /**
-         * @brief Creates a panel backed by the image at the given path.
-         *
-         * @param imagePath path to image file
-         */
-        BackgroundImagePanel(String imagePath) {
-            BufferedImage loaded = null;
-            try {
-                loaded = loadImageFromClasspath(imagePath);
-                if (loaded == null) {
-                    loaded = ImageIO.read(new File(imagePath));
-                }
-                if (loaded == null) {
-                    loaded = ImageIO.read(new File("src" + File.separator + imagePath));
-                }
-            } catch (Exception ignored) {
-                loaded = null;
-            }
-            this.backgroundImage = loaded;
-        }
-
-        /**
-         * @brief Loads image bytes from classpath for JAR-compatible startup assets.
-         *
-         * @param imagePath relative image path (for example, images/TitleImage.jpg)
-         * @return decoded image, or null when no matching classpath resource exists
-         */
-        private static BufferedImage loadImageFromClasspath(String imagePath) {
-            String normalizedPath = imagePath.replace('\\', '/');
-            String[] candidates = {
-                    normalizedPath,
-                    "/" + normalizedPath,
-                    "src/" + normalizedPath,
-                    "/src/" + normalizedPath
-            };
-
-            for (String candidate : candidates) {
-                try (InputStream stream = MazeRenderer.class.getResourceAsStream(candidate)) {
-                    if (stream != null) {
-                        BufferedImage image = ImageIO.read(stream);
-                        if (image != null) {
-                            return image;
-                        }
-                    }
-                } catch (Exception ignored) {
-                    // Try next candidate resource path.
-                }
-            }
-
-            return null;
-        }
-
-        /**
-         * @brief Paints stretched image or fallback solid background.
-         */
         @Override
         protected void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
-            if (backgroundImage != null) {
-                graphics.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
-                return;
+            Graphics2D g = (Graphics2D) graphics.create();
+            g.setPaint(new GradientPaint(0, 0, UITheme.background(),
+                    getWidth(), getHeight(), UITheme.surface()));
+            g.fillRect(0, 0, getWidth(), getHeight());
+            int centerX = getWidth() / 2;
+            int top = 70;
+            g.setColor(UITheme.ACCENT);
+            g.fillRoundRect(centerX - 46, top, 92, 92, 24, 24);
+            g.setColor(Color.WHITE);
+            g.setStroke(new java.awt.BasicStroke(5f,
+                    java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
+            int cell = 16;
+            int left = centerX - 32;
+            int gridTop = top + 14;
+            for (int row = 0; row < 4; row++) {
+                for (int col = 0; col < 4; col++) {
+                    if ((row == 1 && col == 1) || (row == 2 && col == 2)) {
+                        continue;
+                    }
+                    g.drawRoundRect(left + col * cell, gridTop + row * cell,
+                            cell, cell, 3, 3);
+                }
             }
-
-            graphics.setColor(new Color(30, 30, 30));
-            graphics.fillRect(0, 0, getWidth(), getHeight());
+            g.setColor(UITheme.text());
+            g.setFont(getFont().deriveFont(Font.BOLD, 32f));
+            String title = "MAZE SOLVER";
+            int titleWidth = g.getFontMetrics().stringWidth(title);
+            g.drawString(title, centerX - titleWidth / 2, top + 145);
+            g.setColor(UITheme.muted());
+            g.setFont(getFont().deriveFont(Font.PLAIN, 15f));
+            String subtitle = "Explore. Solve. Understand.";
+            int subtitleWidth = g.getFontMetrics().stringWidth(subtitle);
+            g.drawString(subtitle, centerX - subtitleWidth / 2, top + 174);
+            g.dispose();
         }
     }
 }
