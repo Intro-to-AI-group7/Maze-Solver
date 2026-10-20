@@ -1,6 +1,6 @@
-# Maze-Solver 0.8.0
+# Maze-Solver 0.8.1
 
-Maze-Solver 0.8.0 is a Java Swing desktop app for loading, visualizing, and
+Maze-Solver 0.8.1 is a Java Swing desktop app for loading, visualizing, and
 solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First
 Search, and weighted A*. Maze files support optional per-direction movement
 costs while preserving the original unweighted format.
@@ -60,6 +60,13 @@ Maze-Solver has six main responsibilities:
 - Configurable test-suite workflow from the title screen.
 - Seeded experiment generation with adjustable map size, interior obstacle
   density, reachability, endpoint placement, and movement-cost policies.
+- Generated experiment maps use a seeded traditional corridor-maze backbone.
+  The configured blocked percentage is applied by opening additional cells or
+  removing dead-end corridors, so density changes preserve long orthogonal
+  walls and one-cell-wide passages instead of producing speckled noise.
+- Guaranteed-solvable generation retries disconnected layouts and uses a
+  seeded winding connector only as a final fallback. Fixed endpoints are
+  preserved during density adjustment.
 - Shared-map comparisons across any selected subset of the five algorithms.
 - Suite save/load, progress and cancellation, per-result animated review,
   suite map export, and UTF-8 CSV export.
@@ -70,7 +77,7 @@ Maze-Solver has six main responsibilities:
   generation.
 - Windows, macOS, or Linux with desktop GUI support.
 - No external dependencies required.
-- Release version: `0.8.0` (also exposed by `app.Version.RELEASE`).
+- Release version: `0.8.1` (also exposed by `app.Version.RELEASE`).
 
 ## Quick Start
 
@@ -132,7 +139,9 @@ shown once.
 To configure experiments, choose **Configure Tests** on the title screen. Add
 one row per test condition, edit the row values, select algorithms and
 iterations, then choose **Run Tests**. Each generated-map iteration creates
-one map and uses that same map for every selected algorithm. Saved-map rows
+one map and uses that same map for every selected algorithm. Generated layouts
+retain the suite's row/column, blocked-percent, reachability, endpoint, seed,
+and movement-cost settings. Saved-map rows
 reuse their embedded map for every iteration. Automatic seeds are materialized
 when a suite is saved so later generated-map runs can be reproduced. Results
 can be exported manually or automatically to CSV, and unique maps can be
@@ -152,7 +161,7 @@ and display `N/A (saved map)` instead of a generated seed.
 Test suites use the human-readable `.mstests` extension; individual maps use
 the human-readable `.msmap` extension. Import and save dialogs filter and
 normalize to their corresponding extension and open in the application
-directory. A saved suite contains `applicationVersion=0.8.0` and
+directory. A saved suite contains `applicationVersion=0.8.1` and
 `version=1`; the former identifies the application release and the latter is
 the stable suite schema version. Older schema-version-1 suites remain
 readable.
@@ -492,7 +501,7 @@ Maze-Solver/
 
 Core packages and classes:
 
-- `app.MS`: application entry point for release 0.8.0.
+- `app.MS`: application entry point for release 0.8.1.
 - `app.Version`: authoritative application release metadata.
 - `maze.map.Maze`: model for occupancy, neighbors, directional costs, start, goal,
   generation, and validation.
@@ -637,7 +646,7 @@ Convenience scripts are available under `scripts\`:
 The first script compiles the application and regression tests, runs the
 regression suite, and launches the Swing application. The second creates a
 self-extracting single-file Windows executable:
-`dist\MazeSolver-0.8.0.exe`. The executable embeds the complete application
+`dist\MazeSolver-0.8.1.exe`. The executable embeds the complete application
 image and Java runtime, extracts to a temporary directory when launched,
 waits for the application to close, and removes its temporary files. It can
 be distributed as one file and does not require Java on the target machine.
@@ -645,7 +654,7 @@ Normal launches do not open a terminal window. For troubleshooting, launch
 the executable with the optional debug flag:
 
 ```powershell
-.\dist\MazeSolver-0.8.0.exe --debug
+.\dist\MazeSolver-0.8.1.exe --debug
 ```
 
 ### Developer Notes: experiment execution
@@ -717,7 +726,7 @@ The script checks for Doxygen and XeLaTeX. If either is missing, it asks before
 installing it through an available package manager. It generates the HTML
 reference, builds the PDF, and removes only the generated `doc\latex` folder.
 The remaining documentation outputs are `doc\html`,
-`doc\Maze-Solver-docs_V0.8.0.pdf`, and `doc\Doxyfile`.
+`doc\Maze-Solver-docs_V0.8.1.pdf`, and `doc\Doxyfile`.
 
 On Linux, use the equivalent script:
 

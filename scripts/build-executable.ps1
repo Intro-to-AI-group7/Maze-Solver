@@ -10,7 +10,7 @@ $jar = Join-Path $package "MazeSolver.jar"
 $staging = Join-Path $root "build\self-extractor"
 $payload = Join-Path $staging "MazeSolver-payload.zip"
 $wrapperProject = Join-Path $staging "wrapper"
-$singleFile = Join-Path $dist "MazeSolver-0.8.0.exe"
+$singleFile = Join-Path $dist "MazeSolver-0.8.1.exe"
 $jpackageCommand = Get-Command jpackage -ErrorAction Stop
 $javaBin = Split-Path -Parent $jpackageCommand.Source
 $javac = Join-Path $javaBin "javac.exe"
@@ -57,7 +57,7 @@ try {
         --main-jar (Split-Path -Leaf $jar) `
         --main-class app.MS `
         --dest $dist `
-        --app-version 0.8.0 `
+        --app-version 0.8.1 `
         --vendor "Intro-to-AI-group7"
     if ($LASTEXITCODE -ne 0) {
         throw "Executable packaging failed."
@@ -83,10 +83,10 @@ try {
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <AssemblyName>MazeSolver</AssemblyName>
     <RootNamespace>MazeSolverLauncher</RootNamespace>
-    <Version>0.8.0</Version>
-    <AssemblyVersion>0.8.0.0</AssemblyVersion>
-    <FileVersion>0.8.0.0</FileVersion>
-    <InformationalVersion>0.8.0-beta</InformationalVersion>
+    <Version>0.8.1</Version>
+    <AssemblyVersion>0.8.1.0</AssemblyVersion>
+    <FileVersion>0.8.1.0</FileVersion>
+    <InformationalVersion>0.8.1</InformationalVersion>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>

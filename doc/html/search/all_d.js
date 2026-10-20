@@ -1,27 +1,7 @@
 var searchData=
 [
-  ['main_0',['main',['../classapp_1_1_m_s.html#ab69f53b767e2d9361eea83bb01caffdb',1,'app.MS.main()'],['../classexperiments_1_1_experiment_cli.html#aee9b4e56239a62b361163a5be38d52e5',1,'experiments.ExperimentCli.main()']]],
-  ['manual_5fseed_1',['MANUAL_SEED',['../enumexperiments_1_1_test_suite_1_1_map_source.html#a9b045f669b3482dc2767d1809b86edc6',1,'experiments::TestSuite::MapSource']]],
-  ['map_2',['MAP',['../enumexperiments_1_1_experiment_runner_1_1_task_priority.html#a98eee0180c97844d72893bfdaf102c5f',1,'experiments::ExperimentRunner::TaskPriority']]],
-  ['map_20format_3',['Weighted map format',['../index.html#autotoc_md8',1,'']]],
-  ['map_5fextension_4',['MAP_EXTENSION',['../classmaze_1_1map_1_1_maze.html#a0e1e20067ee0e2d4150ba4d563ef1902',1,'maze::map::Maze']]],
-  ['mapprogresslistener_5',['MapProgressListener',['../interfaceexperiments_1_1_experiment_runner_1_1_map_progress_listener.html',1,'experiments::ExperimentRunner']]],
-  ['mapsource_6',['MapSource',['../enumexperiments_1_1_test_suite_1_1_map_source.html',1,'experiments::TestSuite']]],
-  ['max_5fmovement_5fcost_7',['MAX_MOVEMENT_COST',['../classmaze_1_1map_1_1_maze.html#aae918ed77d89503d58bf990e64cc19a7',1,'maze::map::Maze']]],
-  ['maze_8',['Maze',['../classmaze_1_1map_1_1_maze.html',1,'maze.map.Maze'],['../classmaze_1_1map_1_1_maze.html#a73cd7bf55e33eaa7b7632025094080ef',1,'maze.map.Maze.Maze()']]],
-  ['maze_20file_20format_9',['Maze File Format',['../index.html#autotoc_md7',1,'']]],
-  ['maze_20files_10',['Included Maze Files',['../index.html#autotoc_md9',1,'']]],
-  ['maze_20solver_200_208_200_11',['Maze-Solver 0.8.0',['../index.html',1,'']]],
-  ['maze_2ejava_12',['Maze.java',['../_maze_8java.html',1,'']]],
-  ['maze_3a_3amap_13',['map',['../namespacemaze_1_1map.html',1,'maze']]],
-  ['maze_3a_3asearch_14',['search',['../namespacemaze_1_1search.html',1,'maze']]],
-  ['mazefileio_15',['MazeFileIO',['../classmaze_1_1map_1_1_maze_file_i_o.html',1,'maze::map']]],
-  ['mazefileio_2ejava_16',['MazeFileIO.java',['../_maze_file_i_o_8java.html',1,'']]],
-  ['mazerenderer_17',['MazeRenderer',['../classui_1_1_maze_renderer.html',1,'ui']]],
-  ['mazerenderer_2ejava_18',['MazeRenderer.java',['../_maze_renderer_8java.html',1,'']]],
-  ['mazesolver_19',['MazeSolver',['../classmaze_1_1search_1_1_maze_solver.html',1,'maze.search.MazeSolver'],['../classmaze_1_1search_1_1_maze_solver.html#a0849cfb0be6a0f74b3fb7a47fac0fc0d',1,'maze.search.MazeSolver.MazeSolver()']]],
-  ['mazesolver_2ejava_20',['MazeSolver.java',['../_maze_solver_8java.html',1,'']]],
-  ['min_5fmovement_5fcost_21',['MIN_MOVEMENT_COST',['../classmaze_1_1map_1_1_maze.html#a8adae223bd1afd13d2fcf331fbf28d7f',1,'maze::map::Maze']]],
-  ['ms_22',['MS',['../classapp_1_1_m_s.html',1,'app.MS'],['../classapp_1_1_m_s.html#a032eb498db3d86032eae8dba597fd71e',1,'app.MS.MS()']]],
-  ['ms_2ejava_23',['MS.java',['../_m_s_8java.html',1,'']]]
+  ['launch_20from_20release_20jar_0',['Launch From Release JAR',['../index.html#autotoc_md14',1,'']]],
+  ['launchfromtitlescreen_1',['launchFromTitleScreen',['../classui_1_1_maze_renderer.html#a7629fee0bfcce84fa1236467aae37eab',1,'ui::MazeRenderer']]],
+  ['license_2',['License',['../index.html#autotoc_md18',1,'']]],
+  ['load_3',['load',['../classexperiments_1_1_test_suite_i_o.html#a84b76664e41ef89c881d4095ae263969',1,'experiments::TestSuiteIO']]]
 ];

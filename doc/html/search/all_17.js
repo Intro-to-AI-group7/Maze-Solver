@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['weightdisplaystate_0',['WeightDisplayState',['../enumui_1_1_maze_renderer_1_1_weight_display_state.html',1,'ui::MazeRenderer']]],
-  ['weighted_20map_20format_1',['Weighted map format',['../index.html#autotoc_md8',1,'']]],
-  ['west_2',['WEST',['../enummaze_1_1map_1_1_maze_1_1_dir.html#a1df6be459e46b8edeb84072f816477b6',1,'maze::map::Maze::Dir']]]
+  ['validate_0',['validate',['../classexperiments_1_1_test_suite.html#a9426ca37452c358492055c24f2ae53a2',1,'experiments.TestSuite.validate()'],['../classexperiments_1_1_test_suite_1_1_test_case.html#a561d6ed029a4a31510263532f85edc55',1,'experiments.TestSuite.TestCase.validate()']]],
+  ['validateneighborconnections_1',['validateNeighborConnections',['../classmaze_1_1map_1_1_maze.html#a0a3180154e1d22d2640dcd5ea401f178',1,'maze::map::Maze']]],
+  ['version_2',['Version',['../classapp_1_1_version.html',1,'app']]],
+  ['version_2ejava_3',['Version.java',['../_version_8java.html',1,'']]]
 ];

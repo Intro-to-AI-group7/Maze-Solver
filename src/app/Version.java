@@ -5,7 +5,7 @@ package app;
  */
 public final class Version {
     /** Current application release version. */
-    public static final String RELEASE = "0.8.0";
+    public static final String RELEASE = "0.8.1";
 
     private Version() {
     }

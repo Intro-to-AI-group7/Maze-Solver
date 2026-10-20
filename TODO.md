@@ -362,7 +362,7 @@ the foundation phase is deliberately started.
 - [ ] Add optional benchmark charts or a report-oriented analysis export.
 - [ ] Add an application-level logging toggle to control verbose diagnostic
       console output.
-- [x] Regenerate the Doxygen HTML reference and release PDF for the 0.8.0
+- [x] Regenerate the Doxygen HTML reference and release PDF for the 0.8.1
       release documentation pass.
 - [ ] Improve user-facing explanations for disabled saved-map configuration
       fields if usability testing identifies confusion.

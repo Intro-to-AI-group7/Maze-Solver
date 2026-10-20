@@ -387,9 +387,13 @@ public class Maze {
      * Generates a seeded experiment map from a validated test configuration.
      *
      * <p>The outside border is always blocked and is excluded from the
-     * requested density calculation. The generated map uses one effective
-     * seed for its layout, endpoint selection, and movement costs. Algorithms
-     * should run against the returned maze without regenerating it.
+     * requested density calculation. The interior starts as a seeded,
+     * one-cell-wide traditional corridor maze. The requested density is then
+     * applied by opening additional cells or removing suitable dead ends,
+     * preserving the corridor structure instead of producing independent
+     * cell noise. The generated map uses one effective seed for its layout,
+     * endpoint selection, and movement costs. Algorithms should run against
+     * the returned maze without regenerating it.
      *
      * @param testCase validated experiment configuration
      * @param effectiveSeed seed resolved for the containing test-case row
@@ -425,7 +429,8 @@ public class Maze {
             if (testCase.getReachabilityMode() == TestSuite.ReachabilityMode.GUARANTEED_SOLVABLE
                     && !connected) {
                 if (attempt == maxAttempts - 1) {
-                    carveDirectConnection(open, startRow, startCol, goalRow, goalCol);
+                    carveRandomConnection(
+                            open, startRow, startCol, goalRow, goalCol, random);
                     connected = true;
                 } else {
                     continue;
@@ -466,11 +471,17 @@ public class Maze {
         boolean[][] open = new boolean[length][width];
         List<int[]> candidates = new ArrayList<>(interiorCells);
 
-        for (int row = 1; row < length - 1; row++) {
-            for (int col = 1; col < width - 1; col++) {
-                open[row][col] = true;
-                candidates.add(new int[] {row, col});
-            }
+        /*
+         * Start from a connected corridor backbone. Density changes are made
+         * afterward so obstacle percentages do not destroy the maze-like
+         * visual structure.
+         */
+        carveTraditionalMaze(open, 1, 1, random);
+        extendEvenInteriorEdges(open, random);
+
+        if (endpointMode == TestSuite.EndpointMode.FIXED) {
+            open[testCase.getStartRow()][testCase.getStartColumn()] = true;
+            open[testCase.getGoalRow()][testCase.getGoalColumn()] = true;
         }
 
         if (endpointMode == TestSuite.EndpointMode.FIXED) {
@@ -483,18 +494,78 @@ public class Maze {
                     || (coordinate[0] == goalRow && coordinate[1] == goalColumn));
         }
 
+        for (int row = 1; row < length - 1; row++) {
+            for (int col = 1; col < width - 1; col++) {
+                if (!open[row][col]) {
+                    candidates.add(new int[] {row, col});
+                }
+            }
+        }
         Collections.shuffle(candidates, random);
         int requestedBlocked = (int) Math.round(
                 interiorCells * testCase.getBlockedPercent() / 100.0);
-        for (int index = 0; index < requestedBlocked && index < candidates.size(); index++) {
-            int[] coordinate = candidates.get(index);
-            open[coordinate[0]][coordinate[1]] = false;
+        int currentBlocked = countBlockedInterior(open);
+        if (requestedBlocked < currentBlocked) {
+            Collections.shuffle(candidates, random);
+            for (int index = 0; index < candidates.size()
+                    && currentBlocked > requestedBlocked; index++) {
+                int[] coordinate = candidates.get(index);
+                open[coordinate[0]][coordinate[1]] = true;
+                currentBlocked--;
+            }
+        } else if (requestedBlocked > currentBlocked) {
+            List<int[]> removable = new ArrayList<>();
+            for (int row = 1; row < length - 1; row++) {
+                for (int col = 1; col < width - 1; col++) {
+                    if (open[row][col]
+                            && !(endpointMode == TestSuite.EndpointMode.OPPOSITE_CORNERS
+                            && ((row == 1 && col == 1)
+                            || (row == length - 2 && col == width - 2)))
+                            && !(endpointMode == TestSuite.EndpointMode.FIXED
+                            && ((row == testCase.getStartRow()
+                            && col == testCase.getStartColumn())
+                            || (row == testCase.getGoalRow()
+                            && col == testCase.getGoalColumn())))) {
+                        removable.add(new int[] {row, col});
+                    }
+                }
+            }
+            Collections.shuffle(removable, random);
+            boolean changed = true;
+            while (changed && currentBlocked < requestedBlocked) {
+                changed = false;
+                for (int[] coordinate : removable) {
+                    if (open[coordinate[0]][coordinate[1]]
+                            && countOpenNeighbors(open, coordinate[0], coordinate[1]) <= 1) {
+                        open[coordinate[0]][coordinate[1]] = false;
+                        currentBlocked++;
+                        changed = true;
+                        if (currentBlocked >= requestedBlocked) {
+                            break;
+                        }
+                    }
+                }
+            }
         }
         if (endpointMode == TestSuite.EndpointMode.OPPOSITE_CORNERS) {
             open[1][1] = true;
             open[length - 2][width - 2] = true;
         }
         return open;
+    }
+
+    private static int countOpenNeighbors(boolean[][] open, int row, int col) {
+        int count = 0;
+        for (Dir direction : Dir.values()) {
+            int neighborRow = row + rowDelta(direction);
+            int neighborColumn = col + colDelta(direction);
+            if (neighborRow >= 1 && neighborRow < open.length - 1
+                    && neighborColumn >= 1 && neighborColumn < open[0].length - 1
+                    && open[neighborRow][neighborColumn]) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static int[][] selectEndpoints(
@@ -704,17 +775,55 @@ public class Maze {
         return false;
     }
 
-    private static void carveDirectConnection(
-            boolean[][] open, int startRow, int startCol, int goalRow, int goalCol) {
+    /**
+     * Carves a seeded randomized Manhattan connection between two endpoints.
+     *
+     * <p>This is used only after the density generator has exhausted its
+     * connectivity retries. Choosing each available axis randomly avoids
+     * turning opposite-corner endpoints into the same left-wall/bottom-wall
+     * corridor for every fallback map.
+     *
+     * @param open mutable occupancy matrix
+     * @param startRow start row coordinate
+     * @param startCol start column coordinate
+     * @param goalRow goal row coordinate
+     * @param goalCol goal column coordinate
+     * @param random seeded random source
+     */
+    private static void carveRandomConnection(
+            boolean[][] open, int startRow, int startCol,
+            int goalRow, int goalCol, Random random) {
         int row = startRow;
         int col = startCol;
         open[row][col] = true;
-        while (row != goalRow) {
-            row += Integer.signum(goalRow - row);
-            open[row][col] = true;
+        int waypointCount = Math.max(2,
+                Math.min(8, (Math.abs(goalRow - startRow) + Math.abs(goalCol - startCol)) / 32));
+        for (int waypoint = 0; waypoint < waypointCount; waypoint++) {
+            int waypointRow = 1 + random.nextInt(open.length - 2);
+            int waypointCol = 1 + random.nextInt(open[0].length - 2);
+            carveManhattanSegment(open, row, col, waypointRow, waypointCol, random);
+            row = waypointRow;
+            col = waypointCol;
         }
-        while (col != goalCol) {
-            col += Integer.signum(goalCol - col);
+        carveManhattanSegment(open, row, col, goalRow, goalCol, random);
+    }
+
+    private static void carveManhattanSegment(
+            boolean[][] open, int startRow, int startCol,
+            int goalRow, int goalCol, Random random) {
+        int row = startRow;
+        int col = startCol;
+        open[row][col] = true;
+        while (row != goalRow || col != goalCol) {
+            boolean canChangeRow = row != goalRow;
+            boolean canChangeColumn = col != goalCol;
+            if (canChangeRow && canChangeColumn && random.nextBoolean()) {
+                row += Integer.signum(goalRow - row);
+            } else if (canChangeColumn) {
+                col += Integer.signum(goalCol - col);
+            } else {
+                row += Integer.signum(goalRow - row);
+            }
             open[row][col] = true;
         }
     }

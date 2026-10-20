@@ -32,6 +32,7 @@ public final class RegressionTests {
     public static void main(String[] args) throws Exception {
         testWeightedMapRoundTrip();
         testAllAlgorithmsOnGeneratedMap();
+        testGeneratedMapConfigurationValidation();
         testReproducibleExperimentRuns();
         testSequentialAndParallelExperimentRunsMatch();
         testSuiteWideParallelQueuePreservesRowOrder();
@@ -75,6 +76,68 @@ public final class RegressionTests {
             require(solver.isSolved(), algorithm + " failed on a guaranteed-solvable map.");
             require(solver.getPathCost() > 0, algorithm + " returned an invalid path cost.");
         }
+    }
+
+    private static void testGeneratedMapConfigurationValidation() {
+        TestSuite.TestCase testCase = baseCase("configuration-validation");
+        testCase.setRows(20);
+        testCase.setColumns(24);
+        testCase.setBlockedPercent(20.0);
+        testCase.setEndpointMode(TestSuite.EndpointMode.FIXED);
+        testCase.setStartRow(1);
+        testCase.setStartColumn(1);
+        testCase.setGoalRow(18);
+        testCase.setGoalColumn(22);
+        testCase.setMinimumCost(3);
+        testCase.setMaximumCost(7);
+        testCase.setSameCostBothDirections(false);
+
+        Maze.GeneratedExperimentMap generated =
+                Maze.generateExperimentMap(testCase, 9876L);
+        Maze maze = generated.getMaze();
+        int interiorCells = (testCase.getRows() - 2) * (testCase.getColumns() - 2);
+        int expectedBlocked = (int) Math.round(
+                interiorCells * testCase.getBlockedPercent() / 100.0);
+
+        require(maze.getLength() == testCase.getRows()
+                && maze.getWidth() == testCase.getColumns(),
+                "Generated map dimensions did not match the test case.");
+        require(generated.getBlockedCellCount() == expectedBlocked,
+                "Generated map did not honor the blocked-cell percentage.");
+        require(generated.getStartRow() == testCase.getStartRow()
+                && generated.getStartColumn() == testCase.getStartColumn()
+                && generated.getGoalRow() == testCase.getGoalRow()
+                && generated.getGoalColumn() == testCase.getGoalColumn(),
+                "Generated map did not honor fixed endpoints.");
+        require(generated.isSolvable(), "Guaranteed-solvable map was not connected.");
+        require(maze.validateNeighborConnections(0).isValid(),
+                "Generated map had invalid neighbor connections.");
+
+        boolean foundMinimumCost = false;
+        boolean foundMaximumCost = false;
+        for (int row = 0; row < maze.getLength(); row++) {
+            for (int col = 0; col < maze.getWidth(); col++) {
+                Maze.Node node = maze.getNode(row, col);
+                if (node == null) {
+                    continue;
+                }
+                for (Maze.Dir direction : Maze.Dir.values()) {
+                    int cost = node.getMoveCost(direction);
+                    if (cost == testCase.getMinimumCost()) {
+                        foundMinimumCost = true;
+                    }
+                    if (cost == testCase.getMaximumCost()) {
+                        foundMaximumCost = true;
+                    }
+                    require(cost == 0
+                            || (cost >= testCase.getMinimumCost()
+                            && cost <= testCase.getMaximumCost()),
+                            "Generated movement cost was outside the configured range.");
+                }
+            }
+        }
+        require(foundMinimumCost && foundMaximumCost,
+                "Generated map did not exercise the configured movement-cost range.");
     }
 
     private static void testReproducibleExperimentRuns() {

@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $doc = Join-Path $root "doc"
 $latexDir = Join-Path $doc "latex"
-$pdf = Join-Path $doc "Maze-Solver-docs_V0.8.0.pdf"
+$pdf = Join-Path $doc "Maze-Solver-docs_V0.8.1.pdf"
 
 function Install-MissingTool {
     param(
@@ -51,7 +51,7 @@ try {
 
         Get-ChildItem -LiteralPath $latexDir -Filter *.tex | ForEach-Object {
             $text = Get-Content -LiteralPath $_.FullName -Raw
-            $text = $text -replace '\\newline(?=[A-Za-z])', '\newline{}'
+            $text = $text.Replace('\newline', '\newline{}')
             Set-Content -LiteralPath $_.FullName -Value $text -NoNewline
         }
 
