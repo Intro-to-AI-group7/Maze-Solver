@@ -366,7 +366,7 @@ final class ReviewButtonEditor extends AbstractCellEditor implements TableCellEd
         button.setOpaque(true);
         button.setFocusPainted(false);
         button.addActionListener(event -> {
-            reviewAction.accept(row);
+            this.reviewAction.accept(row);
             fireEditingStopped();
         });
     }

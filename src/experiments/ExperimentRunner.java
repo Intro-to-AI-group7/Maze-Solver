@@ -56,10 +56,6 @@ public final class ExperimentRunner {
      * The remaining 10% protects transient generation and UI allocations.
      */
     private static final double PREFETCH_HEADROOM_FRACTION = 0.90;
-    /** Reserve a portion of the compute budget for concurrent map generation. */
-    private static final double MAP_WORKER_FRACTION = 0.25;
-    /** Bound queued map tasks without making queue length the memory policy. */
-    private static final int PREFETCH_BATCH_MULTIPLIER = 8;
     /** Reserve additional headroom for temporary generation and solver objects. */
     private static final double MEMORY_SAFETY_FACTOR = 1.20;
     /** CPU load at which adaptive mode removes one worker from the next batch. */
@@ -108,16 +104,14 @@ public final class ExperimentRunner {
     }
 
     private static final class SuiteMapWork {
-        private final int order;
         private final TestSuite.TestCase testCase;
         private final long seed;
         private final int iteration;
         private final long reservationBytes;
 
         private SuiteMapWork(
-                int order, TestSuite.TestCase testCase, long seed,
+                TestSuite.TestCase testCase, long seed,
                 int iteration, long reservationBytes) {
-            this.order = order;
             this.testCase = testCase;
             this.seed = seed;
             this.iteration = iteration;
@@ -138,13 +132,11 @@ public final class ExperimentRunner {
     private static final class SuiteGeneratedMapResult {
         private final SuiteMapWork work;
         private final Maze.GeneratedExperimentMap map;
-        private final long elapsedNs;
 
         private SuiteGeneratedMapResult(
-                SuiteMapWork work, Maze.GeneratedExperimentMap map, long elapsedNs) {
+                SuiteMapWork work, Maze.GeneratedExperimentMap map) {
             this.work = work;
             this.map = map;
-            this.elapsedNs = elapsedNs;
         }
     }
 
@@ -391,7 +383,7 @@ public final class ExperimentRunner {
             long seed = resolveTestCaseSeed(testCase);
             for (int iteration = 1; iteration <= testCase.getIterations(); iteration++) {
                 workQueue.add(new SuiteMapWork(
-                        workQueue.size(), testCase, seed, iteration, estimateMapBytes(testCase)));
+                        testCase, seed, iteration, estimateMapBytes(testCase)));
             }
         }
 
@@ -456,11 +448,9 @@ public final class ExperimentRunner {
                         awaitIfPaused(token);
                         int activeMaps = activeMapWorkerCount.incrementAndGet();
                         updatePeak(peakMapWorkerCount, activeMaps);
-                        long startNs = System.nanoTime();
                         try {
                             Maze.GeneratedExperimentMap map = createMap(work.testCase, work.seed);
-                            return new SuiteGeneratedMapResult(
-                                    work, map, System.nanoTime() - startNs);
+                            return new SuiteGeneratedMapResult(work, map);
                         } catch (OutOfMemoryError error) {
                             throw memoryFailure(work.testCase, work.iteration, error);
                         } finally {
@@ -486,11 +476,9 @@ public final class ExperimentRunner {
                     mapCompletions.submit(() -> {
                         int activeMaps = activeMapWorkerCount.incrementAndGet();
                         updatePeak(peakMapWorkerCount, activeMaps);
-                        long startNs = System.nanoTime();
                         try {
                             Maze.GeneratedExperimentMap map = createMap(work.testCase, work.seed);
-                            return new SuiteGeneratedMapResult(
-                                    work, map, System.nanoTime() - startNs);
+                            return new SuiteGeneratedMapResult(work, map);
                         } finally {
                             activeMapWorkerCount.decrementAndGet();
                         }
@@ -574,7 +562,7 @@ public final class ExperimentRunner {
                                 updatePeak(peakSolverWorkerCount, activeSolvers);
                                 try {
                                     return new SolverCompletion(
-                                            generated.work, generated.work.iteration, algorithm,
+                                            generated.work,
                                             timedSolve(
                                                     suite.getName(), generated.work.testCase,
                                                     generated.work.iteration, generated.map,
@@ -714,21 +702,11 @@ public final class ExperimentRunner {
 
     private static final class SolverCompletion {
         private final SuiteMapWork work;
-        private final int iteration;
-        private final MazeSolver.Algorithm algorithm;
         private final ExperimentResult result;
 
         private SolverCompletion(
-                int iteration, MazeSolver.Algorithm algorithm, ExperimentResult result) {
-            this(null, iteration, algorithm, result);
-        }
-
-        private SolverCompletion(
-                SuiteMapWork work, int iteration,
-                MazeSolver.Algorithm algorithm, ExperimentResult result) {
+                SuiteMapWork work, ExperimentResult result) {
             this.work = work;
-            this.iteration = iteration;
-            this.algorithm = algorithm;
             this.result = result;
         }
     }
@@ -869,16 +847,6 @@ public final class ExperimentRunner {
                     ? priorityComparison
                     : Long.compare(sequence, other.sequence);
         }
-    }
-
-    private static int getMapGenerationWorkerCount(int computeWorkers, int prefetchedMaps) {
-        int preferred = (int) Math.ceil(computeWorkers * MAP_WORKER_FRACTION);
-        return Math.max(1, Math.min(computeWorkers - 1, Math.min(preferred, prefetchedMaps)));
-    }
-
-    private static int getMapGenerationWorkerCount(int computeWorkers) {
-        int preferred = (int) Math.ceil(computeWorkers * MAP_WORKER_FRACTION);
-        return Math.max(1, Math.min(computeWorkers - 1, preferred));
     }
 
     private static int boundedWorkerQueueLimit(
