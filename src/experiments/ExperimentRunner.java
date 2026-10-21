@@ -36,9 +36,10 @@ import maze.search.MazeSolver;
  *
  * <p>One map is generated per row iteration and reused by every selected
  * algorithm. Solver timing therefore excludes map generation, result
- * construction, callbacks, and console output. Parallel execution uses
- * bounded admission so queued solver work cannot retain an unbounded number of
- * generated maps.
+ * construction, callbacks, and console output. Each result uses one external
+ * monotonic timing interval around the complete solve; per-step solver timing
+ * is disabled for batch execution. Parallel execution uses bounded admission
+ * so queued solver work cannot retain an unbounded number of generated maps.
  */
 public final class ExperimentRunner {
     private static final long LIVE_PROGRESS_INTERVAL_NS = 100_000_000L;
@@ -55,10 +56,6 @@ public final class ExperimentRunner {
      * The remaining 10% protects transient generation and UI allocations.
      */
     private static final double PREFETCH_HEADROOM_FRACTION = 0.90;
-    /** Reserve a portion of the compute budget for concurrent map generation. */
-    private static final double MAP_WORKER_FRACTION = 0.25;
-    /** Bound queued map tasks without making queue length the memory policy. */
-    private static final int PREFETCH_BATCH_MULTIPLIER = 8;
     /** Reserve additional headroom for temporary generation and solver objects. */
     private static final double MEMORY_SAFETY_FACTOR = 1.20;
     /** CPU load at which adaptive mode removes one worker from the next batch. */
@@ -107,16 +104,14 @@ public final class ExperimentRunner {
     }
 
     private static final class SuiteMapWork {
-        private final int order;
         private final TestSuite.TestCase testCase;
         private final long seed;
         private final int iteration;
         private final long reservationBytes;
 
         private SuiteMapWork(
-                int order, TestSuite.TestCase testCase, long seed,
+                TestSuite.TestCase testCase, long seed,
                 int iteration, long reservationBytes) {
-            this.order = order;
             this.testCase = testCase;
             this.seed = seed;
             this.iteration = iteration;
@@ -137,13 +132,11 @@ public final class ExperimentRunner {
     private static final class SuiteGeneratedMapResult {
         private final SuiteMapWork work;
         private final Maze.GeneratedExperimentMap map;
-        private final long elapsedNs;
 
         private SuiteGeneratedMapResult(
-                SuiteMapWork work, Maze.GeneratedExperimentMap map, long elapsedNs) {
+                SuiteMapWork work, Maze.GeneratedExperimentMap map) {
             this.work = work;
             this.map = map;
-            this.elapsedNs = elapsedNs;
         }
     }
 
@@ -390,7 +383,7 @@ public final class ExperimentRunner {
             long seed = resolveTestCaseSeed(testCase);
             for (int iteration = 1; iteration <= testCase.getIterations(); iteration++) {
                 workQueue.add(new SuiteMapWork(
-                        workQueue.size(), testCase, seed, iteration, estimateMapBytes(testCase)));
+                        testCase, seed, iteration, estimateMapBytes(testCase)));
             }
         }
 
@@ -455,11 +448,9 @@ public final class ExperimentRunner {
                         awaitIfPaused(token);
                         int activeMaps = activeMapWorkerCount.incrementAndGet();
                         updatePeak(peakMapWorkerCount, activeMaps);
-                        long startNs = System.nanoTime();
                         try {
                             Maze.GeneratedExperimentMap map = createMap(work.testCase, work.seed);
-                            return new SuiteGeneratedMapResult(
-                                    work, map, System.nanoTime() - startNs);
+                            return new SuiteGeneratedMapResult(work, map);
                         } catch (OutOfMemoryError error) {
                             throw memoryFailure(work.testCase, work.iteration, error);
                         } finally {
@@ -485,11 +476,9 @@ public final class ExperimentRunner {
                     mapCompletions.submit(() -> {
                         int activeMaps = activeMapWorkerCount.incrementAndGet();
                         updatePeak(peakMapWorkerCount, activeMaps);
-                        long startNs = System.nanoTime();
                         try {
                             Maze.GeneratedExperimentMap map = createMap(work.testCase, work.seed);
-                            return new SuiteGeneratedMapResult(
-                                    work, map, System.nanoTime() - startNs);
+                            return new SuiteGeneratedMapResult(work, map);
                         } finally {
                             activeMapWorkerCount.decrementAndGet();
                         }
@@ -573,7 +562,7 @@ public final class ExperimentRunner {
                                 updatePeak(peakSolverWorkerCount, activeSolvers);
                                 try {
                                     return new SolverCompletion(
-                                            generated.work, generated.work.iteration, algorithm,
+                                            generated.work,
                                             timedSolve(
                                                     suite.getName(), generated.work.testCase,
                                                     generated.work.iteration, generated.map,
@@ -713,21 +702,11 @@ public final class ExperimentRunner {
 
     private static final class SolverCompletion {
         private final SuiteMapWork work;
-        private final int iteration;
-        private final MazeSolver.Algorithm algorithm;
         private final ExperimentResult result;
 
         private SolverCompletion(
-                int iteration, MazeSolver.Algorithm algorithm, ExperimentResult result) {
-            this(null, iteration, algorithm, result);
-        }
-
-        private SolverCompletion(
-                SuiteMapWork work, int iteration,
-                MazeSolver.Algorithm algorithm, ExperimentResult result) {
+                SuiteMapWork work, ExperimentResult result) {
             this.work = work;
-            this.iteration = iteration;
-            this.algorithm = algorithm;
             this.result = result;
         }
     }
@@ -868,16 +847,6 @@ public final class ExperimentRunner {
                     ? priorityComparison
                     : Long.compare(sequence, other.sequence);
         }
-    }
-
-    private static int getMapGenerationWorkerCount(int computeWorkers, int prefetchedMaps) {
-        int preferred = (int) Math.ceil(computeWorkers * MAP_WORKER_FRACTION);
-        return Math.max(1, Math.min(computeWorkers - 1, Math.min(preferred, prefetchedMaps)));
-    }
-
-    private static int getMapGenerationWorkerCount(int computeWorkers) {
-        int preferred = (int) Math.ceil(computeWorkers * MAP_WORKER_FRACTION);
-        return Math.max(1, Math.min(computeWorkers - 1, preferred));
     }
 
     private static int boundedWorkerQueueLimit(
@@ -1097,6 +1066,7 @@ public final class ExperimentRunner {
         MazeSolver solver = new MazeSolver();
         solver.setAlg(algorithm.name());
         solver.setMaze(maze);
+        solver.setStepTimingEnabled(false);
         while (!solver.isFinished()) {
             solver.updateSolve();
         }
@@ -1215,21 +1185,31 @@ public final class ExperimentRunner {
         MazeSolver solver = new MazeSolver();
         solver.setAlg(algorithm.name());
         solver.setMaze(generated.getMaze());
-        long startNs = System.nanoTime();
+        solver.setStepTimingEnabled(false);
         reportSolveProgress(
-                progressListener, testCase, iteration, algorithm, solver, startNs, false);
+                progressListener, testCase, iteration, algorithm, solver, 0, false);
+        long startNs = System.nanoTime();
         long lastProgressNs = startNs;
+        long progressCallbackNs = 0;
         while (!solver.isFinished()) {
             solver.updateSolve();
-            long now = System.nanoTime();
-            if (now - lastProgressNs >= LIVE_PROGRESS_INTERVAL_NS) {
-                reportSolveProgress(
-                        progressListener, testCase, iteration, algorithm, solver, startNs, false);
-                lastProgressNs = now;
+            if (progressListener != null) {
+                long now = System.nanoTime();
+                if (now - lastProgressNs >= LIVE_PROGRESS_INTERVAL_NS) {
+                    long callbackStartNs = now;
+                    reportSolveProgress(
+                            progressListener, testCase, iteration, algorithm, solver,
+                            now - startNs - progressCallbackNs, false);
+                    long callbackEndNs = System.nanoTime();
+                    progressCallbackNs += callbackEndNs - callbackStartNs;
+                    lastProgressNs = callbackEndNs;
+                }
             }
         }
+        long solveEndNs = System.nanoTime();
         reportSolveProgress(
-                progressListener, testCase, iteration, algorithm, solver, startNs, true);
+                progressListener, testCase, iteration, algorithm, solver,
+                solveEndNs - startNs - progressCallbackNs, true);
 
         boolean solved = solver.isSolved();
         int pathLength = solved ? Math.max(0, solver.getFinalPath().size() - 1) : -1;
@@ -1262,17 +1242,17 @@ public final class ExperimentRunner {
                 pathLength,
                 solved ? solver.getPathCost() : -1,
                 solver.getVisitedCount(),
-                solver.getSolveTimeNs());
+                solveEndNs - startNs - progressCallbackNs);
     }
 
     private static void reportSolveProgress(
             SolveProgressListener listener, TestSuite.TestCase testCase, int iteration,
-            MazeSolver.Algorithm algorithm, MazeSolver solver, long startNs, boolean finished) {
+            MazeSolver.Algorithm algorithm, MazeSolver solver, long elapsedNs, boolean finished) {
         if (listener != null) {
             listener.onProgress(new SolveProgress(
                     testCase.getId(), iteration, algorithm, solver.getVisitedCount(),
                     solver.isFinished() ? solver.getPathCost() : solver.getCurrentPathCost(),
-                    System.nanoTime() - startNs, finished));
+                    elapsedNs, finished));
         }
     }
 
