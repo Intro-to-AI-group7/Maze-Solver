@@ -171,6 +171,14 @@ warm-up using each selected algorithm. Warm-up solves are excluded from the
 results, progress count, and timing metrics so class loading and JIT
 compilation are less likely to skew the first measured iteration.
 
+Experiment result runtimes measure one complete solver run from the start of
+the search through result collection. They exclude map generation and suite
+scheduling, and they do not read the solver's per-step diagnostic timer. This
+avoids adding two `System.nanoTime()` calls to every search step, which is
+particularly important for small mazes. If live solver progress is requested,
+the runner performs throttled progress timing checks; the command-line runner
+does not request those callbacks.
+
 Experiment suites run sequentially by default. Select **Fixed parallel** or
 **Adaptive parallel** in the test-suite editor to run independent algorithms
 for each generated map concurrently. Sequential mode remains available for
@@ -270,10 +278,12 @@ After loading or generating a maze:
   solution has been found.
 - Solve Time: elapsed time spent inside solver search-step calls. Timer delays,
   UI repainting, and animation intervals are outside those measurements, so
-  animated and instant solving times are directly comparable. The console also
-  prints a diagnostic line containing the result, interval, algorithm, visited
-  node count, final path cost, compute time, and wall-clock session time after
-  each completed solve.
+  animated and instant solving times are directly comparable. The interactive
+  viewer keeps this per-step diagnostic timing enabled. Test-suite results use
+  a separate external timer around the complete solve instead. The console
+  also prints a diagnostic line containing the result, interval, algorithm,
+  visited node count, final path cost, compute time, and wall-clock session
+  time after each completed solve.
 - Zoom +/-: adjust cell size.
 - Ctrl + Mouse Wheel: zoom while cursor is over the maze viewport.
 

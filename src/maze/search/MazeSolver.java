@@ -12,8 +12,10 @@ import java.util.List;
  *
  * <p>The solver keeps internal state between calls to {@link #updateSolve()},
  * so callers can visualize or inspect each step one node at a time.
- * Reported solve time measures the elapsed time of each search-step call,
- * excluding timer delays and UI repaint work.
+ * By default, reported solve time accumulates the elapsed time of each
+ * search-step call, excluding timer delays and UI repaint work. Batch callers
+ * can disable this diagnostic timing and measure a complete solve externally
+ * with {@link #setStepTimingEnabled(boolean)}.
  *
  * <p>Typical usage: create a solver, set algorithm and maze, then call
  * {@link #updateSolve()} repeatedly until {@link #isFinished()} returns true.
@@ -60,6 +62,7 @@ public class MazeSolver {
     private boolean solved;
     private int visitedCount;
     private long solveTimeNs;
+    private boolean stepTimingEnabled = true;
     private long pathCost = -1;
     private long currentPathCost = -1;
     private Maze.Node[][] parent;
@@ -126,6 +129,19 @@ public class MazeSolver {
     }
 
     /**
+     * Enables or disables the per-step timing used by interactive displays.
+     *
+     * <p>Timing is enabled by default. Batch callers that measure the complete
+     * solve externally can disable it to avoid two clock reads for every search
+     * step.
+     *
+     * @param enabled whether each search step should update {@link #getSolveTimeNs()}
+     */
+    public void setStepTimingEnabled(boolean enabled) {
+        this.stepTimingEnabled = enabled;
+    }
+
+    /**
      * Advances solving by exactly one visited node.
      *
      * @return node visited in this step, or {@code null} if solving is complete or no work remains
@@ -138,12 +154,11 @@ public class MazeSolver {
 
         initializeIfNeeded();
 
-        long startTime = System.nanoTime();
-        Maze.Node result;
-
-        result = strategy.step(this);
-
-        solveTimeNs += System.nanoTime() - startTime;
+        long startTime = stepTimingEnabled ? System.nanoTime() : 0;
+        Maze.Node result = strategy.step(this);
+        if (stepTimingEnabled) {
+            solveTimeNs += System.nanoTime() - startTime;
+        }
         return result;
     }
 
@@ -175,9 +190,11 @@ public class MazeSolver {
     }
 
     /**
-     * Gets the total computation time elapsed in the current run.
+     * Gets the total computation time elapsed in the current run when per-step
+     * timing is enabled.
      *
-     * @return elapsed computation time in nanoseconds, excluding timer and UI delays
+     * @return elapsed computation time in nanoseconds, or zero when per-step
+     *         timing is disabled
      */
     public long getSolveTimeNs() {
         return solveTimeNs;

@@ -32,6 +32,7 @@ public final class RegressionTests {
     public static void main(String[] args) throws Exception {
         testWeightedMapRoundTrip();
         testAllAlgorithmsOnGeneratedMap();
+        testSolverStepTimingCanBeDisabled();
         testGeneratedMapConfigurationValidation();
         testReproducibleExperimentRuns();
         testSequentialAndParallelExperimentRunsMatch();
@@ -76,6 +77,25 @@ public final class RegressionTests {
             require(solver.isSolved(), algorithm + " failed on a guaranteed-solvable map.");
             require(solver.getPathCost() > 0, algorithm + " returned an invalid path cost.");
         }
+    }
+
+    private static void testSolverStepTimingCanBeDisabled() {
+        TestSuite.TestCase testCase = baseCase("timing-mode");
+        Maze maze = Maze.generateExperimentMap(testCase, 123L).getMaze();
+
+        MazeSolver timedSolver = solve(maze, MazeSolver.Algorithm.BFS);
+        require(timedSolver.getSolveTimeNs() > 0,
+                "Default solver timing did not record search-step time.");
+
+        MazeSolver untimedSolver = new MazeSolver();
+        untimedSolver.setAlg(MazeSolver.Algorithm.BFS.name());
+        untimedSolver.setMaze(maze);
+        untimedSolver.setStepTimingEnabled(false);
+        while (!untimedSolver.isFinished()) {
+            untimedSolver.updateSolve();
+        }
+        require(untimedSolver.getSolveTimeNs() == 0,
+                "Disabled solver timing recorded per-step time.");
     }
 
     private static void testGeneratedMapConfigurationValidation() {
