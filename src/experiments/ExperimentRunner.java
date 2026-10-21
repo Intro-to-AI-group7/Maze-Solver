@@ -36,9 +36,10 @@ import maze.search.MazeSolver;
  *
  * <p>One map is generated per row iteration and reused by every selected
  * algorithm. Solver timing therefore excludes map generation, result
- * construction, callbacks, and console output. Parallel execution uses
- * bounded admission so queued solver work cannot retain an unbounded number of
- * generated maps.
+ * construction, callbacks, and console output. Each result uses one external
+ * monotonic timing interval around the complete solve; per-step solver timing
+ * is disabled for batch execution. Parallel execution uses bounded admission
+ * so queued solver work cannot retain an unbounded number of generated maps.
  */
 public final class ExperimentRunner {
     private static final long LIVE_PROGRESS_INTERVAL_NS = 100_000_000L;
@@ -1097,6 +1098,7 @@ public final class ExperimentRunner {
         MazeSolver solver = new MazeSolver();
         solver.setAlg(algorithm.name());
         solver.setMaze(maze);
+        solver.setStepTimingEnabled(false);
         while (!solver.isFinished()) {
             solver.updateSolve();
         }
@@ -1215,21 +1217,31 @@ public final class ExperimentRunner {
         MazeSolver solver = new MazeSolver();
         solver.setAlg(algorithm.name());
         solver.setMaze(generated.getMaze());
-        long startNs = System.nanoTime();
+        solver.setStepTimingEnabled(false);
         reportSolveProgress(
-                progressListener, testCase, iteration, algorithm, solver, startNs, false);
+                progressListener, testCase, iteration, algorithm, solver, 0, false);
+        long startNs = System.nanoTime();
         long lastProgressNs = startNs;
+        long progressCallbackNs = 0;
         while (!solver.isFinished()) {
             solver.updateSolve();
-            long now = System.nanoTime();
-            if (now - lastProgressNs >= LIVE_PROGRESS_INTERVAL_NS) {
-                reportSolveProgress(
-                        progressListener, testCase, iteration, algorithm, solver, startNs, false);
-                lastProgressNs = now;
+            if (progressListener != null) {
+                long now = System.nanoTime();
+                if (now - lastProgressNs >= LIVE_PROGRESS_INTERVAL_NS) {
+                    long callbackStartNs = now;
+                    reportSolveProgress(
+                            progressListener, testCase, iteration, algorithm, solver,
+                            now - startNs - progressCallbackNs, false);
+                    long callbackEndNs = System.nanoTime();
+                    progressCallbackNs += callbackEndNs - callbackStartNs;
+                    lastProgressNs = callbackEndNs;
+                }
             }
         }
+        long solveEndNs = System.nanoTime();
         reportSolveProgress(
-                progressListener, testCase, iteration, algorithm, solver, startNs, true);
+                progressListener, testCase, iteration, algorithm, solver,
+                solveEndNs - startNs - progressCallbackNs, true);
 
         boolean solved = solver.isSolved();
         int pathLength = solved ? Math.max(0, solver.getFinalPath().size() - 1) : -1;
@@ -1262,17 +1274,17 @@ public final class ExperimentRunner {
                 pathLength,
                 solved ? solver.getPathCost() : -1,
                 solver.getVisitedCount(),
-                solver.getSolveTimeNs());
+                solveEndNs - startNs - progressCallbackNs);
     }
 
     private static void reportSolveProgress(
             SolveProgressListener listener, TestSuite.TestCase testCase, int iteration,
-            MazeSolver.Algorithm algorithm, MazeSolver solver, long startNs, boolean finished) {
+            MazeSolver.Algorithm algorithm, MazeSolver solver, long elapsedNs, boolean finished) {
         if (listener != null) {
             listener.onProgress(new SolveProgress(
                     testCase.getId(), iteration, algorithm, solver.getVisitedCount(),
                     solver.isFinished() ? solver.getPathCost() : solver.getCurrentPathCost(),
-                    System.nanoTime() - startNs, finished));
+                    elapsedNs, finished));
         }
     }
 

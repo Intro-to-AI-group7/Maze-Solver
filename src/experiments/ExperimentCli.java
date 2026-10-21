@@ -80,9 +80,7 @@ public final class ExperimentCli {
                         (completedRuns, total, result) ->
                                 monitor.completedRuns.set(completedRuns),
                         cancelled::get,
-                        progress -> {
-                            // The CLI samples worker diagnostics on its monitor interval.
-                        },
+                        null,
                         (generated, total, reserved, budget, heapUsed, maxHeap, loaded, message) -> {
                             monitor.generatedMaps.set(generated);
                             monitor.loadedMaps.set(loaded);
