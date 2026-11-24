@@ -54,7 +54,7 @@ var searchData=
   ['solveprogress_51',['SolveProgress',['../classexperiments_1_1_experiment_runner_1_1_solve_progress.html',1,'experiments::ExperimentRunner']]],
   ['solveprogresslistener_52',['SolveProgressListener',['../interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html',1,'experiments::ExperimentRunner']]],
   ['solver_53',['SOLVER',['../enumexperiments_1_1_experiment_runner_1_1_task_priority.html#a742a35cc3a56816c9500cd2b1dd0e2fe',1,'experiments::ExperimentRunner::TaskPriority']]],
-  ['solver_20v0_209_201a_54',['Maze-Solver V0.9.1a',['../index.html',1,'']]],
+  ['solver_20v1_200_201a_54',['Maze-Solver V1.0.1a',['../index.html',1,'']]],
   ['sort_3c_20f_20_3e_55',['Sort&lt; F &gt;',['../classanalysis_1_1_table_query.html#a431ac26334c6e2227fc666be088ac85f',1,'analysis::TableQuery']]],
   ['sorting_56',['Filters and sorting',['../index.html#autotoc_md9',1,'']]],
   ['sorts_57',['sorts',['../classanalysis_1_1_table_query.html#a199afe6cb25ade6c01191cde885588ac',1,'analysis::TableQuery']]],

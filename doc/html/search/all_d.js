@@ -16,7 +16,7 @@ var searchData=
   ['maze_13',['Maze',['../classmaze_1_1map_1_1_maze.html',1,'maze.map.Maze'],['../classmaze_1_1map_1_1_maze.html#a73cd7bf55e33eaa7b7632025094080ef',1,'maze.map.Maze.Maze()']]],
   ['maze_20file_20format_14',['Maze File Format',['../index.html#autotoc_md14',1,'']]],
   ['maze_20files_15',['Included Maze Files',['../index.html#autotoc_md16',1,'']]],
-  ['maze_20solver_20v0_209_201a_16',['Maze-Solver V0.9.1a',['../index.html',1,'']]],
+  ['maze_20solver_20v1_200_201a_16',['Maze-Solver V1.0.1a',['../index.html',1,'']]],
   ['maze_2ejava_17',['Maze.java',['../_maze_8java.html',1,'']]],
   ['maze_3a_3amap_18',['map',['../namespacemaze_1_1map.html',1,'maze']]],
   ['maze_3a_3asearch_19',['search',['../namespacemaze_1_1search.html',1,'maze']]],

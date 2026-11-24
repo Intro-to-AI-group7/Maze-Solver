@@ -92,7 +92,7 @@ $header = @(
     "# For APPROXIMATE_DISTANCE, targetDistance is rounded from the requested percentage of max Manhattan distance."
     "format=maze-solver-test-suite"
     "version=1"
-    "applicationVersion=V0.9.1a"
+    "applicationVersion=V1.0.1a"
     "name=full-factorial-maze-benchmark"
     "automaticExport=false"
     "exportDirectory="

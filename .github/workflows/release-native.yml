@@ -57,6 +57,16 @@ jobs:
           test "$actual" = "Maze-Solver $expected"
           printf '%s\n' "$GITHUB_SHA" > dist/BUILD_COMMIT.txt
           printf '%s %s\n' "$RUNNER_OS" "$RUNNER_ARCH" > dist/BUILD_PLATFORM.txt
+      - name: Run regression suite
+        shell: bash
+        run: |
+          mkdir -p build/regression-tests
+          sources=()
+          while IFS= read -r -d '' source; do
+            sources+=("$source")
+          done < <(find src test/java -name '*.java' -print0)
+          javac -Xlint:all -d build/regression-tests "${sources[@]}"
+          java -Djava.awt.headless=true -cp build/regression-tests test.RegressionTests
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: native-${{ matrix.platform }}
