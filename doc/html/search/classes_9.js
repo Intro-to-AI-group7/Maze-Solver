@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['searchstrategy_0',['SearchStrategy',['../interfacemaze_1_1search_1_1_search_strategy.html',1,'maze::search']]],
-  ['solveprogress_1',['SolveProgress',['../classexperiments_1_1_experiment_runner_1_1_solve_progress.html',1,'experiments::ExperimentRunner']]],
-  ['solveprogresslistener_2',['SolveProgressListener',['../interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html',1,'experiments::ExperimentRunner']]]
+  ['neighborvalidationresult_0',['NeighborValidationResult',['../classmaze_1_1map_1_1_maze_1_1_neighbor_validation_result.html',1,'maze::map::Maze']]],
+  ['node_1',['Node',['../classmaze_1_1map_1_1_maze_1_1_node.html',1,'maze::map::Maze']]]
 ];

@@ -1,5 +1,12 @@
 var annotated_dup =
 [
+    [ "analysis", "namespaceanalysis.html", [
+      [ "ResultChart", "classanalysis_1_1_result_chart.html", "classanalysis_1_1_result_chart" ],
+      [ "ResultFiles", "classanalysis_1_1_result_files.html", "classanalysis_1_1_result_files" ],
+      [ "ResultQuery", "classanalysis_1_1_result_query.html", "classanalysis_1_1_result_query" ],
+      [ "ResultStatistics", "classanalysis_1_1_result_statistics.html", "classanalysis_1_1_result_statistics" ],
+      [ "TableQuery", "classanalysis_1_1_table_query.html", "classanalysis_1_1_table_query" ]
+    ] ],
     [ "app", "namespaceapp.html", [
       [ "ApplicationPreferences", "classapp_1_1_application_preferences.html", "classapp_1_1_application_preferences" ],
       [ "MS", "classapp_1_1_m_s.html", "classapp_1_1_m_s" ],

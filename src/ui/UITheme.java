@@ -231,6 +231,8 @@ final class UITheme {
         UIManager.put("Panel.background", background());
         UIManager.put("Panel.foreground", text());
         UIManager.put("Label.foreground", text());
+        UIManager.put("OptionPane.background", background());
+        UIManager.put("OptionPane.messageForeground", text());
         UIManager.put("Table.background", surface());
         UIManager.put("Table.foreground", text());
         UIManager.put("TableHeader.background", surface());

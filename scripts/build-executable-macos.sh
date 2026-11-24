@@ -6,7 +6,8 @@ CLASSES="$ROOT/build/classes"
 PACKAGE="$ROOT/build/package"
 DIST="$ROOT/dist"
 JAR="$PACKAGE/MazeSolver.jar"
-VERSION="0.8.1"
+NATIVE_VERSION="0.9.0"
+RELEASE="V0.9.0a"
 JAVAC_BIN="$(command -v javac)"
 JAVA_HOME="$(cd "$(dirname "$JAVAC_BIN")/.." && pwd)"
 JAVAC="$JAVA_HOME/bin/javac"
@@ -32,7 +33,7 @@ mapfile -t SOURCES < <(find "$ROOT/src" -type f -name '*.java' -print)
     "$JAVAC" -Xlint:all -d "$CLASSES" "${SOURCES[@]}"
     rm -f "$JAR"
     "$JAR_TOOL" --create --file "$JAR" --main-class app.MS -C "$CLASSES" .
-    rm -rf "$DIST/MazeSolver.app" "$DIST/MazeSolver-$VERSION.dmg"
+    rm -rf "$DIST/MazeSolver.app" "$DIST/MazeSolver-$NATIVE_VERSION.dmg"
     "$JPACKAGE" \
         --type dmg \
         --name MazeSolver \
@@ -40,11 +41,12 @@ mapfile -t SOURCES < <(find "$ROOT/src" -type f -name '*.java' -print)
         --main-jar "$(basename "$JAR")" \
         --main-class app.MS \
         --dest "$DIST" \
-        --app-version "$VERSION" \
+        --app-version "$NATIVE_VERSION" \
         --mac-package-name "Maze-Solver" \
         --mac-package-identifier "group7.introtoai.mazesolver" \
         --vendor "Intro-to-AI-group7"
+    mv -f "$DIST/MazeSolver-$NATIVE_VERSION.dmg" "$DIST/MazeSolver-$RELEASE.dmg"
 )
 
-echo "macOS installer created at: $DIST/MazeSolver-$VERSION.dmg"
+echo "macOS installer created at: $DIST/MazeSolver-$RELEASE.dmg"
 echo "The package architecture matches the macOS JDK used to build it."

@@ -1,6 +1,6 @@
-# Maze-Solver 0.8.1
+# Maze-Solver V0.9.0a
 
-Maze-Solver 0.8.1 is a Java Swing desktop app for loading, visualizing, and
+Maze-Solver V0.9.0a is an unverified alpha build of the Java Swing desktop app for loading, visualizing, and
 solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First
 Search, and A* with directional movement costs. Maze files support optional per-direction movement
 costs while preserving the original unweighted format.
@@ -14,16 +14,17 @@ It is designed for both interactive exploration and large-map performance testin
 3. Requirements
 4. Quick Start
 5. How to Use
-6. Maze File Format
-7. Included Maze Files
-8. Algorithms
-9. Rendering and Performance
-10. Project Structure
-11. API and Extension Notes
-12. Launch From Release JAR
-13. Troubleshooting
-14. Development Notes
-15. License
+6. Results Analysis
+7. Maze File Format
+8. Included Maze Files
+9. Algorithms
+10. Rendering and Performance
+11. Project Structure
+12. API and Extension Notes
+13. Launch From Release JAR
+14. Troubleshooting
+15. Development Notes
+16. License
 
 ## Overview
 
@@ -74,6 +75,11 @@ Maze-Solver has six main responsibilities:
 - Shared-map comparisons across any selected subset of the five algorithms.
 - Suite save/load, progress and cancellation, per-result animated review,
   suite map export, and UTF-8 CSV export.
+- Column-header filters and multi-column sorting with editable expressions for
+  results and test configurations. Results are queried before pagination.
+- Per-map/per-algorithm summaries, optional IQR outlier removal, normalized
+  means, and raw/normalized overlays with configurable graph axes and legends.
+- Headless PNG/CSV analysis exports, saved analysis views, and results CSV reload.
 
 ## Requirements
 
@@ -81,7 +87,7 @@ Maze-Solver has six main responsibilities:
   generation.
 - Windows, macOS, or Linux with desktop GUI support.
 - No external dependencies required.
-- Release version: `0.8.1` (also exposed by `app.Version.RELEASE`).
+- Alpha build: `V0.9.0a` (also exposed by `app.Version.RELEASE` and `ExperimentCli --version`).
 
 ## Quick Start
 
@@ -165,7 +171,7 @@ and display `N/A (saved map)` instead of a generated seed.
 Test suites use the human-readable `.mstests` extension; individual maps use
 the human-readable `.msmap` extension. Import and save dialogs filter and
 normalize to their corresponding extension and open in the application
-directory. A saved suite contains `applicationVersion=0.8.1` and
+directory. A suite saved by this build contains `applicationVersion=V0.9.0a` and
 `version=1`; the former identifies the application release and the latter is
 the stable suite schema version. Older schema-version-1 suites remain
 readable.
@@ -199,17 +205,17 @@ Experiment results retain only measurements, configuration metadata, and the
 effective map seed. Generated maps are recreated from that seed only when a
 result is reviewed, which avoids retaining large serialized maps for every
 algorithm run. The results table is paged with selectable page sizes of 10,
-25, 50, or 100 rows. Paging supports direct page-number entry and jumps of
-1, 10, or 100 pages in either direction. The footer shows active mapping and
+25, 50, or 100 rows. Use **First**, **Previous**, **Next**, **Last**, or enter
+a page number directly. The footer shows active mapping and
 solving workers, interval peaks, elapsed time, and solve throughput. The map
 progress bar shows heap usage and scheduler reservations. The progress status
 identifies the most recently completed condition.
-Enable **Follow latest results** in the results footer to keep the table on
-the dynamically growing final page while a suite runs. Using any paging
-control pauses following so earlier result pages can be inspected; enable it
-again to resume following the newest page.
-The **Results view** selector can switch between the paged table and a live
-solve log. The live log appends each completed solve with its condition,
+Enable **Follow latest results** to jump to the newest completed result that
+matches your filters and scroll it into view. With a custom sort, that row
+can appear on any page. Manual paging unchecks follow mode so you can inspect
+other results.
+Choose **Live solve log** in the **Results view** selector to follow solves
+as they finish. The log appends each completed solve with its condition,
 iteration, algorithm, solved status, path cost, explored-node count, and
 runtime, and automatically follows the newest entry. It is intentionally
 bounded to the most recent 500 solve entries; the complete results remain
@@ -329,6 +335,194 @@ Random generation details:
 - The generator defaults to using the same positive integer cost in both
   directions of each connection. Clear the same-cost checkbox to generate
   independent integer costs for reverse directions.
+
+## Results Analysis
+
+The results area offers **Table view**, **Summary**, **Graphs**, and the existing
+**Live solve log**. Use **Toggle setup** or drag the divider to give analysis
+more space. **Expand graph** opens a larger graph preview; image exports keep
+their full resolution regardless of the preview size.
+
+### Filters and sorting
+
+Open **Analysis options** to choose a filter field, operator, and value, then
+select **Add**. This panel also contains custom sorting, summary grouping, and
+outlier controls. Separate rules with a semicolon to require all of them.
+Use `|` for alternatives within a rule. You can also edit the expression
+directly and press **Apply** or Enter. Examples:
+
+```text
+algorithm=UCS|A_STAR;rows>=500
+solved=true;actual_blocked>=40;actual_blocked<=60
+map~first-few-characters-of-the-map-id
+```
+
+`=` and `!=` compare values, `~` searches text, and numeric fields also support
+`>`, `<`, `>=`, and `<=`. Filters cover configuration, map identity, algorithm,
+outcome, dimensions, requested/actual obstacle density, costs, endpoint distance,
+seed, iteration, runtime, nodes, source, execution mode, symmetry, and heuristic.
+`ExperimentCli --fields` lists all field names. Names and text comparisons are
+case-insensitive. Missing costs/lengths do not pass numeric comparisons.
+
+Click a table heading to sort ascending/descending. Shift-click adds a secondary
+key. Right-click a heading to choose a sort direction, add a secondary key,
+add a filter, or clear that column's filters or sort key. These actions update
+the editable **Filters** and **Sort** fields and apply the query immediately.
+Open **Analysis options** to edit the results sort expression. It accepts
+entries such as `map:asc,algorithm:asc,runtime_ms:asc`. Sorting uses the
+underlying numeric values at full precision, with missing values last in both
+directions. **Reset
+sort** restores arrival order, while **Clear filters** preserves the sort.
+Both operations apply to the complete result set before it is paged. The footer
+reports matching and total rows. Review uses the actual displayed record.
+Right-click a result to copy its cell value, its row as tab-separated text,
+or its map ID. The menu can also filter to the row's algorithm, compare the map,
+or open the solve review when the original suite is available.
+Press Enter in **Summary groups** or select **Apply** to save grouping edits.
+An invalid chart setting displays an error in the graph preview while the table
+and summary continue to use the selected filters and sort order.
+
+The test configuration table has the same column-header actions. **Sort / Filter**
+opens its editable query fields. For example, use
+`algorithms~UCS;iterations>=10` to find configurations that include UCS and
+`rows:asc,iterations:desc` to order them. Hover over a heading for its query
+field name. The configuration query changes only the editor view. Saving and
+running use the full suite in its original order. Reset the query to drag
+configurations into a new order.
+
+### Compare algorithms on the same map
+
+Right-click a table result and select **Compare this map**. This selects the
+exact map, includes all its algorithms/iterations, sorts them by algorithm and
+iteration, and opens an overlay graph. Map identity includes generation settings
+and the effective seed, or a saved-map content hash; matching seed values alone
+are insufficient. Execution modes are always kept separate.
+
+Summary defaults to `configuration,map,algorithm`. Algorithm and execution mode
+are always separated, even if omitted from grouping. Each row reports original, excluded, and retained runs; distinct
+maps; raw and retained success rates; runtime mean, median, sample standard
+deviation, minimum and maximum; nodes; cost; and matched UCS comparisons.
+Cost statistics exclude unsuccessful solves and show their sample count.
+UCS baselines come from the complete dataset even when filters hide UCS rows.
+Missing baselines and zero denominators produce N/A, not invented percentages.
+
+### All iterations and normalized results
+
+Graph View options are:
+
+- **ITERATIONS:** measurements without outlier removal. Bar/line charts use the
+  selected raw statistic; scatter/box charts show the measurement distribution.
+- **NORMALIZED:** use one retained mean for each exact
+  **map × algorithm × execution mode** group. Algorithms are never averaged
+  together. If several maps share an X value, their means have equal weight.
+- **OVERLAY:** on categorical axes, solid bars show normalized means and
+  translucent bars in the same series color show individual runs, including
+  outliers. On numeric axes, normalized means appear as diamonds. Each raw
+  series has one translucent line joining its dots in iteration order within
+  the same suite, configuration, map, algorithm, and execution mode.
+  This is the default comparison view.
+- **BOTH:** show iteration and normalized charts in two panels.
+
+Normalization uses optional **IQR** outlier removal, enabled by default, with
+runtime as the default trimming metric. Within each map/algorithm/execution
+group, values below `Q1 - 1.5 × IQR` or above `Q3 + 1.5 × IQR` are excluded.
+Quartiles use linear interpolation; at least four eligible observations are
+required. A zero IQR retains values equal to the quartiles. **NONE** averages
+all iterations instead. Changing the trimming metric can change which complete
+observations enter the normalized summary. Raw measurements are never modified.
+Exclusion counts appear in summaries, image captions, and overlay legends.
+
+Ten iterations using one seed are ten timing repetitions of **one map**, not
+ten independent environments. Use multiple seeds/conditions to generalize
+conclusions. The summary exposes both run and map counts. Normalized values
+describe the selected observations; outlier removal is not a guarantee of a
+more representative result. Report the raw results and trimming policy too.
+
+### Graph controls and image export
+
+Choose X and Y independently. X can be a category or numeric field; line and
+scatter charts require numeric X. Y includes runtime, nodes, path cost/length,
+success, excess cost versus UCS, and node reduction versus UCS. For example:
+choose **LINE**, X **ROWS** (or **CELLS**), Y **Runtime (ms)**, and
+**NORMALIZED** to compare each algorithm as map size increases. For rectangular
+maps, CELLS represents total grid cells; filter/group other conditions carefully.
+
+Chart choices include grouped bars, lines, scatter points, and box plots.
+Category order can follow the X values or the plotted value; numeric line/scatter
+axes always stay in numeric order. Toggle **Show legend** to show/hide the
+algorithm/execution key in both the preview and the exported image. Colors stay
+stable when filtering. Optional log Y displays positive values only. Error bars
+on mean charts represent one sample SD, not a confidence interval. In normalized
+charts that SD is across map means, so one map does not produce an SD error bar.
+Boxes show Q1/median/Q3 with min/max whiskers. Normalized box plots describe map
+means, not the original iterations.
+
+**Export graph PNG** writes a labeled 1600×1000 image, or 3200×1000 for BOTH.
+Images include filters, ordering, sample/map counts, trimming policy, and units.
+The preview fits its available area. Categories are limited to 40 and series to
+15; refine filters/grouping rather than silently dropping groups. Scatter charts
+explicitly sample at most 4,000 displayed points; CSV/statistics retain all rows.
+Conditions not on an axis or separated into series are pooled, as noted on images.
+
+### Save, reopen, and validate
+
+The **Results actions** menu groups exports, CSV loading, saved views, and help.
+**Export all results CSV** preserves every raw observation. **Export filtered CSV**
+exports every matching row, not just the visible page, in the selected order.
+**Export summary CSV** preserves the grouped statistics and exclusion counts.
+**Open results CSV** reloads measurements without rerunning a suite. New UI/CLI
+exports include versioned map identities, execution mode, symmetry, endpoints,
+and heuristic metadata. Original map files are not embedded: imported result
+CSVs support analysis, but cannot open animated map review by themselves.
+
+Older application CSVs remain readable, with absent provenance marked UNKNOWN.
+Their map count cannot be verified, and normalized graphs/normalized CSV export
+require a new run with map identities. General summaries and iteration charts
+remain available. **Save analysis view** and **Load analysis view** persist
+filters, sorting, grouping, axes, graph view, legend, and trimming controls in
+`.msview` files.
+
+The CLI uses the same query, statistics, and image renderer as Swing:
+
+```powershell
+# Reopen measurements; do not rerun the solvers.
+java -Djava.awt.headless=true -cp build\classes experiments.ExperimentCli `
+    --results build\results\cli-results.csv `
+    --filter 'algorithm=UCS|GREEDY|A_STAR' `
+    --sort 'map:asc,algorithm:asc,iteration:asc' `
+    --normalized-csv build\results\per-map-means.csv `
+    --filtered-csv build\results\selected-runs.csv `
+    --chart build\results\comparison.png --chart-view OVERLAY --validate
+
+# Each algorithm's normalized mean runtime as map size increases; hide the key.
+java -Djava.awt.headless=true -cp build\classes experiments.ExperimentCli `
+    --results build\results\cli-results.csv `
+    --chart build\results\scaling.png --chart-type LINE `
+    --chart-x ROWS --chart-y RUNTIME_MS --normalize --outliers IQR --hide-legend
+```
+
+`--summary-csv` respects `--group-by`; `--normalized-csv` always separates map
+and algorithm. `--preset FILE` loads a saved UI view; subsequent flags override
+its controls. `--chart-width` / `--chart-height` configure per-panel resolution.
+CLI `--repeat` still benchmarks suite repetitions and exports the final run;
+within-suite iterations are preserved individually. `--validate` checks metric
+consistency and available matched UCS/A* costs; it does not reconstruct paths
+or establish correctness when no baseline is present.
+
+Run the deterministic validation workflow:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\validate-analysis.ps1
+```
+
+It compiles sources, checks table queries, pagination, live following, result
+identity, and image rendering, and verifies that two algorithms on one map retain separate means of **10 ms**
+and **100 ms**, with one outlier excluded from each five-run group. It also
+executes a 90-solve suite across three map sizes and tests CLI axis/legend options.
+Inspectable CSV/PNG fixtures are written under `build/analysis-validation/`.
+The full `test.RegressionTests` suite also includes the core analysis checks.
+For a controlled timing study, prefer sequential execution and analyze saved
+measurements afterward; concurrent UI analysis still consumes CPU resources.
 
 ## Maze File Format
 
@@ -526,19 +720,20 @@ Maze-Solver/
 │  ├─ maze/
 │  │  ├─ map/                  maze model, generation, and map persistence
 │  │  └─ search/               solver facade and search strategies
-│  ├─ experiments/             experiment configuration and execution
+│  ├─ experiments/             experiment configuration, execution, and CLI
+│  ├─ analysis/                result queries, statistics, charts, and CSV I/O
 │  └─ ui/                      Swing renderer and test-suite window
 ├─ test/
 │  ├─ java/                    regression tests
 │  └─ resources/
 │     ├─ maps/                 .msmap fixtures
 │     └─ suites/               .mstests fixtures
-└─ doc/                       generated Doxygen HTML documentation
+└─ doc/                       Doxygen configuration, HTML reference, and PDF
 ```
 
 Core packages and classes:
 
-- `app.MS`: application entry point for release 0.8.1.
+- `app.MS`: desktop application entry point.
 - `app.Version`: authoritative application release metadata.
 - `maze.map.Maze`: model for occupancy, neighbors, directional costs, start, goal,
   generation, and validation.
@@ -554,7 +749,15 @@ Core packages and classes:
 - `experiments.TestSuite`: validated experiment-row and suite configuration.
 - `experiments.ExperimentResult`: immutable per-algorithm experiment metrics.
 - `experiments.ExperimentRunner`: non-UI seeded experiment execution with progress and cancellation.
-- `experiments.TestSuiteIO`: versioned `.mstests` persistence and CSV export.
+- `experiments.TestSuiteIO`: versioned `.mstests` persistence and legacy CSV export.
+- `experiments.ExperimentCli`: headless suite execution, saved-result analysis,
+  exports, and measurement validation.
+- `analysis.TableQuery` and `analysis.ResultQuery`: shared typed expression
+  parsing and global filtering and sorting of results.
+- `analysis.ResultRecord` and `analysis.ResultFiles`: measurement provenance and
+  raw-result and summary CSV I/O.
+- `analysis.ResultStatistics` and `analysis.ResultChart`: per-map and
+  per-algorithm aggregation and PNG rendering shared by Swing and the CLI.
 - `ui.TestSuiteWindow`: Swing configuration, execution, results, map review, and
   export workflow and coordination.
 - `ui.TestConfigurationTableModel` and `ui.ExperimentResultTableModel`:
@@ -566,6 +769,8 @@ Core packages and classes:
   Review actions. These components are wired by the Swing table classes.
 - `ui.TestSuiteConfigurationPanel` and `ui.ExperimentResultsPanel`: extracted
   Swing layout and action wiring for configuration and result areas.
+- `ui.ResultAnalysisPanel` and `ui.TableHeaderQuery`: background result
+  analysis and column actions that update the editable query fields.
 - `test.RegressionTests`: dependency-free checks for weighted maps, all algorithms,
   reproducibility, persistence, CSV export, and cancellation.
 
@@ -676,7 +881,7 @@ common Windows installation directories. It selects matching `java` and
 The first script compiles the application and regression tests, runs the
 regression suite, and launches the Swing application. The second creates a
 self-extracting single-file Windows executable:
-`dist\MazeSolver-0.8.1.exe`. The executable embeds the complete application
+`dist\MazeSolver-V0.9.0a.exe`. The executable embeds the complete application
 image and Java runtime, extracts to a temporary directory when launched,
 waits for the application to close, and removes its temporary files. It can
 be distributed as one file and does not require Java on the target machine.
@@ -684,7 +889,7 @@ Normal launches do not open a terminal window. For troubleshooting, launch
 the executable with the optional debug flag:
 
 ```powershell
-.\dist\MazeSolver-0.8.1.exe --debug
+.\dist\MazeSolver-V0.9.0a.exe --debug
 ```
 
 ### Developer Notes: experiment execution
@@ -736,7 +941,7 @@ chmod +x scripts/compile-and-run.sh scripts/build-executable.sh
 ```
 
 The Linux application image is created at `dist/MazeSolver/bin/MazeSolver`,
-and the portable bundle is `dist/MazeSolver-portable-linux.zip`. These
+and the portable bundle is `dist/MazeSolver-V0.9.0a-portable-linux.zip`. These
 bundles include the Java runtime and do not require Java to be installed on
 the target machine. The generated `build/` and `dist/` directories are
 ignored by Git.
@@ -748,7 +953,8 @@ chmod +x scripts/build-executable-macos.sh
 ./scripts/build-executable-macos.sh
 ```
 
-This creates `dist/MazeSolver-0.8.1.dmg`. The package architecture matches
+This creates `dist/MazeSolver-V0.9.0a.dmg`. Native packaging tools receive the
+numeric version `0.9.0`. The package architecture matches
 the installed JDK: use an Intel JDK for Intel Macs or an Apple-silicon JDK for
 Apple-silicon Macs. `jpackage` does not cross-build native macOS packages from
 Windows or Linux. The generated application is unsigned by default; public
@@ -786,7 +992,7 @@ installing it through an available package manager. It replaces the generated
 `doc\html` directory so deleted classes leave no stale pages, builds the PDF,
 and removes the temporary `doc\latex` folder.
 The remaining documentation outputs are `doc\html`,
-`doc\Maze-Solver-docs_V0.8.1.pdf`, and `doc\Doxyfile`.
+`doc\Maze-Solver-docs_V0.9.0a.pdf`, and `doc\Doxyfile`.
 
 On Linux, use the equivalent script:
 

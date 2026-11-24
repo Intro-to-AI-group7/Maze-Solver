@@ -6,7 +6,7 @@ CLASSES="$ROOT/build/classes"
 PACKAGE="$ROOT/build/package"
 DIST="$ROOT/dist"
 JAR="$PACKAGE/MazeSolver.jar"
-PORTABLE_ZIP="$DIST/MazeSolver-portable-linux.zip"
+PORTABLE_ZIP="$DIST/MazeSolver-V0.9.0a-portable-linux.zip"
 JAVAC_BIN="$(readlink -f "$(command -v javac)")"
 JAVA_HOME="$(cd "$(dirname "$JAVAC_BIN")/.." && pwd)"
 JAVAC="$JAVA_HOME/bin/javac"
@@ -34,7 +34,7 @@ mapfile -t SOURCES < <(find "$ROOT/src" -type f -name '*.java' -print)
         --main-jar "$(basename "$JAR")" \
         --main-class app.MS \
         --dest "$DIST" \
-        --app-version 0.8.1 \
+        --app-version 0.9.0 \
         --vendor "Intro-to-AI-group7"
     if ! command -v zip >/dev/null 2>&1; then
         echo "The zip command is required to create the portable bundle." >&2

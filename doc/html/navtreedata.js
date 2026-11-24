@@ -25,9 +25,13 @@
 var NAVTREE =
 [
   [ "Maze-Solver", "index.html", [
-    [ "Maze-Solver 0.8.1", "index.html", "index" ],
+    [ "Maze-Solver V0.9.0a", "index.html", "index" ],
     [ "Namespaces", "namespaces.html", [
-      [ "Namespace List", "namespaces.html", "namespaces_dup" ]
+      [ "Namespace List", "namespaces.html", "namespaces_dup" ],
+      [ "Namespace Members", "namespacemembers.html", [
+        [ "All", "namespacemembers.html", null ],
+        [ "Functions", "namespacemembers_func.html", null ]
+      ] ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
@@ -48,8 +52,9 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_application_preferences_8java.html",
-"classexperiments_1_1_test_suite_1_1_test_case.html#a8eb6da21ddb59743d21d78501b682110",
-"enumexperiments_1_1_test_suite_1_1_endpoint_mode.html"
+"classexperiments_1_1_test_suite.html#a728487b59a400cf56a4054ebf612777b",
+"classmaze_1_1search_1_1_maze_solver.html#a0590fb4ea205f4809089b96aebe7e8ce",
+"enummaze_1_1search_1_1_maze_solver_1_1_algorithm.html"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

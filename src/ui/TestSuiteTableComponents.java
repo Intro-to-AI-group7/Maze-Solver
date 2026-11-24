@@ -220,7 +220,7 @@ final class MapValueEditor extends AbstractCellEditor implements TableCellEditor
     private final JTextField seedField = new JTextField();
     private final JButton button = new JButton("Import map...");
     private JTable table;
-    private int row;
+    private int modelRow;
 
     MapValueEditor() {
         UITheme.styleTextField(seedField);
@@ -228,7 +228,7 @@ final class MapValueEditor extends AbstractCellEditor implements TableCellEditor
         editorPanel.add(seedField, BorderLayout.CENTER);
         editorPanel.add(button, BorderLayout.EAST);
         button.addActionListener(event -> {
-            if (table.getValueAt(row, 3) != TestSuite.MapSource.SAVED_MAP) {
+            if (table.getModel().getValueAt(modelRow, 3) != TestSuite.MapSource.SAVED_MAP) {
                 fireEditingStopped();
                 return;
             }
@@ -245,11 +245,9 @@ final class MapValueEditor extends AbstractCellEditor implements TableCellEditor
                     String contents = java.nio.file.Files.readString(
                             chooser.getSelectedFile().toPath());
                     Maze imported = Maze.importFromText(contents);
-                    table.getModel().setValueAt(imported.getLength(), row, 5);
-                    table.getModel().setValueAt(imported.getWidth(), row, 6);
-                    table.getModel().setValueAt(contents, row, 20);
-                    table.getModel().setValueAt(name, row, 4);
-                    fireEditingStopped();
+                    fireEditingCanceled();
+                    ((TestConfigurationTableModel) table.getModel()).setImportedMap(
+                            modelRow, name, contents, imported.getLength(), imported.getWidth());
                 } catch (java.io.IOException | IllegalArgumentException ex) {
                     JOptionPane.showMessageDialog(table, "Could not read map: "
                             + ex.getMessage(), "Map Import Error",
@@ -263,8 +261,8 @@ final class MapValueEditor extends AbstractCellEditor implements TableCellEditor
     public Component getTableCellEditorComponent(
             JTable table, Object value, boolean selected, int row, int column) {
         this.table = table;
-        this.row = row;
-        boolean savedMap = table.getValueAt(row, 3) == TestSuite.MapSource.SAVED_MAP;
+        modelRow = table.convertRowIndexToModel(row);
+        boolean savedMap = table.getModel().getValueAt(modelRow, 3) == TestSuite.MapSource.SAVED_MAP;
         seedField.setText(String.valueOf(value));
         seedField.selectAll();
         button.setVisible(savedMap);
@@ -274,7 +272,7 @@ final class MapValueEditor extends AbstractCellEditor implements TableCellEditor
 
     @Override
     public Object getCellEditorValue() {
-        return seedField.isVisible() ? seedField.getText().trim() : button.getText();
+        return seedField.isVisible() ? seedField.getText().trim() : table.getModel().getValueAt(modelRow, 4);
     }
 }
 

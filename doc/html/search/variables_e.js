@@ -1,5 +1,19 @@
 var searchData=
 [
-  ['ucs_0',['UCS',['../enummaze_1_1search_1_1_maze_solver_1_1_algorithm.html#a6c9c2018c7dfcddaf489b5254c860dff',1,'maze::search::MazeSolver::Algorithm']]],
-  ['uniform_1',['UNIFORM',['../enumexperiments_1_1_test_suite_1_1_cost_mode.html#ac87f647aa3ca78100cd48590a6744421',1,'experiments::TestSuite::CostMode']]]
+  ['saved_5fmap_0',['SAVED_MAP',['../enumexperiments_1_1_test_suite_1_1_map_source.html#aaa68d85421e074e2603538351543090f',1,'experiments::TestSuite::MapSource']]],
+  ['scatter_1',['SCATTER',['../enumanalysis_1_1_result_chart_1_1_type.html#ae111a8f801138be005ab7f5e8f88b4bc',1,'analysis::ResultChart::Type']]],
+  ['seed_2',['SEED',['../enumanalysis_1_1_result_query_1_1_field.html#a9084c233d795faf0274c883bc7dfe3de',1,'analysis::ResultQuery::Field']]],
+  ['seed_5for_5fmap_3',['SEED_OR_MAP',['../enumui_1_1_test_configuration_table_model_1_1_field.html#a251fe372e4be0a56dd089a43d5004a42',1,'ui::TestConfigurationTableModel::Field']]],
+  ['sequential_4',['SEQUENTIAL',['../enumexperiments_1_1_test_suite_1_1_execution_mode.html#abdc9901b5bb14f15c58a70eae8cd5db2',1,'experiments::TestSuite::ExecutionMode']]],
+  ['solved_5',['SOLVED',['../enumanalysis_1_1_result_query_1_1_field.html#a10ca1307fe65641721ab1921706f43bf',1,'analysis::ResultQuery::Field']]],
+  ['solver_6',['SOLVER',['../enumexperiments_1_1_experiment_runner_1_1_task_priority.html#a742a35cc3a56816c9500cd2b1dd0e2fe',1,'experiments::ExperimentRunner::TaskPriority']]],
+  ['source_7',['SOURCE',['../enumanalysis_1_1_result_query_1_1_field.html#aecd8fec104f15b2d330a5358d2e4dfae',1,'analysis.ResultQuery.Field.SOURCE'],['../enumui_1_1_test_configuration_table_model_1_1_field.html#a88342bd4780a36fbd824b739354fba0d',1,'ui.TestConfigurationTableModel.Field.SOURCE']]],
+  ['south_8',['SOUTH',['../enummaze_1_1map_1_1_maze_1_1_dir.html#a8f205018f4303f1ddd08b357c32dcb57',1,'maze::map::Maze::Dir']]],
+  ['start_5fcolumn_9',['START_COLUMN',['../enumui_1_1_test_configuration_table_model_1_1_field.html#a89ab38be5db08e43874fc09922e7c9c1',1,'ui::TestConfigurationTableModel::Field']]],
+  ['start_5frow_10',['START_ROW',['../enumui_1_1_test_configuration_table_model_1_1_field.html#a140ff0bd439d0f9a68cd89ee780560ba',1,'ui::TestConfigurationTableModel::Field']]],
+  ['success_11',['SUCCESS',['../enumanalysis_1_1_result_statistics_1_1_metric.html#a6e9698f32e356729c5d6adb538f40b30',1,'analysis::ResultStatistics::Metric']]],
+  ['suite_12',['SUITE',['../enumanalysis_1_1_result_query_1_1_field.html#a87a2d76b16de19dc30d21e3f57b5696d',1,'analysis::ResultQuery::Field']]],
+  ['suite_5fextension_13',['SUITE_EXTENSION',['../classexperiments_1_1_test_suite_i_o.html#a87bd35f52835911fee781f5c826de010',1,'experiments::TestSuiteIO']]],
+  ['suite_5fformat_5fversion_14',['SUITE_FORMAT_VERSION',['../classexperiments_1_1_test_suite_i_o.html#a16744fa9efe922e2564abbf8017e71d4',1,'experiments::TestSuiteIO']]],
+  ['symmetric_15',['SYMMETRIC',['../enumanalysis_1_1_result_query_1_1_field.html#acc221358c2fcf8a5ed86ad8606659e36',1,'analysis.ResultQuery.Field.SYMMETRIC'],['../enumui_1_1_test_configuration_table_model_1_1_field.html#a97862d1bf5bf243d40250c401e8cbbc4',1,'ui.TestConfigurationTableModel.Field.SYMMETRIC']]]
 ];

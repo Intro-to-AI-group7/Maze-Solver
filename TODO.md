@@ -12,14 +12,22 @@ complete. Feature and architecture documentation is maintained in
 These items are optional follow-up improvements and are not blockers for the
 current route-planning agent implementation.
 
+### V0.9.0a alpha maintenance
+
+- [x] Add column sort and filter actions to both test-suite tables and keep
+      the expressions editable.
+- [x] Keep the newest matching result visible during live runs and pause follow
+      mode when the user pages manually.
+- [x] Refresh the README and regenerate the Doxygen HTML and current release PDF.
+- [x] Remove obsolete local package artifacts and superseded release PDFs.
+- [ ] Verify the alpha on macOS and Linux, including native packaging.
+
 ### Maintenance pass (0.8.1)
 
 - [x] Document the 1,296-condition benchmark matrix, Windows JDK discovery,
       automatic heap sizing, adaptive startup limits, and visible-view refreshes.
 - [x] Remove unused scheduler helpers, completion fields, table editors, and
       redundant UCS state; share map-worker diagnostics across execution paths.
-- [ ] Review removal of old generated experiment exports, packaged binaries,
-      build output, and the previous release PDF before deleting retained files.
 - [x] Correct stale title-image and fixture-location instructions and distinguish
       per-result search time from end-to-end CLI timing.
 
@@ -68,8 +76,8 @@ current route-planning agent implementation.
       when map generation or solver execution fails.
 - [ ] Preserve the last measured instantaneous solves-per-second value after
       a suite completes; the current footer sampling resets it to zero.
-- [x] Add an opt-in results-table follow mode that keeps the view on the
-      dynamically growing final page during a suite run.
+- [x] Add an opt-in results-table follow mode that scrolls to the newest
+      matching result on its sorted page during a suite run.
 - [x] Add an alternative live solve-log view that follows each completed
       result as it arrives without changing table pagination.
 - [x] Bound the live diagnostic solve log to the most recent 500 entries so
@@ -369,10 +377,13 @@ the foundation phase is deliberately started.
       profiling proves one map dominates.
 - [ ] Add an optional Windows hybrid-CPU affinity setting for P-core-only
       performance comparisons.
-- [ ] Add aggregate statistical analysis for repeated experiment runs,
+- [x] Add aggregate statistical analysis for repeated experiment runs,
       including averages, medians, minimums, maximums, and standard deviation
       by algorithm and test condition.
-- [ ] Add optional benchmark charts or a report-oriented analysis export.
+- [x] Add optional benchmark charts or a report-oriented analysis export.
+- [x] Add shared global filtering/sorting, per-map/per-algorithm outlier-trimmed
+      means, raw/normalized overlays, configurable graph axes and legends,
+      PNG/CSV exports, saved views, results reload, and headless CLI validation.
 - [ ] Add an application-level logging toggle to control verbose diagnostic
       console output.
 - [x] Regenerate the Doxygen HTML reference and release PDF for the 0.8.1

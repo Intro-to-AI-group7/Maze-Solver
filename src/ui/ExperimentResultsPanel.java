@@ -31,34 +31,38 @@ final class ExperimentResultsPanel extends JPanel {
             "Workers: solving 0 / mapping 0    Elapsed: 00:00:00    "
                     + "Solves/sec: 0.00    Avg: 0.00");
     private final JButton pauseButton = new JButton("Pause");
+    private final JCheckBox followLatest = new JCheckBox("Follow latest results");
+    private final JComboBox<String> viewSelector = new JComboBox<>(
+            new String[] {"Table view", "Summary", "Graphs", "Live solve log"});
 
     ExperimentResultsPanel(
             JTable resultTable,
             JTextArea solveLog,
             JTextArea mapLog,
+            ResultAnalysisPanel analysis,
             JLabel statusLabel,
             JProgressBar progressBar,
             JProgressBar mapProgressBar,
             Runnable runSuite,
             Runnable cancelRun,
             Runnable pauseRun,
-            Runnable exportResults,
             Runnable exportMaps,
             IntConsumer reviewResult,
             IntConsumer pageSizeChanged,
             IntConsumer pageJump,
             IntConsumer pageDelta,
             java.util.function.Consumer<Boolean> followLatestChanged,
-            java.util.function.Consumer<String> viewChanged) {
+            java.util.function.Consumer<String> viewChanged,
+            Runnable toggleSetup) {
         super(new BorderLayout(4, 4));
         Objects.requireNonNull(resultTable);
         Objects.requireNonNull(statusLabel);
         Objects.requireNonNull(progressBar);
         Objects.requireNonNull(mapProgressBar);
 
-        resultTable.getColumnModel().getColumn(10)
+        resultTable.getColumnModel().getColumn(14)
                 .setCellRenderer(new ReviewButtonRenderer());
-        resultTable.getColumnModel().getColumn(10)
+        resultTable.getColumnModel().getColumn(14)
                 .setCellEditor(new ReviewButtonEditor(reviewResult));
 
         JPanel actions = new JPanel(new BorderLayout(6, 0));
@@ -67,8 +71,8 @@ final class ExperimentResultsPanel extends JPanel {
         pauseButton.addActionListener(event -> pauseRun.run());
         buttons.add(pauseButton);
         buttons.add(button("Cancel", cancelRun));
-        buttons.add(button("Export CSV", exportResults));
-        buttons.add(button("Export Maps", exportMaps));
+        buttons.add(analysis.resultsMenu(exportMaps));
+        buttons.add(button("Toggle setup", toggleSetup));
         buttons.add(statusLabel);
         actions.add(buttons, BorderLayout.WEST);
         JPanel progressContainer = new JPanel(new GridBagLayout());
@@ -80,9 +84,14 @@ final class ExperimentResultsPanel extends JPanel {
         progressConstraints.insets = new Insets(0, 0, 5, 6);
         progressContainer.add(mapProgressBar, progressConstraints);
         actions.add(progressContainer, BorderLayout.CENTER);
-        add(actions, BorderLayout.NORTH);
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(actions, BorderLayout.NORTH);
+        top.add(analysis.controls(), BorderLayout.CENTER);
+        add(top, BorderLayout.NORTH);
         JPanel resultViews = new JPanel(new CardLayout());
         resultViews.add(new JScrollPane(resultTable), "table");
+        resultViews.add(analysis.summary(), "summary");
+        resultViews.add(analysis.graph(), "graphs");
         JPanel logViews = new JPanel(new BorderLayout(4, 0));
         JScrollPane solveScroll = new JScrollPane(solveLog);
         JScrollPane mapScroll = new JScrollPane(mapLog);
@@ -93,13 +102,15 @@ final class ExperimentResultsPanel extends JPanel {
         logSplit.setDividerLocation(0.75);
         logViews.add(logSplit, BorderLayout.CENTER);
         resultViews.add(logViews, "log");
-        JComboBox<String> viewSelector = new JComboBox<>(
-                new String[] {"Table view", "Live solve log"});
         viewSelector.setToolTipText("Choose how completed solves are displayed.");
         viewSelector.addActionListener(event -> {
             String view = (String) viewSelector.getSelectedItem();
             ((CardLayout) resultViews.getLayout()).show(
-                    resultViews, "Live solve log".equals(view) ? "log" : "table");
+                    resultViews, switch (view) {
+                        case "Live solve log" -> "log";
+                        case "Summary" -> "summary"; case "Graphs" -> "graphs"; default -> "table";
+                    });
+            analysis.setView(view);
             viewChanged.accept(view);
         });
         JPanel viewSelectorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
@@ -113,9 +124,8 @@ final class ExperimentResultsPanel extends JPanel {
         pageSize.addActionListener(event ->
                 pageSizeChanged.accept((Integer) pageSize.getSelectedItem()));
         paging.add(pageSize);
-        paging.add(button("-1", () -> pageDelta.accept(-1)));
-        paging.add(button("-10", () -> pageDelta.accept(-10)));
-        paging.add(button("-100", () -> pageDelta.accept(-100)));
+        paging.add(button("First", () -> pageJump.accept(1)));
+        paging.add(button("Previous", () -> pageDelta.accept(-1)));
         JTextField pageNumber = new JTextField("1", 4);
         pageNumber.addActionListener(event -> {
             try {
@@ -126,26 +136,28 @@ final class ExperimentResultsPanel extends JPanel {
         });
         paging.add(new JLabel("Go to:"));
         paging.add(pageNumber);
-        paging.add(button("+1", () -> pageDelta.accept(1)));
-        paging.add(button("+10", () -> pageDelta.accept(10)));
-        paging.add(button("+100", () -> pageDelta.accept(100)));
-        JCheckBox followLatest = new JCheckBox("Follow latest results");
+        paging.add(button("Next", () -> pageDelta.accept(1)));
+        paging.add(button("Last", () -> pageJump.accept(Integer.MAX_VALUE)));
         followLatest.setToolTipText(
-                "Keep the table on the final page as new solver results arrive.");
+                "Jump to and scroll to the newest matching result, using the current sort order.");
         followLatest.addActionListener(event ->
                 followLatestChanged.accept(followLatest.isSelected()));
         paging.add(followLatest);
         paging.add(pageInfo);
+        viewSelector.addActionListener(event -> paging.setVisible("Table view".equals(viewSelector.getSelectedItem())));
         JPanel footer = new JPanel(new BorderLayout());
-        footer.add(viewSelectorPanel, BorderLayout.WEST);
-        footer.add(memoryInfo, BorderLayout.CENTER);
-        footer.add(paging, BorderLayout.EAST);
+        JPanel statusRow = new JPanel(new BorderLayout());
+        statusRow.add(viewSelectorPanel, BorderLayout.WEST);
+        statusRow.add(memoryInfo, BorderLayout.CENTER);
+        footer.add(statusRow, BorderLayout.NORTH);
+        footer.add(paging, BorderLayout.SOUTH);
         add(footer, BorderLayout.SOUTH);
     }
 
     void setPageInfo(String text) {
         pageInfo.setText(text);
     }
+    void setFollowLatest(boolean enabled) { followLatest.setSelected(enabled); }
 
     void setMemoryInfo(String text) {
         memoryInfo.setText(text);
@@ -154,6 +166,7 @@ final class ExperimentResultsPanel extends JPanel {
     void setPaused(boolean paused) {
         pauseButton.setText(paused ? "Resume" : "Pause");
     }
+    void showGraphs() { viewSelector.setSelectedItem("Graphs"); }
 
     private static JButton button(String label, Runnable action) {
         JButton button = new JButton(label);

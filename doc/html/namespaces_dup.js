@@ -1,5 +1,6 @@
 var namespaces_dup =
 [
+    [ "analysis", "namespaceanalysis.html", "namespaceanalysis" ],
     [ "app", "namespaceapp.html", "namespaceapp" ],
     [ "experiments", "namespaceexperiments.html", "namespaceexperiments" ],
     [ "maze", null, [

@@ -32,6 +32,7 @@ import experiments.TestSuite;
 import experiments.TestSuiteIO;
 import maze.map.Maze;
 import maze.search.MazeSolver;
+import analysis.ResultRecord;
 
 /**
  * Swing editor and execution window for configurable experiment suites.
@@ -47,7 +48,7 @@ public final class TestSuiteWindow {
     private static final int MAX_LIVE_LOG_ENTRIES = 500;
     private static TestSuiteWindow activeWindow;
 
-    private final JFrame frame = new JFrame("Maze Solver - Configure Tests");
+    private final JFrame frame = new JFrame("Maze Solver " + app.Version.RELEASE + " - Configure Tests");
     private final JTextField suiteNameField = new JTextField("experiment-suite", 18);
     private final JComboBox<TestSuite.ExecutionMode> executionModeCombo =
             new JComboBox<>(TestSuite.ExecutionMode.values());
@@ -61,20 +62,26 @@ public final class TestSuiteWindow {
             new LinkedHashMap<>();
     private final Deque<String> completedSolveLog = new ArrayDeque<>();
     private final Deque<String> mapGenerationLog = new ArrayDeque<>();
-    private final List<ExperimentResult> resultRows = new java.util.ArrayList<>();
+    private final List<ResultRecord> analysisRows = new java.util.ArrayList<>();
+    private List<ResultRecord> selectedResults = List.of();
+    private final ResultAnalysisPanel analysisPanel = new ResultAnalysisPanel(
+            this::analysisSelectionChanged, this::openAnalysisResults, this::showError);
+    private boolean analysisRefreshPending;
+    private long lastAnalysisRefreshNs;
     private final JLabel statusLabel = new JLabel("Add or edit a test row.");
     private final JProgressBar progressBar = new JProgressBar();
     private final JProgressBar mapProgressBar = new JProgressBar();
     private ExperimentResultsPanel resultsPanel;
+    private JSplitPane contentSplit;
     private int resultPageSize = 25;
     private int resultPage;
     private boolean followLatestResults;
+    private int latestMatchingIndex = -1;
     private TestSuite activeSuite;
     private final Timer memoryTimer;
     private final Timer viewRefreshTimer;
     private final Runnable onBack;
     private SwingWorker<List<ExperimentResult>, Object> worker;
-    private boolean resultPageRefreshPending;
     private boolean solveLogRefreshPending;
     private volatile long suiteStartNanos;
     private volatile long suiteEndNanos;
@@ -138,6 +145,75 @@ public final class TestSuiteWindow {
         viewRefreshTimer.start();
         addDefaultRow();
         configureTableEditors();
+        resultTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for (int column = 0; column < resultTable.getColumnCount(); column++) {
+            resultTable.getColumnModel().getColumn(column).setPreferredWidth(column == 10 ? 200 : 115);
+        }
+        resultTable.setToolTipText("Right-click to copy a cell or open result actions.");
+        resultTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override public void mousePressed(java.awt.event.MouseEvent event) { showMapMenu(event); }
+            @Override public void mouseReleased(java.awt.event.MouseEvent event) { showMapMenu(event); }
+            private void showMapMenu(java.awt.event.MouseEvent event) {
+                if (!event.isPopupTrigger()) { return; }
+                int row = resultTable.rowAtPoint(event.getPoint());
+                int column = resultTable.columnAtPoint(event.getPoint());
+                if (row < 0 || column < 0) { return; }
+                int modelRow = resultTable.convertRowIndexToModel(row);
+                resultsContextMenu(modelRow, resultTable.convertColumnIndexToModel(column))
+                        .show(resultTable, event.getX(), event.getY());
+            }
+        });
+        for (int column : new int[] {4, 5, 7}) {
+            resultTable.getColumnModel().getColumn(column).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+                private static final long serialVersionUID = 1L;
+                @Override public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
+                        boolean selected, boolean focused, int row, int viewColumn) {
+                    Object display = value == null ? "N/A" : value instanceof Double
+                            ? String.format(java.util.Locale.ROOT, "%.6f", value) : value;
+                    setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+                    return super.getTableCellRendererComponent(table, display, selected, focused, row, viewColumn);
+                }
+            });
+        }
+        analysisPanel.installTableHeader(resultTable);
+    }
+
+    private javax.swing.JPopupMenu resultsContextMenu(int row, int column) {
+        ResultRecord record = resultModel.recordAt(row);
+        String cell = resultModel.copyValueAt(row, column);
+        String rowValues = resultModel.copyRowAt(row);
+        TestSuite suite = activeSuite;
+        var menu = new javax.swing.JPopupMenu();
+        menu.add(resultAction("Copy cell value", !resultModel.isCellEditable(row, column), () -> copyResultText(cell)));
+        menu.add(resultAction("Copy row (tab-separated)", true, () -> copyResultText(rowValues)));
+        menu.add(resultAction("Copy map ID", !record.mapId().isBlank(), () -> copyResultText(record.mapId())));
+        menu.addSeparator();
+        menu.add(resultAction("Filter to this algorithm", true,
+                () -> analysisPanel.filterAlgorithm(record.result().getAlgorithm())));
+        menu.add(resultAction("Compare this map", !record.mapId().isBlank(), () -> {
+            analysisPanel.compareMap(record.mapId());
+            resultsPanel.showGraphs();
+        }));
+        menu.add(resultAction("Review solve", suite != null, () -> {
+            if (activeSuite == suite) { reviewResult(record.result()); }
+        }));
+        return menu;
+    }
+
+    private static javax.swing.JMenuItem resultAction(String title, boolean enabled, Runnable action) {
+        var item = new javax.swing.JMenuItem(title);
+        item.setEnabled(enabled);
+        item.addActionListener(event -> action.run());
+        return item;
+    }
+
+    private void copyResultText(String value) {
+        try {
+            java.awt.Toolkit.getDefaultToolkit().getSystemClipboard()
+                    .setContents(new java.awt.datatransfer.StringSelection(value), null);
+        } catch (IllegalStateException ex) {
+            showError("The clipboard is busy. Try copying again.");
+        }
     }
 
     /**
@@ -177,6 +253,7 @@ public final class TestSuiteWindow {
         }
         activeWindow.memoryTimer.stop();
         activeWindow.viewRefreshTimer.stop();
+        activeWindow.analysisPanel.close();
         activeWindow.cancelRun();
         activeWindow.frame.dispose();
         activeWindow = null;
@@ -198,29 +275,35 @@ public final class TestSuiteWindow {
                 resultTable,
                 solveLog,
                 mapLog,
+                analysisPanel,
                 statusLabel,
                 progressBar,
                 mapProgressBar,
                 this::runSuite,
                 this::cancelRun,
                 this::togglePause,
-                this::exportResults,
                 this::exportMaps,
                 this::reviewResult,
                 this::setResultPageSize,
                 this::goToResultPage,
                 this::moveResultPage,
                 this::setFollowLatestResults,
-                this::setResultsView);
+                this::setResultsView,
+                this::toggleSetup);
         JSplitPane splitPane = new JSplitPane(
                 JSplitPane.VERTICAL_SPLIT, configurationPanel, resultsPanel);
+        contentSplit = splitPane;
         splitPane.setContinuousLayout(true);
         splitPane.setOneTouchExpandable(true);
-        splitPane.setResizeWeight(0.72);
+        splitPane.setResizeWeight(0.30);
+        splitPane.setDividerLocation(210);
         splitPane.setDividerSize(8);
         splitPane.setToolTipText("Drag the divider to resize test setup and results.");
         root.add(splitPane, BorderLayout.CENTER);
         return root;
+    }
+    private void toggleSetup() {
+        contentSplit.setDividerLocation(contentSplit.getDividerLocation() > 20 ? 0 : 210);
     }
 
     private void returnToPreviousScreen() {
@@ -237,7 +320,8 @@ public final class TestSuiteWindow {
     private void insertDefaultRow(int row) {
         int insertionRow = Math.max(0, Math.min(row, configModel.getRowCount()));
         configModel.insertRow(insertionRow, defaultRowValues());
-        configTable.setRowSelectionInterval(insertionRow, insertionRow);
+        configTable.clearSelection();
+        configTable.selectModelRow(insertionRow);
     }
 
     private Object[] defaultRowValues() {
@@ -335,27 +419,23 @@ public final class TestSuiteWindow {
     }
 
     private void removeSelectedRow() {
-        if (configTable.isEditing()) {
-            configTable.getCellEditor().stopCellEditing();
-        }
-        int[] selectedRows = configTable.getSelectedRows();
+        int[] selectedRows = configTable.selectedModelRows();
+        if (configTable.isEditing() && !configTable.getCellEditor().stopCellEditing()) { return; }
         for (int index = selectedRows.length - 1; index >= 0; index--) {
             configModel.removeRow(selectedRows[index]);
         }
     }
 
     private void duplicateSelectedRows() {
-        if (configTable.isEditing()) {
-            configTable.getCellEditor().stopCellEditing();
-        }
-        int[] selectedRows = configTable.getSelectedRows();
+        int[] selectedRows = configTable.selectedModelRows();
+        if (configTable.isEditing() && !configTable.getCellEditor().stopCellEditing()) { return; }
         if (selectedRows.length == 0) {
             return;
         }
         int[] duplicatedRows = configModel.duplicateRows(selectedRows);
         configTable.clearSelection();
         for (int row : duplicatedRows) {
-            configTable.addRowSelectionInterval(row, row);
+            configTable.selectModelRow(row);
         }
     }
 
@@ -410,8 +490,12 @@ public final class TestSuiteWindow {
         try {
             TestSuite suite = readSuiteFromTable();
             activeSuite = suite;
-            resultModel.setRowCount(0);
-            resultRows.clear();
+            ResultRecord.Factory provenance = new ResultRecord.Factory(suite);
+            analysisRows.clear();
+            analysisRefreshPending = false;
+            selectedResults = List.of();
+            latestMatchingIndex = -1;
+            analysisPanel.setSource(List.of());
             completedSolveLog.clear();
             mapGenerationLog.clear();
             activeSolveProgress.clear();
@@ -445,11 +529,11 @@ public final class TestSuiteWindow {
             worker = new SwingWorker<List<ExperimentResult>, Object>() {
                 @Override
                 protected List<ExperimentResult> doInBackground() {
+                    SwingWorker<?, ?> currentRun = this;
                     ExperimentRunner.ExecutionControl control = new ExperimentRunner.ExecutionControl() {
                         @Override
                         public boolean isCancelled() {
-                            return TestSuiteWindow.this.worker == null
-                                    || TestSuiteWindow.this.worker.isCancelled();
+                            return currentRun.isCancelled();
                         }
 
                         @Override
@@ -485,6 +569,7 @@ public final class TestSuiteWindow {
 
                 @Override
                 protected void process(List<Object> events) {
+                    if (TestSuiteWindow.this.worker != this) { return; }
                     ExperimentResult latestResult = null;
                     for (Object event : events) {
                         if (event instanceof ExperimentRunner.SolveProgress) {
@@ -498,7 +583,8 @@ public final class TestSuiteWindow {
                             appendMapLog(progress);
                         } else if (event instanceof ExperimentResult) {
                             ExperimentResult result = (ExperimentResult) event;
-                            resultRows.add(result);
+                            analysisRows.add(provenance.create(result));
+                            analysisRefreshPending = true;
                             appendSolveLog(result);
                             latestResult = result;
                         }
@@ -509,14 +595,12 @@ public final class TestSuiteWindow {
                                 + latestResult.getIteration() + " / "
                                 + latestResult.getAlgorithm());
                     }
-                    if (followLatestResults) {
-                        resultPage = pageCount() - 1;
-                    }
-                    requestResultPageRefresh();
                 }
 
                 @Override
                 protected void done() {
+                    if (TestSuiteWindow.this.worker != this) { return; }
+                    analysisPanel.updateSource(analysisRows);
                     suiteEndNanos = System.nanoTime();
                     if (isCancelled()) {
                         setStatusText("Run cancelled.");
@@ -536,7 +620,7 @@ public final class TestSuiteWindow {
                             Path directory = suite.getExportDirectory() == null
                                     ? TestSuiteIO.defaultExportDirectory()
                                     : Paths.get(suite.getExportDirectory());
-                            TestSuiteIO.exportCsv(results,
+                            analysis.ResultFiles.save(results.stream().map(provenance::create).toList(),
                                     directory.resolve(safeFileName(suite.getName()) + ".csv"));
                         }
                     } catch (CancellationException ex) {
@@ -666,6 +750,11 @@ public final class TestSuiteWindow {
             return;
         }
         updateProgress(completedSolveCount, progressBar.getMaximum());
+        if (activeSuite == null && !analysisRows.isEmpty()) {
+            resultsPanel.setMemoryInfo("Saved measurements: " + analysisRows.size()
+                    + " rows. No benchmark is running.");
+            return;
+        }
         long now = System.nanoTime();
         long elapsedNanos = Math.max(0L,
                 (suiteEndNanos == 0L ? now : suiteEndNanos) - suiteStartNanos);
@@ -768,23 +857,6 @@ public final class TestSuiteWindow {
                 + ExperimentRunner.getParallelWorkerCount() + " workers.";
     }
 
-    private void exportResults() {
-        try {
-            if (worker == null || !worker.isDone() || worker.isCancelled()) {
-                showError("Run a complete test suite before exporting results.");
-                return;
-            }
-
-            List<ExperimentResult> results = worker.get();
-            Path file = chooseFile("Export Results CSV", JFileChooser.SAVE_DIALOG);
-            if (file != null) {
-                TestSuiteIO.exportCsv(results, file);
-                setStatusText("Results exported.");
-            }
-        } catch (Exception ex) {
-            showError("Could not export results: " + rootCause(ex).getMessage());
-        }
-    }
 
     private void exportMaps() {
         try {
@@ -844,11 +916,17 @@ public final class TestSuiteWindow {
     }
 
     private void reviewResult(int row) {
-        int resultIndex = resultPage * resultPageSize + row;
-        if (row < 0 || resultIndex >= resultRows.size()) {
+        if (row < 0 || row >= resultModel.getRowCount()) {
             return;
         }
-        ExperimentResult result = resultRows.get(resultIndex);
+        reviewResult(resultModel.recordAt(row).result());
+    }
+
+    private void reviewResult(ExperimentResult result) {
+        if (activeSuite == null) {
+            showError("This CSV contains measurements, not the original maps. Run the suite to review its maps.");
+            return;
+        }
         try {
             TestSuite.TestCase testCase = findTestCase(result.getConfigurationId());
             Maze maze = testCase.getMapSource() == TestSuite.MapSource.SAVED_MAP
@@ -883,7 +961,7 @@ public final class TestSuiteWindow {
 
     private void goToResultPage(int pageNumber) {
         pauseFollowingLatestResults();
-        resultPage = Math.max(0, Math.min(pageNumber - 1, pageCount() - 1));
+        resultPage = Math.min(Math.max(1, pageNumber), pageCount()) - 1;
         refreshResultPage();
     }
 
@@ -894,13 +972,12 @@ public final class TestSuiteWindow {
     }
 
     private int pageCount() {
-        return Math.max(1, (resultRows.size() + resultPageSize - 1) / resultPageSize);
+        return Math.max(1, (selectedResults.size() + resultPageSize - 1) / resultPageSize);
     }
 
     private void setFollowLatestResults(boolean follow) {
         followLatestResults = follow;
         if (follow) {
-            resultPage = pageCount() - 1;
             refreshResultPage();
         }
     }
@@ -910,7 +987,13 @@ public final class TestSuiteWindow {
         if (liveSolveLogVisible) {
             refreshSolveLog();
             setStatusText("Live solve log follows completed solves.");
+        } else if ("Graphs".equals(view)) {
+            if (contentSplit != null) { contentSplit.setDividerLocation(0); }
+            setStatusText("Graph analysis uses current filters.");
+        } else if ("Summary".equals(view)) {
+            setStatusText("Per-algorithm statistics with exclusion counts.");
         } else {
+            if (followLatestResults) { refreshResultPage(); }
             setStatusText("Table view follows completed solves.");
         }
     }
@@ -955,14 +1038,11 @@ public final class TestSuiteWindow {
         solveLogRefreshPending = true;
     }
 
-    private void requestResultPageRefresh() {
-        resultPageRefreshPending = true;
-    }
-
     private void refreshPendingViews() {
-        if (resultPageRefreshPending && !liveSolveLogVisible) {
-            resultPageRefreshPending = false;
-            refreshResultPage();
+        if (analysisRefreshPending && System.nanoTime() - lastAnalysisRefreshNs >= 1_000_000_000L) {
+            analysisRefreshPending = false;
+            lastAnalysisRefreshNs = System.nanoTime();
+            analysisPanel.updateSource(analysisRows);
         }
         if (solveLogRefreshPending && liveSolveLogVisible) {
             solveLogRefreshPending = false;
@@ -1035,30 +1115,64 @@ public final class TestSuiteWindow {
         return configurationId + '\u0000' + iteration + '\u0000' + algorithm;
     }
 
-    /**
-     * Keeps the diagnostic log bounded while the complete result list remains
-     * available for the table and exports.
-     */
     private void pauseFollowingLatestResults() {
         followLatestResults = false;
+        resultsPanel.setFollowLatest(false);
     }
 
     private void refreshResultPage() {
-        resultModel.setRowCount(0);
-        int start = Math.min(resultRows.size(), resultPage * resultPageSize);
-        int end = Math.min(resultRows.size(), start + resultPageSize);
-        for (int index = start; index < end; index++) {
-            ExperimentResult result = resultRows.get(index);
-            resultModel.addRow(new Object[] {
-                result.getConfigurationId(), result.getIteration(), result.getAlgorithm(),
-                result.isSolved(), result.getPathCost(), result.getPathLength(),
-                result.getNodesExplored(), String.format(java.util.Locale.ROOT, "%.3f",
-                        result.getRuntimeMs()), result.getMapSource(), result.getSeedLabel(), "Review"
+        if (followLatestResults && latestMatchingIndex >= 0) {
+            resultPage = latestMatchingIndex / resultPageSize;
+        }
+        resultPage = Math.max(0, Math.min(resultPage, pageCount() - 1));
+        int start = Math.min(selectedResults.size(), resultPage * resultPageSize);
+        int end = Math.min(selectedResults.size(), start + resultPageSize);
+        resultModel.setPage(selectedResults.subList(start, end));
+        if (followLatestResults && latestMatchingIndex >= start && latestMatchingIndex < end) {
+            int modelRow = latestMatchingIndex - start;
+            ResultRecord target = resultModel.recordAt(modelRow);
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                if (!followLatestResults || modelRow >= resultModel.getRowCount()
+                        || resultModel.recordAt(modelRow) != target) { return; }
+                int viewRow = resultTable.convertRowIndexToView(modelRow);
+                if (viewRow < 0) { return; }
+                java.awt.Rectangle cell = resultTable.getCellRect(viewRow, 0, true);
+                cell.x = resultTable.getVisibleRect().x;
+                cell.width = 1;
+                resultTable.scrollRectToVisible(cell);
             });
         }
         if (resultsPanel != null) {
-            resultsPanel.setPageInfo("Page " + (resultPage + 1) + " of " + pageCount());
+            resultsPanel.setPageInfo("Page " + (resultPage + 1) + " of " + pageCount()
+                    + " | " + (selectedResults.isEmpty() ? 0 : start + 1) + "–" + end
+                    + " / " + selectedResults.size() + " matching / " + analysisRows.size() + " total");
         }
+    }
+
+    private void analysisSelectionChanged(List<ResultRecord> rows, int latestIndex) {
+        selectedResults = rows;
+        latestMatchingIndex = latestIndex;
+        refreshResultPage();
+    }
+
+    private void openAnalysisResults(List<ResultRecord> rows) {
+        if (worker != null && !worker.isDone()) {
+            showError("Wait for the current suite to finish or cancel it before opening saved results.");
+            return;
+        }
+        activeSuite = null;
+        worker = null;
+        analysisRows.clear(); analysisRows.addAll(rows);
+        completedSolveLog.clear(); mapGenerationLog.clear(); activeSolveProgress.clear();
+        solveLog.setText("Saved result measurements loaded. Worker history was not stored in the CSV.\n");
+        mapLog.setText("Saved result measurements loaded. Map-generation history is unavailable.\n");
+        completedSolveCount = rows.size();
+        suiteStartNanos = System.nanoTime(); suiteEndNanos = suiteStartNanos;
+        progressBar.setMaximum(rows.size()); progressBar.setValue(rows.size());
+        mapProgressBar.setValue(0); mapProgressBar.setString("Imported measurements");
+        resultPage = 0; pauseFollowingLatestResults();
+        analysisPanel.setSource(rows);
+        setStatusText("Opened " + rows.size() + " saved measurements.");
     }
 
     private String text(int row, int column) {

@@ -10,7 +10,9 @@ $jar = Join-Path $package "MazeSolver.jar"
 $staging = Join-Path $root "build\self-extractor"
 $payload = Join-Path $staging "MazeSolver-payload.zip"
 $wrapperProject = Join-Path $staging "wrapper"
-$singleFile = Join-Path $dist "MazeSolver-0.8.1.exe"
+$release = "V0.9.0a"
+$nativeVersion = "0.9.0"
+$singleFile = Join-Path $dist "MazeSolver-$release.exe"
 $jpackageCommand = Get-Command jpackage -ErrorAction Stop
 $javaBin = Split-Path -Parent $jpackageCommand.Source
 $javac = Join-Path $javaBin "javac.exe"
@@ -57,7 +59,7 @@ try {
         --main-jar (Split-Path -Leaf $jar) `
         --main-class app.MS `
         --dest $dist `
-        --app-version 0.8.1 `
+        --app-version $nativeVersion `
         --vendor "Intro-to-AI-group7"
     if ($LASTEXITCODE -ne 0) {
         throw "Executable packaging failed."
@@ -71,7 +73,7 @@ try {
         -DestinationPath $payload -CompressionLevel Optimal
 
     New-Item -ItemType Directory -Force -Path $wrapperProject | Out-Null
-    @'
+    @"
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -83,17 +85,17 @@ try {
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <AssemblyName>MazeSolver</AssemblyName>
     <RootNamespace>MazeSolverLauncher</RootNamespace>
-    <Version>0.8.1</Version>
-    <AssemblyVersion>0.8.1.0</AssemblyVersion>
-    <FileVersion>0.8.1.0</FileVersion>
-    <InformationalVersion>0.8.1</InformationalVersion>
+    <Version>$nativeVersion-alpha</Version>
+    <AssemblyVersion>$nativeVersion.0</AssemblyVersion>
+    <FileVersion>$nativeVersion.0</FileVersion>
+    <InformationalVersion>$release</InformationalVersion>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="MazeSolver-payload.zip" LogicalName="MazeSolverPayload.zip" />
   </ItemGroup>
 </Project>
-'@ | Set-Content -LiteralPath (Join-Path $wrapperProject "MazeSolverLauncher.csproj") -Encoding UTF8
+"@ | Set-Content -LiteralPath (Join-Path $wrapperProject "MazeSolverLauncher.csproj") -Encoding UTF8
 
     @'
 using System.Diagnostics;

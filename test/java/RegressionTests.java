@@ -44,6 +44,7 @@ public final class RegressionTests {
         testEmbeddedSavedMap();
         testUniqueMapExport();
         testCancellationPreservesCompletedResults();
+        AnalysisTests.run();
         System.out.println("All Maze-Solver regression tests passed.");
     }
 
@@ -336,6 +337,14 @@ public final class RegressionTests {
         Path suiteFile = directory.resolve("suite.mstests");
         Path csvFile = directory.resolve("results.csv");
         TestSuiteIO.save(suite, suiteFile);
+        var suiteProperties = new java.util.Properties();
+        try (var reader = Files.newBufferedReader(suiteFile)) {
+            suiteProperties.load(reader);
+        }
+        require(app.Version.RELEASE.equals(suiteProperties.getProperty("applicationVersion")),
+                "Saved suite did not record the application version.");
+        require("1".equals(suiteProperties.getProperty("version")),
+                "The application version must not change the suite schema version.");
         TestSuite loaded = TestSuiteIO.load(suiteFile);
         require(!loaded.getTestCases().get(0).isAutomaticSeed(),
                 "Saving a suite did not materialize its automatic seed.");

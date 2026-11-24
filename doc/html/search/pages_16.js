@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['weighted_20map_20format_0',['Weighted map format',['../index.html#autotoc_md9',1,'']]]
+  ['v0_209_200a_0',['Maze-Solver V0.9.0a',['../index.html',1,'']]],
+  ['validate_1',['Save, reopen, and validate',['../index.html#autotoc_md13',1,'']]]
 ];

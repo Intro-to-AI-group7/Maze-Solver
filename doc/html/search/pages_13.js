@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['solver_200_208_201_0',['Maze-Solver 0.8.1',['../index.html',1,'']]],
-  ['start_1',['Quick Start',['../index.html#autotoc_md5',1,'']]],
-  ['structure_2',['Project Structure',['../index.html#autotoc_md13',1,'']]]
+  ['same_20map_0',['Compare algorithms on the same map',['../index.html#autotoc_md10',1,'']]],
+  ['save_20reopen_20and_20validate_1',['Save, reopen, and validate',['../index.html#autotoc_md13',1,'']]],
+  ['solver_20v0_209_200a_2',['Maze-Solver V0.9.0a',['../index.html',1,'']]],
+  ['sorting_3',['Filters and sorting',['../index.html#autotoc_md9',1,'']]],
+  ['start_4',['Quick Start',['../index.html#autotoc_md5',1,'']]],
+  ['structure_5',['Project Structure',['../index.html#autotoc_md19',1,'']]]
 ];

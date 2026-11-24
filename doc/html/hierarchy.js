@@ -1,9 +1,18 @@
 var hierarchy =
 [
+    [ "analysis.ResultChart.Aggregate", "enumanalysis_1_1_result_chart_1_1_aggregate.html", null ],
     [ "maze.search.MazeSolver.Algorithm", "enummaze_1_1search_1_1_maze_solver_1_1_algorithm.html", null ],
     [ "app.ApplicationPreferences", "classapp_1_1_application_preferences.html", null ],
+    [ "analysis.ResultStatistics.Baselines", "classanalysis_1_1_result_statistics_1_1_baselines.html", null ],
     [ "experiments.ExperimentRunner.CancellationToken", "interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html", [
       [ "experiments.ExperimentRunner.ExecutionControl", "interfaceexperiments_1_1_experiment_runner_1_1_execution_control.html", null ]
+    ] ],
+    [ "analysis.TableQuery&lt; R, F extends TableQuery.Column&lt; R &gt; &gt;.Column&lt; R &gt;", "interfaceanalysis_1_1_table_query_1_1_column.html", null ],
+    [ "analysis.TableQuery&lt; R, F extends TableQuery.Column&lt; R &gt; &gt;.Column&lt; IntFunction&lt; Object &gt; &gt;", "interfaceanalysis_1_1_table_query_1_1_column.html", [
+      [ "ui.TestConfigurationTableModel.Field", "enumui_1_1_test_configuration_table_model_1_1_field.html", null ]
+    ] ],
+    [ "analysis.TableQuery&lt; R, F extends TableQuery.Column&lt; R &gt; &gt;.Column&lt; ResultRecord &gt;", "interfaceanalysis_1_1_table_query_1_1_column.html", [
+      [ "analysis.ResultQuery.Field", "enumanalysis_1_1_result_query_1_1_field.html", null ]
     ] ],
     [ "experiments.TestSuite.CostMode", "enumexperiments_1_1_test_suite_1_1_cost_mode.html", null ],
     [ "maze.map.Maze.Dir", "enummaze_1_1map_1_1_maze_1_1_dir.html", null ],
@@ -13,26 +22,37 @@ var hierarchy =
     [ "experiments.ExperimentResult", "classexperiments_1_1_experiment_result.html", null ],
     [ "experiments.ExperimentRunner", "classexperiments_1_1_experiment_runner.html", null ],
     [ "maze.map.Maze.GeneratedExperimentMap", "classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html", null ],
+    [ "ui.ResultAnalysisPanel.IoTask", "interfaceui_1_1_result_analysis_panel_1_1_io_task.html", null ],
     [ "experiments.ExperimentRunner.MapProgressListener", "interfaceexperiments_1_1_experiment_runner_1_1_map_progress_listener.html", null ],
     [ "experiments.TestSuite.MapSource", "enumexperiments_1_1_test_suite_1_1_map_source.html", null ],
     [ "maze.map.Maze", "classmaze_1_1map_1_1_maze.html", null ],
     [ "maze.map.MazeFileIO", "classmaze_1_1map_1_1_maze_file_i_o.html", null ],
     [ "ui.MazeRenderer", "classui_1_1_maze_renderer.html", null ],
     [ "maze.search.MazeSolver", "classmaze_1_1search_1_1_maze_solver.html", null ],
+    [ "analysis.ResultStatistics.Metric", "enumanalysis_1_1_result_statistics_1_1_metric.html", null ],
     [ "app.MS", "classapp_1_1_m_s.html", null ],
     [ "maze.map.Maze.NeighborValidationResult", "classmaze_1_1map_1_1_maze_1_1_neighbor_validation_result.html", null ],
     [ "maze.map.Maze.Node", "classmaze_1_1map_1_1_maze_1_1_node.html", null ],
+    [ "analysis.ResultChart.Order", "enumanalysis_1_1_result_chart_1_1_order.html", null ],
+    [ "analysis.ResultStatistics.Outliers", "enumanalysis_1_1_result_statistics_1_1_outliers.html", null ],
     [ "experiments.ExperimentRunner.ProgressListener", "interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html", null ],
     [ "experiments.TestSuite.ReachabilityMode", "enumexperiments_1_1_test_suite_1_1_reachability_mode.html", null ],
+    [ "analysis.ResultChart", "classanalysis_1_1_result_chart.html", null ],
+    [ "analysis.ResultFiles", "classanalysis_1_1_result_files.html", null ],
+    [ "analysis.ResultQuery", "classanalysis_1_1_result_query.html", null ],
+    [ "analysis.ResultStatistics", "classanalysis_1_1_result_statistics.html", null ],
     [ "maze.search.SearchStrategy", "interfacemaze_1_1search_1_1_search_strategy.html", null ],
     [ "experiments.ExperimentRunner.SolveProgress", "classexperiments_1_1_experiment_runner_1_1_solve_progress.html", null ],
     [ "experiments.ExperimentRunner.SolveProgressListener", "interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html", null ],
+    [ "analysis.TableQuery&lt; R, F extends TableQuery.Column&lt; R &gt; &gt;", "classanalysis_1_1_table_query.html", null ],
     [ "experiments.ExperimentRunner.TaskPriority", "enumexperiments_1_1_experiment_runner_1_1_task_priority.html", null ],
     [ "experiments.TestSuite.TestCase", "classexperiments_1_1_test_suite_1_1_test_case.html", null ],
     [ "experiments.TestSuite", "classexperiments_1_1_test_suite.html", null ],
     [ "experiments.TestSuiteIO", "classexperiments_1_1_test_suite_i_o.html", null ],
     [ "ui.TestSuiteWindow", "classui_1_1_test_suite_window.html", null ],
     [ "maze.search.UninformedSearch.TraversalMode", "enummaze_1_1search_1_1_uninformed_search_1_1_traversal_mode.html", null ],
+    [ "analysis.ResultChart.Type", "enumanalysis_1_1_result_chart_1_1_type.html", null ],
     [ "app.Version", "classapp_1_1_version.html", null ],
+    [ "analysis.ResultChart.View", "enumanalysis_1_1_result_chart_1_1_view.html", null ],
     [ "ui.MazeRenderer.WeightDisplayState", "enumui_1_1_maze_renderer_1_1_weight_display_state.html", null ]
 ];

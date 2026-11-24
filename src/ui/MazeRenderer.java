@@ -253,7 +253,7 @@ public final class MazeRenderer {
             titleFrame.dispose();
         }
 
-        titleFrame = new JFrame("Maze Solver");
+        titleFrame = new JFrame("Maze Solver " + app.Version.RELEASE);
         titleFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         titleFrame.addWindowListener(new WindowAdapter() {
             @Override

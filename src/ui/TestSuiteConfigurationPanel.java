@@ -7,10 +7,12 @@ import java.util.Objects;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 
 /**
  * Layout and actions for editing the suite name and test configurations.
@@ -21,7 +23,7 @@ final class TestSuiteConfigurationPanel extends JPanel {
 
     TestSuiteConfigurationPanel(
             JTextField suiteNameField,
-            JTable configTable,
+            TestConfigurationTable configTable,
             Runnable addRow,
             Runnable duplicateRows,
             Runnable removeRows,
@@ -61,8 +63,49 @@ final class TestSuiteConfigurationPanel extends JPanel {
                 themeButton.setText(UITheme.isDark() ? "Light" : "Dark"));
         themeButton.setToolTipText("Switch between light and dark mode");
         controls.add(themeButton);
+        JToggleButton queryToggle = new JToggleButton("Sort / Filter");
+        queryToggle.setToolTipText(TableHeaderQuery.HEADER_HINT);
+        controls.add(queryToggle);
         controls.add(button("Back to Main Menu", back));
-        add(controls, BorderLayout.NORTH);
+
+        JTextField filters = new JTextField(24);
+        JTextField sorting = new JTextField(19);
+        filters.setToolTipText("Separate rules with ; and alternatives with |. Example: algorithms~UCS;iterations>=10");
+        sorting.setToolTipText("Sort keys in priority order. Example: rows:asc,iterations:desc");
+        JPanel queryBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        Runnable apply = () -> {
+            queryToggle.setSelected(true);
+            queryBar.setVisible(true);
+            try {
+                configTable.applyQuery(filters.getText(), sorting.getText());
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Configuration query", JOptionPane.ERROR_MESSAGE);
+            }
+        };
+        filters.addActionListener(event -> apply.run());
+        sorting.addActionListener(event -> apply.run());
+        JLabel filterLabel = new JLabel("Filters");
+        filterLabel.setLabelFor(filters);
+        queryBar.add(filterLabel);
+        queryBar.add(filters);
+        JLabel sortLabel = new JLabel("Sort");
+        sortLabel.setLabelFor(sorting);
+        queryBar.add(sortLabel);
+        queryBar.add(sorting);
+        queryBar.add(button("Apply", apply));
+        queryBar.add(button("Reset", () -> {
+            filters.setText("");
+            sorting.setText("");
+            apply.run();
+        }));
+        queryBar.setVisible(false);
+        queryToggle.addActionListener(event -> queryBar.setVisible(queryToggle.isSelected()));
+        JPanel header = new JPanel(new BorderLayout());
+        header.add(controls, BorderLayout.NORTH);
+        header.add(queryBar, BorderLayout.CENTER);
+        add(header, BorderLayout.NORTH);
+
+        new TableHeaderQuery(filters, sorting, apply).install(configTable, TestConfigurationTableModel.Field::at);
 
         configTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         configTable.setRowHeight(26);

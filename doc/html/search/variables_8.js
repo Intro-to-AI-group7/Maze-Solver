@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['manual_5fseed_0',['MANUAL_SEED',['../enumexperiments_1_1_test_suite_1_1_map_source.html#a9b045f669b3482dc2767d1809b86edc6',1,'experiments::TestSuite::MapSource']]],
-  ['map_1',['MAP',['../enumexperiments_1_1_experiment_runner_1_1_task_priority.html#a98eee0180c97844d72893bfdaf102c5f',1,'experiments::ExperimentRunner::TaskPriority']]],
-  ['map_5fextension_2',['MAP_EXTENSION',['../classmaze_1_1map_1_1_maze.html#a0e1e20067ee0e2d4150ba4d563ef1902',1,'maze::map::Maze']]],
-  ['max_5fmovement_5fcost_3',['MAX_MOVEMENT_COST',['../classmaze_1_1map_1_1_maze.html#aae918ed77d89503d58bf990e64cc19a7',1,'maze::map::Maze']]],
-  ['min_5fmovement_5fcost_4',['MIN_MOVEMENT_COST',['../classmaze_1_1map_1_1_maze.html#a8adae223bd1afd13d2fcf331fbf28d7f',1,'maze::map::Maze']]]
+  ['iqr_0',['IQR',['../enumanalysis_1_1_result_statistics_1_1_outliers.html#a9e78e554b861e1b9b4de03edaf57154f',1,'analysis::ResultStatistics::Outliers']]],
+  ['isgoal_1',['isGoal',['../classmaze_1_1map_1_1_maze_1_1_node.html#a31aab2196f5d649b0d944d0f8091a162',1,'maze::map::Maze::Node']]],
+  ['iteration_2',['ITERATION',['../enumanalysis_1_1_result_query_1_1_field.html#a21023250f5bea45ee89f074aa59359dc',1,'analysis::ResultQuery::Field']]],
+  ['iterations_3',['ITERATIONS',['../enumanalysis_1_1_result_chart_1_1_view.html#a93e2f2f4362e2b30ac7641b5171f7070',1,'analysis.ResultChart.View.ITERATIONS'],['../enumui_1_1_test_configuration_table_model_1_1_field.html#a73c12e060504335322a2c25a6693e853',1,'ui.TestConfigurationTableModel.Field.ITERATIONS']]]
 ];

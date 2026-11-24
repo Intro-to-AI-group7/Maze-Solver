@@ -10,11 +10,12 @@ var searchData=
   ['isfinished_7',['isFinished',['../classexperiments_1_1_experiment_runner_1_1_solve_progress.html#a301989697f09a14309e1da6d689d270a',1,'experiments.ExperimentRunner.SolveProgress.isFinished()'],['../classmaze_1_1search_1_1_maze_solver.html#a0590fb4ea205f4809089b96aebe7e8ce',1,'maze.search.MazeSolver.isFinished()']]],
   ['isgeneratedmapsolvable_8',['isGeneratedMapSolvable',['../classexperiments_1_1_experiment_result.html#a8c68948c9e4dc244311de06d9c5ab214',1,'experiments::ExperimentResult']]],
   ['isinbounds_9',['isInBounds',['../classmaze_1_1map_1_1_maze.html#a785e8e46fa8aa15c4ef23f1d4321c614',1,'maze::map::Maze']]],
-  ['isoccupied_10',['isOccupied',['../classmaze_1_1map_1_1_maze.html#a96b282d3b956df0049d9966f2d21e4a4',1,'maze::map::Maze']]],
-  ['isparallelexecution_11',['isParallelExecution',['../classexperiments_1_1_test_suite.html#a31bdf9c09243fec507e39150d9b3634d',1,'experiments::TestSuite']]],
-  ['ispaused_12',['isPaused',['../interfaceexperiments_1_1_experiment_runner_1_1_execution_control.html#ab96a5f1a3e6d85020e6b337d621b6f6d',1,'experiments::ExperimentRunner::ExecutionControl']]],
-  ['issamecostbothdirections_13',['isSameCostBothDirections',['../classexperiments_1_1_test_suite_1_1_test_case.html#a95f033418c7ab8c77fa835ab75c79af5',1,'experiments::TestSuite::TestCase']]],
-  ['issolvable_14',['isSolvable',['../classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#aa5841b86733eab7cd6f56a021d0f1671',1,'maze::map::Maze::GeneratedExperimentMap']]],
-  ['issolved_15',['isSolved',['../classexperiments_1_1_experiment_result.html#a729d0e72982d0322ea5e072a60b52b9c',1,'experiments.ExperimentResult.isSolved()'],['../classmaze_1_1search_1_1_maze_solver.html#a6a8b6bb0a463b42325cd68972994e1d6',1,'maze.search.MazeSolver.isSolved()']]],
-  ['isvalid_16',['isValid',['../classmaze_1_1map_1_1_maze_1_1_neighbor_validation_result.html#ae229baf6bc6774414dde7c032e5a8dc8',1,'maze::map::Maze::NeighborValidationResult']]]
+  ['isnumeric_10',['isNumeric',['../enumanalysis_1_1_result_query_1_1_field.html#aafb8db5627a95ae5faf542ec7d22023e',1,'analysis.ResultQuery.Field.isNumeric()'],['../interfaceanalysis_1_1_table_query_1_1_column.html#aae6c8727c0de7d1c1cbfcd8eadcd8d9d',1,'analysis.TableQuery.Column.isNumeric()'],['../enumui_1_1_test_configuration_table_model_1_1_field.html#ad63c56706902d27df9eed58bffbc1159',1,'ui.TestConfigurationTableModel.Field.isNumeric()']]],
+  ['isoccupied_11',['isOccupied',['../classmaze_1_1map_1_1_maze.html#a96b282d3b956df0049d9966f2d21e4a4',1,'maze::map::Maze']]],
+  ['isparallelexecution_12',['isParallelExecution',['../classexperiments_1_1_test_suite.html#a31bdf9c09243fec507e39150d9b3634d',1,'experiments::TestSuite']]],
+  ['ispaused_13',['isPaused',['../interfaceexperiments_1_1_experiment_runner_1_1_execution_control.html#ab96a5f1a3e6d85020e6b337d621b6f6d',1,'experiments::ExperimentRunner::ExecutionControl']]],
+  ['issamecostbothdirections_14',['isSameCostBothDirections',['../classexperiments_1_1_test_suite_1_1_test_case.html#a95f033418c7ab8c77fa835ab75c79af5',1,'experiments::TestSuite::TestCase']]],
+  ['issolvable_15',['isSolvable',['../classmaze_1_1map_1_1_maze_1_1_generated_experiment_map.html#aa5841b86733eab7cd6f56a021d0f1671',1,'maze::map::Maze::GeneratedExperimentMap']]],
+  ['issolved_16',['isSolved',['../classexperiments_1_1_experiment_result.html#a729d0e72982d0322ea5e072a60b52b9c',1,'experiments.ExperimentResult.isSolved()'],['../classmaze_1_1search_1_1_maze_solver.html#a6a8b6bb0a463b42325cd68972994e1d6',1,'maze.search.MazeSolver.isSolved()']]],
+  ['isvalid_17',['isValid',['../classmaze_1_1map_1_1_maze_1_1_neighbor_validation_result.html#ae229baf6bc6774414dde7c032e5a8dc8',1,'maze::map::Maze::NeighborValidationResult']]]
 ];
