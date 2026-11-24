@@ -1,0 +1,68 @@
+name: Build release packages
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            os: windows-latest
+            script: scripts/build-executable.ps1
+            asset: dist/MazeSolver-*.exe
+          - platform: linux
+            os: ubuntu-latest
+            script: scripts/build-executable.sh
+            asset: dist/MazeSolver-*-portable-linux.zip
+          - platform: macos
+            os: macos-latest
+            script: scripts/build-executable-macos.sh
+            asset: dist/MazeSolver-*.dmg
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-dotnet@v6.1.0
+        if: runner.os == 'Windows'
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build native package
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          BUILD_SCRIPT: ${{ matrix.script }}
+        run: bash "$BUILD_SCRIPT"
+      - name: Build Windows executable
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/build-executable.ps1
+      - name: Check packaged application version
+        shell: bash
+        run: |
+          expected=$(sed -n 's/.*RELEASE = "\([^"]*\)";.*/\1/p' src/app/Version.java)
+          actual=$(java -cp build/package/MazeSolver.jar experiments.ExperimentCli --version)
+          test "$actual" = "Maze-Solver $expected"
+          printf '%s\n' "$GITHUB_SHA" > dist/BUILD_COMMIT.txt
+          printf '%s %s\n' "$RUNNER_OS" "$RUNNER_ARCH" > dist/BUILD_PLATFORM.txt
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: native-${{ matrix.platform }}
+          path: |
+            ${{ matrix.asset }}
+            dist/BUILD_COMMIT.txt
+            dist/BUILD_PLATFORM.txt
+          if-no-files-found: error
+          retention-days: 7

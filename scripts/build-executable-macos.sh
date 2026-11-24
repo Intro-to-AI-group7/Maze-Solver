@@ -6,8 +6,8 @@ CLASSES="$ROOT/build/classes"
 PACKAGE="$ROOT/build/package"
 DIST="$ROOT/dist"
 JAR="$PACKAGE/MazeSolver.jar"
-NATIVE_VERSION="0.9.0"
-RELEASE="V0.9.0a"
+NATIVE_VERSION="0.9.1"
+RELEASE="V0.9.1a"
 JAVAC_BIN="$(command -v javac)"
 JAVA_HOME="$(cd "$(dirname "$JAVAC_BIN")/.." && pwd)"
 JAVAC="$JAVA_HOME/bin/javac"
@@ -26,7 +26,10 @@ if [[ -z "$JAVA_MAJOR" || "$JAVA_MAJOR" -lt 21 ]]; then
 fi
 
 mkdir -p "$CLASSES" "$PACKAGE" "$DIST"
-mapfile -t SOURCES < <(find "$ROOT/src" -type f -name '*.java' -print)
+SOURCES=()
+while IFS= read -r -d '' source; do
+    SOURCES+=("$source")
+done < <(find "$ROOT/src" -type f -name '*.java' -print0)
 
 (
     cd "$ROOT"

@@ -1,6 +1,6 @@
-# Maze-Solver V0.9.0a
+# Maze-Solver V0.9.1a
 
-Maze-Solver V0.9.0a is an unverified alpha build of the Java Swing desktop app for loading, visualizing, and
+Maze-Solver V0.9.1a is an unverified alpha build of the Java Swing desktop app for loading, visualizing, and
 solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First
 Search, and A* with directional movement costs. Maze files support optional per-direction movement
 costs while preserving the original unweighted format.
@@ -87,7 +87,7 @@ Maze-Solver has six main responsibilities:
   generation.
 - Windows, macOS, or Linux with desktop GUI support.
 - No external dependencies required.
-- Alpha build: `V0.9.0a` (also exposed by `app.Version.RELEASE` and `ExperimentCli --version`).
+- Alpha build: `V0.9.1a` (also exposed by `app.Version.RELEASE` and `ExperimentCli --version`).
 
 ## Quick Start
 
@@ -171,7 +171,7 @@ and display `N/A (saved map)` instead of a generated seed.
 Test suites use the human-readable `.mstests` extension; individual maps use
 the human-readable `.msmap` extension. Import and save dialogs filter and
 normalize to their corresponding extension and open in the application
-directory. A suite saved by this build contains `applicationVersion=V0.9.0a` and
+directory. A suite saved by this build contains `applicationVersion=V0.9.1a` and
 `version=1`; the former identifies the application release and the latter is
 the stable suite schema version. Older schema-version-1 suites remain
 readable.
@@ -881,7 +881,7 @@ common Windows installation directories. It selects matching `java` and
 The first script compiles the application and regression tests, runs the
 regression suite, and launches the Swing application. The second creates a
 self-extracting single-file Windows executable:
-`dist\MazeSolver-V0.9.0a.exe`. The executable embeds the complete application
+`dist\MazeSolver-V0.9.1a.exe`. The executable embeds the complete application
 image and Java runtime, extracts to a temporary directory when launched,
 waits for the application to close, and removes its temporary files. It can
 be distributed as one file and does not require Java on the target machine.
@@ -889,7 +889,7 @@ Normal launches do not open a terminal window. For troubleshooting, launch
 the executable with the optional debug flag:
 
 ```powershell
-.\dist\MazeSolver-V0.9.0a.exe --debug
+.\dist\MazeSolver-V0.9.1a.exe --debug
 ```
 
 ### Developer Notes: experiment execution
@@ -941,7 +941,7 @@ chmod +x scripts/compile-and-run.sh scripts/build-executable.sh
 ```
 
 The Linux application image is created at `dist/MazeSolver/bin/MazeSolver`,
-and the portable bundle is `dist/MazeSolver-V0.9.0a-portable-linux.zip`. These
+and the portable bundle is `dist/MazeSolver-V0.9.1a-portable-linux.zip`. These
 bundles include the Java runtime and do not require Java to be installed on
 the target machine. The generated `build/` and `dist/` directories are
 ignored by Git.
@@ -953,8 +953,8 @@ chmod +x scripts/build-executable-macos.sh
 ./scripts/build-executable-macos.sh
 ```
 
-This creates `dist/MazeSolver-V0.9.0a.dmg`. Native packaging tools receive the
-numeric version `0.9.0`. The package architecture matches
+This creates `dist/MazeSolver-V0.9.1a.dmg`. Native packaging tools receive the
+numeric version `0.9.1`. The package architecture matches
 the installed JDK: use an Intel JDK for Intel Macs or an Apple-silicon JDK for
 Apple-silicon Macs. `jpackage` does not cross-build native macOS packages from
 Windows or Linux. The generated application is unsigned by default; public
@@ -992,7 +992,7 @@ installing it through an available package manager. It replaces the generated
 `doc\html` directory so deleted classes leave no stale pages, builds the PDF,
 and removes the temporary `doc\latex` folder.
 The remaining documentation outputs are `doc\html`,
-`doc\Maze-Solver-docs_V0.9.0a.pdf`, and `doc\Doxyfile`.
+`doc\Maze-Solver-docs_V0.9.1a.pdf`, and `doc\Doxyfile`.
 
 On Linux, use the equivalent script:
 

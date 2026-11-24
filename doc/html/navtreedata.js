@@ -25,7 +25,7 @@
 var NAVTREE =
 [
   [ "Maze-Solver", "index.html", [
-    [ "Maze-Solver V0.9.0a", "index.html", "index" ],
+    [ "Maze-Solver V0.9.1a", "index.html", "index" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [

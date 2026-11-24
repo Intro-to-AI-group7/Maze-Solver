@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Maze-Solver: Maze-Solver V0.9.0a</title>
+<title>Maze-Solver: Maze-Solver V0.9.1a</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.9.0a</span>
+   <div id="projectname">Maze-Solver<span id="projectnumber">&#160;V0.9.1a</span>
    </div>
   </td>
  </tr>
@@ -108,11 +108,11 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('index.html',''
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Maze-Solver V0.9.0a </div></div>
+  <div class="headertitle"><div class="title">Maze-Solver V0.9.1a </div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md__c_1_2_users_2ramse_2_github_2_maze-_solver_2_r_e_a_d_m_e"></a></p>
-<p>Maze-Solver V0.9.0a is an unverified alpha build of the Java Swing desktop app for loading, visualizing, and solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and A* with directional movement costs. Maze files support optional per-direction movement costs while preserving the original unweighted format.</p>
+<p>Maze-Solver V0.9.1a is an unverified alpha build of the Java Swing desktop app for loading, visualizing, and solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and A* with directional movement costs. Maze files support optional per-direction movement costs while preserving the original unweighted format.</p>
 <p>It is designed for both interactive exploration and large-map performance testing, with a paint-based renderer that supports very large mazes efficiently.</p>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md1"></a>
 Table of Contents</h1>
@@ -179,7 +179,7 @@ Requirements</h1>
 <li>Java JDK 21 (LTS) or newer, including the <span class="tt">jpackage</span> tool for executable generation.</li>
 <li>Windows, macOS, or Linux with desktop GUI support.</li>
 <li>No external dependencies required.</li>
-<li>Alpha build: <span class="tt">V0.9.0a</span> (also exposed by <span class="tt"><a class="el" href="classapp_1_1_version.html#ad4214ed139ea8d6d0aab5683164d9d85" title="Current application release version.">app.Version.RELEASE</a></span> and <span class="tt">ExperimentCli --version</span>).</li>
+<li>Alpha build: <span class="tt">V0.9.1a</span> (also exposed by <span class="tt"><a class="el" href="classapp_1_1_version.html#ad4214ed139ea8d6d0aab5683164d9d85" title="Current application release version.">app.Version.RELEASE</a></span> and <span class="tt">ExperimentCli --version</span>).</li>
 </ul>
 <h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
 Quick Start</h1>
@@ -214,7 +214,7 @@ Quick Start</h1>
 <p>Use <b>Back to Main Menu</b> in the maze controls to leave an interactive session without exiting the application. The test-suite editor has the same navigation button, and closing either secondary window returns to the title screen. The title screen is hidden while a secondary screen is open so each menu is only shown once.</p>
 <p>To configure experiments, choose <b>Configure Tests</b> on the title screen. Add one row per test condition, edit the row values, select algorithms and iterations, then choose <b>Run Tests</b>. Each generated-map iteration creates one map and uses that same map for every selected algorithm. Generated layouts retain the suite's row/column, blocked-percent, reachability, endpoint, seed, and movement-cost settings. Saved-map rows reuse their embedded map for every iteration. Automatic seeds are materialized when a suite is saved so later generated-map runs can be reproduced. Results can be exported manually or automatically to CSV, and unique maps can be exported for later inspection.</p>
 <p>The test editor uses dropdowns for reachability, cost, endpoint, and map-source preferences. The Algorithms cell provides a checkbox multi-select, and boolean options use checkboxes. Numeric values are normalized to integers when editing ends. In <span class="tt">RANDOM</span> and <span class="tt">DISTANCE</span> endpoint modes, start and goal coordinates are disabled; <span class="tt">DISTANCE</span> enables the target-distance field.</p>
-<p>Each row can use an automatic seed, a manually entered seed, or a saved map. Saved maps are imported through the row editor and embedded in the suite file using UTF-8-safe encoding, so the suite does not depend on the original map file remaining available. Saved-map results identify the source as <span class="tt">SAVED_MAP</span> and display <span class="tt">N/A (saved map)</span> instead of a generated seed. Test suites use the human-readable <span class="tt">.mstests</span> extension; individual maps use the human-readable <span class="tt">.msmap</span> extension. Import and save dialogs filter and normalize to their corresponding extension and open in the application directory. A suite saved by this build contains <span class="tt">applicationVersion=V0.9.0a</span> and <span class="tt">version=1</span>; the former identifies the application release and the latter is the stable suite schema version. Older schema-version-1 suites remain readable.</p>
+<p>Each row can use an automatic seed, a manually entered seed, or a saved map. Saved maps are imported through the row editor and embedded in the suite file using UTF-8-safe encoding, so the suite does not depend on the original map file remaining available. Saved-map results identify the source as <span class="tt">SAVED_MAP</span> and display <span class="tt">N/A (saved map)</span> instead of a generated seed. Test suites use the human-readable <span class="tt">.mstests</span> extension; individual maps use the human-readable <span class="tt">.msmap</span> extension. Import and save dialogs filter and normalize to their corresponding extension and open in the application directory. A suite saved by this build contains <span class="tt">applicationVersion=V0.9.1a</span> and <span class="tt">version=1</span>; the former identifies the application release and the latter is the stable suite schema version. Older schema-version-1 suites remain readable.</p>
 <p>Before measured runs begin, the experiment runner performs three warm-up rounds using each selected algorithm on a small seeded map. Warm-up solves are excluded from results, progress counts, and per-result search timing. CLI suite elapsed time includes warm-up, generation, scheduling, and result handling.</p>
 <p>Experiment result runtimes measure one complete solver run from the start of the search through result collection. They exclude map generation and suite scheduling, and they do not read the solver's per-step diagnostic timer. This avoids adding two <span class="tt">System.nanoTime()</span> calls to every search step, which is particularly important for small mazes. If live solver progress is requested, the runner performs throttled progress timing checks; the command-line runner does not request those callbacks.</p>
 <p>Experiment suites run sequentially by default. Select <b>Fixed parallel</b> or <b>Adaptive parallel</b> in the test-suite editor to run independent algorithms for each generated map concurrently. Sequential mode remains available for compatibility checks and comparisons. Each generated map is shared by the selected algorithms for that iteration. Returned results and CSV exports are ordered by test condition, iteration, and algorithm; the live UI displays results in completion order.</p>
@@ -577,8 +577,8 @@ Development Notes</h1>
 <div class="fragment"><div class="line">.\scripts\compile-and-run.ps1</div>
 <div class="line">.\scripts\build-executable.ps1</div>
 </div><!-- fragment --><p>The PowerShell launcher discovers JDK 21 or newer from PATH, <span class="tt">JAVA_HOME</span>, or common Windows installation directories. It selects matching <span class="tt">java</span> and <span class="tt">javac</span> binaries. Packaging still requires <span class="tt">jpackage</span> on PATH and the .NET 8 SDK.</p>
-<p>The first script compiles the application and regression tests, runs the regression suite, and launches the Swing application. The second creates a self-extracting single-file Windows executable: <span class="tt">dist\MazeSolver-V0.9.0a.exe</span>. The executable embeds the complete application image and Java runtime, extracts to a temporary directory when launched, waits for the application to close, and removes its temporary files. It can be distributed as one file and does not require Java on the target machine. Normal launches do not open a terminal window. For troubleshooting, launch the executable with the optional debug flag:</p>
-<div class="fragment"><div class="line">.\dist\MazeSolver-V0.9.0a.exe --debug</div>
+<p>The first script compiles the application and regression tests, runs the regression suite, and launches the Swing application. The second creates a self-extracting single-file Windows executable: <span class="tt">dist\MazeSolver-V0.9.1a.exe</span>. The executable embeds the complete application image and Java runtime, extracts to a temporary directory when launched, waits for the application to close, and removes its temporary files. It can be distributed as one file and does not require Java on the target machine. Normal launches do not open a terminal window. For troubleshooting, launch the executable with the optional debug flag:</p>
+<div class="fragment"><div class="line">.\dist\MazeSolver-V0.9.1a.exe --debug</div>
 </div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md24"></a>
 Developer Notes: experiment execution</h2>
 <p><span class="tt">ExperimentRunner</span> keeps the UI-independent execution path separate from Swing and preserves deterministic result ordering. Sequential mode executes one map and its algorithms directly. Fixed parallel mode uses the processor-aware worker cap (logical processors minus one, with a minimum of one). Adaptive mode selects its worker count once at suite startup using CPU load and heap headroom. It reserves two processors on systems with at least four processors, otherwise one, and can reduce the selected count further under high CPU load. It does not resize the executor during a run.</p>
@@ -591,11 +591,11 @@ Developer Notes: experiment execution</h2>
 <div class="fragment"><div class="line">chmod +x scripts/compile-and-run.sh scripts/build-executable.sh</div>
 <div class="line">./scripts/compile-and-run.sh</div>
 <div class="line">./scripts/build-executable.sh</div>
-</div><!-- fragment --><p>The Linux application image is created at <span class="tt">dist/MazeSolver/bin/MazeSolver</span>, and the portable bundle is <span class="tt">dist/MazeSolver-V0.9.0a-portable-linux.zip</span>. These bundles include the Java runtime and do not require Java to be installed on the target machine. The generated <span class="tt">build/</span> and <span class="tt">dist/</span> directories are ignored by Git.</p>
+</div><!-- fragment --><p>The Linux application image is created at <span class="tt">dist/MazeSolver/bin/MazeSolver</span>, and the portable bundle is <span class="tt">dist/MazeSolver-V0.9.1a-portable-linux.zip</span>. These bundles include the Java runtime and do not require Java to be installed on the target machine. The generated <span class="tt">build/</span> and <span class="tt">dist/</span> directories are ignored by Git.</p>
 <p>On macOS, build the native installer on a Mac with JDK 21 or newer:</p>
 <div class="fragment"><div class="line">chmod +x scripts/build-executable-macos.sh</div>
 <div class="line">./scripts/build-executable-macos.sh</div>
-</div><!-- fragment --><p>This creates <span class="tt">dist/MazeSolver-V0.9.0a.dmg</span>. Native packaging tools receive the numeric version <span class="tt">0.9.0</span>. The package architecture matches the installed JDK: use an Intel JDK for Intel Macs or an Apple-silicon JDK for Apple-silicon Macs. <span class="tt">jpackage</span> does not cross-build native macOS packages from Windows or Linux. The generated application is unsigned by default; public distribution may require an Apple Developer ID certificate, code signing, and notarization.</p>
+</div><!-- fragment --><p>This creates <span class="tt">dist/MazeSolver-V0.9.1a.dmg</span>. Native packaging tools receive the numeric version <span class="tt">0.9.1</span>. The package architecture matches the installed JDK: use an Intel JDK for Intel Macs or an Apple-silicon JDK for Apple-silicon Macs. <span class="tt">jpackage</span> does not cross-build native macOS packages from Windows or Linux. The generated application is unsigned by default; public distribution may require an Apple Developer ID certificate, code signing, and notarization.</p>
 <p>Optional cleanup of compiled artifacts:</p>
 <div class="fragment"><div class="line">Remove-Item -Recurse -Force build</div>
 </div><!-- fragment --><p><span class="tt">build/</span>, <span class="tt">dist/</span>, and <span class="tt">doc/latex/</span> are disposable generated output. Regenerate packages after source changes before distributing them. Keep fixtures under <span class="tt">test/resources/</span>; save ad hoc benchmark output under <span class="tt">build/results/</span> so it does not enter version control. Generated HTML and the current release PDF remain under <span class="tt">doc/</span>.</p>
@@ -604,7 +604,7 @@ Developer Notes: experiment execution</h2>
 <div class="line">javadoc -quiet -Xdoclint:all -d &quot;$env:TEMP\maze-javadoc&quot; $files</div>
 </div><!-- fragment --><p>Doxygen is configured by <span class="tt">doc/Doxyfile</span>. Generate the HTML reference and release PDF with the documentation script:</p>
 <div class="fragment"><div class="line">.\scripts\generate-documentation.ps1</div>
-</div><!-- fragment --><p>The script checks for Doxygen and XeLaTeX. If either is missing, it asks before installing it through an available package manager. It replaces the generated <span class="tt">doc\html</span> directory so deleted classes leave no stale pages, builds the PDF, and removes the temporary <span class="tt">doc\latex</span> folder. The remaining documentation outputs are <span class="tt">doc\html</span>, <span class="tt">doc\Maze-Solver-docs_V0.9.0a.pdf</span>, and <span class="tt">doc\Doxyfile</span>.</p>
+</div><!-- fragment --><p>The script checks for Doxygen and XeLaTeX. If either is missing, it asks before installing it through an available package manager. It replaces the generated <span class="tt">doc\html</span> directory so deleted classes leave no stale pages, builds the PDF, and removes the temporary <span class="tt">doc\latex</span> folder. The remaining documentation outputs are <span class="tt">doc\html</span>, <span class="tt">doc\Maze-Solver-docs_V0.9.1a.pdf</span>, and <span class="tt">doc\Doxyfile</span>.</p>
 <p>On Linux, use the equivalent script:</p>
 <div class="fragment"><div class="line">chmod +x scripts/generate-documentation.sh</div>
 <div class="line">./scripts/generate-documentation.sh</div>

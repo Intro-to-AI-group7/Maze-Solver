@@ -5,7 +5,7 @@ $root = Split-Path -Parent $PSScriptRoot
 $doc = Join-Path $root "doc"
 $htmlDir = Join-Path $doc "html"
 $latexDir = Join-Path $doc "latex"
-$pdf = Join-Path $doc "Maze-Solver-docs_V0.9.0a.pdf"
+$pdf = Join-Path $doc "Maze-Solver-docs_V0.9.1a.pdf"
 
 function Install-MissingTool {
     param(

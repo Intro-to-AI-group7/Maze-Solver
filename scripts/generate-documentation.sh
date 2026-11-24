@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DOC="$ROOT/doc"
 LATEX="$DOC/latex"
-PDF="$DOC/Maze-Solver-docs_V0.9.0a.pdf"
+PDF="$DOC/Maze-Solver-docs_V0.9.1a.pdf"
 
 install_missing() {
     local command_name="$1"
