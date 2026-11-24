@@ -182,6 +182,8 @@ var NAVTREEINDEX1 =
 "classmaze_1_1search_1_1_maze_solver.html#a0849cfb0be6a0f74b3fb7a47fac0fc0d":[2,0,2,1,0,1],
 "classmaze_1_1search_1_1_maze_solver.html#a1b0cc5901f7713b6be5f22b1ad7e4d98":[1,0,2,1,0,11],
 "classmaze_1_1search_1_1_maze_solver.html#a1b0cc5901f7713b6be5f22b1ad7e4d98":[2,0,2,1,0,11],
+"classmaze_1_1search_1_1_maze_solver.html#a2c23f7640bc5f2cbfa3361af287b249d":[1,0,2,1,0,13],
+"classmaze_1_1search_1_1_maze_solver.html#a2c23f7640bc5f2cbfa3361af287b249d":[2,0,2,1,0,13],
 "classmaze_1_1search_1_1_maze_solver.html#a302e9c4d362a46e53340aab65a94c370":[1,0,2,1,0,7],
 "classmaze_1_1search_1_1_maze_solver.html#a302e9c4d362a46e53340aab65a94c370":[2,0,2,1,0,7],
 "classmaze_1_1search_1_1_maze_solver.html#a480d573f9454efbfc82884815d03219d":[1,0,2,1,0,12],
@@ -190,8 +192,8 @@ var NAVTREEINDEX1 =
 "classmaze_1_1search_1_1_maze_solver.html#a6a8b6bb0a463b42325cd68972994e1d6":[2,0,2,1,0,9],
 "classmaze_1_1search_1_1_maze_solver.html#a8f330a1b648451d64e78947d5e9c859a":[1,0,2,1,0,2],
 "classmaze_1_1search_1_1_maze_solver.html#a8f330a1b648451d64e78947d5e9c859a":[2,0,2,1,0,2],
-"classmaze_1_1search_1_1_maze_solver.html#a961567555b5f713d5adc9e2858a96b23":[1,0,2,1,0,13],
-"classmaze_1_1search_1_1_maze_solver.html#a961567555b5f713d5adc9e2858a96b23":[2,0,2,1,0,13],
+"classmaze_1_1search_1_1_maze_solver.html#a961567555b5f713d5adc9e2858a96b23":[1,0,2,1,0,14],
+"classmaze_1_1search_1_1_maze_solver.html#a961567555b5f713d5adc9e2858a96b23":[2,0,2,1,0,14],
 "classmaze_1_1search_1_1_maze_solver.html#aad5cd57f5f5e2fb5cba95cac9170b0fe":[1,0,2,1,0,4],
 "classmaze_1_1search_1_1_maze_solver.html#aad5cd57f5f5e2fb5cba95cac9170b0fe":[2,0,2,1,0,4],
 "classmaze_1_1search_1_1_maze_solver.html#aafaa0389e2550388e7cf828cbdee66c4":[1,0,2,1,0,3],
@@ -247,7 +249,5 @@ var NAVTREEINDEX1 =
 "enumexperiments_1_1_test_suite_1_1_cost_mode.html#a8218fb02098e67e56ed69760e8b11481":[2,0,1,3,2,0],
 "enumexperiments_1_1_test_suite_1_1_cost_mode.html#ac87f647aa3ca78100cd48590a6744421":[1,0,1,3,2,2],
 "enumexperiments_1_1_test_suite_1_1_cost_mode.html#ac87f647aa3ca78100cd48590a6744421":[2,0,1,3,2,2],
-"enumexperiments_1_1_test_suite_1_1_endpoint_mode.html":[1,0,1,3,4],
-"enumexperiments_1_1_test_suite_1_1_endpoint_mode.html":[2,0,1,3,4],
-"enumexperiments_1_1_test_suite_1_1_endpoint_mode.html#a6e7562da7c86048919db8435446a9074":[1,0,1,3,4,2]
+"enumexperiments_1_1_test_suite_1_1_endpoint_mode.html":[1,0,1,3,4]
 };

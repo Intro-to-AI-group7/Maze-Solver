@@ -77,28 +77,6 @@ final class WrappedHeaderRenderer extends DefaultTableCellRenderer {
     }
 }
 
-final class JComboBoxEditor<T> extends AbstractCellEditor implements TableCellEditor {
-    private static final long serialVersionUID = 1L;
-    private final JComboBox<T> comboBox;
-
-    JComboBoxEditor(T[] values) {
-        comboBox = new JComboBox<>(values);
-        UITheme.styleComboBox(comboBox);
-    }
-
-    @Override
-    public Component getTableCellEditorComponent(
-            JTable table, Object value, boolean selected, int row, int column) {
-        comboBox.setSelectedItem(value);
-        return comboBox;
-    }
-
-    @Override
-    public Object getCellEditorValue() {
-        return comboBox.getSelectedItem();
-    }
-}
-
 final class IntegerEditor extends JTextField implements TableCellEditor {
     private static final long serialVersionUID = 1L;
     private final javax.swing.DefaultCellEditor delegate;

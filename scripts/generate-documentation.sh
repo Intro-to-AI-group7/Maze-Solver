@@ -41,6 +41,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Remove stale pages for deleted or renamed classes before regeneration.
+rm -rf "$DOC/html"
 (cd "$DOC" && doxygen Doxyfile)
 
 while IFS= read -r -d '' file; do

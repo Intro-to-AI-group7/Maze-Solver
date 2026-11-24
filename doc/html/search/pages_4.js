@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['contents_0',['Table of Contents',['../index.html#autotoc_md1',1,'']]]
+  ['benchmark_20matrix_0',['Included benchmark matrix',['../index.html#autotoc_md6',1,'']]]
 ];

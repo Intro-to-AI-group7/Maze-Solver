@@ -2,6 +2,7 @@
 *.class
 build/
 dist/
+doc/latex/
 
 # Log file
 *.log

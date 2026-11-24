@@ -3,6 +3,7 @@ $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $PSScriptRoot
 $doc = Join-Path $root "doc"
+$htmlDir = Join-Path $doc "html"
 $latexDir = Join-Path $doc "latex"
 $pdf = Join-Path $doc "Maze-Solver-docs_V0.8.1.pdf"
 
@@ -44,6 +45,16 @@ $xelatex = (Get-Command xelatex -ErrorAction Stop).Source
 try {
     Push-Location $doc
     try {
+        # Doxygen does not remove pages for classes that no longer exist.
+        # Restrict cleanup to the generated HTML directory under this repo.
+        $resolvedHtml = [IO.Path]::GetFullPath($htmlDir)
+        $expectedHtml = [IO.Path]::GetFullPath((Join-Path $root "doc\html"))
+        if ($resolvedHtml -ne $expectedHtml) {
+            throw "Refusing to clean an unexpected documentation path: $resolvedHtml"
+        }
+        if (Test-Path -LiteralPath $resolvedHtml) {
+            Remove-Item -LiteralPath $resolvedHtml -Recurse -Force
+        }
         & $doxygen Doxyfile
         if ($LASTEXITCODE -ne 0) {
             throw "Doxygen generation failed."

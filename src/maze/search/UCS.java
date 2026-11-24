@@ -8,19 +8,16 @@ import maze.map.Maze;
  */
 final class UCS implements SearchStrategy {
     private final PriorityQueue<Entry> frontier = new PriorityQueue<>();
-    private boolean[][] discovered;
     private boolean[][] closed;
 
     @Override
     public void initialize(MazeSolver solver) {
         Maze maze = solver.strategyMaze();
         solver.prepareStrategyTablesWithInfinity();
-        discovered = new boolean[maze.getLength()][maze.getWidth()];
         closed = new boolean[maze.getLength()][maze.getWidth()];
         Maze.Node start = maze.getStart();
-        discovered[start.row][start.col] = true;
         solver.setStrategyCost(start, 0);
-        frontier.add(new Entry(start, 0, 0));
+        frontier.add(new Entry(start, 0));
     }
 
     @Override
@@ -57,7 +54,7 @@ final class UCS implements SearchStrategy {
                 }
                 solver.setStrategyCost(neighbor, routeCost);
                 solver.setStrategyParent(neighbor, current);
-                frontier.add(new Entry(neighbor, routeCost, routeCost));
+                frontier.add(new Entry(neighbor, routeCost));
             }
             if (frontier.isEmpty()) {
                 solver.finishStrategy(false);
@@ -71,18 +68,15 @@ final class UCS implements SearchStrategy {
     private static final class Entry implements Comparable<Entry> {
         private final Maze.Node node;
         private final long gCost;
-        private final long priority;
 
-        private Entry(Maze.Node node, long gCost, long priority) {
+        private Entry(Maze.Node node, long gCost) {
             this.node = node;
             this.gCost = gCost;
-            this.priority = priority;
         }
 
         @Override
         public int compareTo(Entry other) {
-            int result = Long.compare(priority, other.priority);
-            return result != 0 ? result : Long.compare(gCost, other.gCost);
+            return Long.compare(gCost, other.gCost);
         }
     }
 }

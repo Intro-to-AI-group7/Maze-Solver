@@ -49,7 +49,7 @@ var NAVTREEINDEX =
 [
 "_application_preferences_8java.html",
 "classexperiments_1_1_test_suite_1_1_test_case.html#a8eb6da21ddb59743d21d78501b682110",
-"enumexperiments_1_1_test_suite_1_1_endpoint_mode.html#a6e7562da7c86048919db8435446a9074"
+"enumexperiments_1_1_test_suite_1_1_endpoint_mode.html"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

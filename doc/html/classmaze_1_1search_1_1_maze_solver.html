@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('classmaze_1_1s
 </div><!--header-->
 <div class="contents">
 
-<p>Incremental maze solver that supports DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and weighted A*.  
+<p>Incremental maze solver that supports DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and A* on weighted graphs.
  <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
@@ -130,6 +130,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a8f330a1b648451d64e78947d5e9c859a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the active algorithm label.  <br /></td></tr>
 <tr class="memitem:a480d573f9454efbfc82884815d03219d" id="r_a480d573f9454efbfc82884815d03219d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a480d573f9454efbfc82884815d03219d">setMaze</a> (<a class="el" href="classmaze_1_1map_1_1_maze.html">Maze</a> maze)</td></tr>
 <tr class="memdesc:a480d573f9454efbfc82884815d03219d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns the maze instance to solve.  <br /></td></tr>
+<tr class="memitem:a2c23f7640bc5f2cbfa3361af287b249d" id="r_a2c23f7640bc5f2cbfa3361af287b249d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a2c23f7640bc5f2cbfa3361af287b249d">setStepTimingEnabled</a> (boolean enabled)</td></tr>
+<tr class="memdesc:a2c23f7640bc5f2cbfa3361af287b249d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enables or disables the per-step timing used by interactive displays.  <br /></td></tr>
 <tr class="memitem:a961567555b5f713d5adc9e2858a96b23" id="r_a961567555b5f713d5adc9e2858a96b23"><td class="memItemLeft"><a class="el" href="classmaze_1_1map_1_1_maze_1_1_node.html">Maze.Node</a>&#160;</td><td class="memItemRight"><a class="el" href="#a961567555b5f713d5adc9e2858a96b23">updateSolve</a> ()</td></tr>
 <tr class="memdesc:a961567555b5f713d5adc9e2858a96b23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advances solving by exactly one visited node.  <br /></td></tr>
 <tr class="memitem:a0590fb4ea205f4809089b96aebe7e8ce" id="r_a0590fb4ea205f4809089b96aebe7e8ce"><td class="memItemLeft">boolean&#160;</td><td class="memItemRight"><a class="el" href="#a0590fb4ea205f4809089b96aebe7e8ce">isFinished</a> ()</td></tr>
@@ -139,7 +141,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a302e9c4d362a46e53340aab65a94c370" id="r_a302e9c4d362a46e53340aab65a94c370"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a302e9c4d362a46e53340aab65a94c370">getVisitedCount</a> ()</td></tr>
 <tr class="memdesc:a302e9c4d362a46e53340aab65a94c370"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets count of nodes visited in the current run.  <br /></td></tr>
 <tr class="memitem:ad4bded563001c9aaf48023a2da260a75" id="r_ad4bded563001c9aaf48023a2da260a75"><td class="memItemLeft">long&#160;</td><td class="memItemRight"><a class="el" href="#ad4bded563001c9aaf48023a2da260a75">getSolveTimeNs</a> ()</td></tr>
-<tr class="memdesc:ad4bded563001c9aaf48023a2da260a75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the total computation time elapsed in the current run.  <br /></td></tr>
+<tr class="memdesc:ad4bded563001c9aaf48023a2da260a75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the total computation time elapsed in the current run when per-step timing is enabled.  <br /></td></tr>
 <tr class="memitem:ade44d645d91baad4623de5954c802bc0" id="r_ade44d645d91baad4623de5954c802bc0"><td class="memItemLeft">long&#160;</td><td class="memItemRight"><a class="el" href="#ade44d645d91baad4623de5954c802bc0">getPathCost</a> ()</td></tr>
 <tr class="memdesc:ade44d645d91baad4623de5954c802bc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the total movement cost of the final path.  <br /></td></tr>
 <tr class="memitem:aafaa0389e2550388e7cf828cbdee66c4" id="r_aafaa0389e2550388e7cf828cbdee66c4"><td class="memItemLeft">long&#160;</td><td class="memItemRight"><a class="el" href="#aafaa0389e2550388e7cf828cbdee66c4">getCurrentPathCost</a> ()</td></tr>
@@ -150,8 +152,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ad3f428fc46f8f06b8f46c8d531222afe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets transient search state so solving can start fresh.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Incremental maze solver that supports DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and weighted A*. </p>
-<p>The solver keeps internal state between calls to <code><a class="el" href="#a961567555b5f713d5adc9e2858a96b23">updateSolve()</a></code>, so callers can visualize or inspect each step one node at a time. Reported solve time measures the elapsed time of each search-step call, excluding timer delays and UI repaint work.</p>
+<div class="textblock"><p>Incremental maze solver that supports DFS, BFS, Uniform Cost Search, Greedy Best-First Search, and A* on weighted graphs. </p>
+<p>The solver keeps internal state between calls to <code><a class="el" href="#a961567555b5f713d5adc9e2858a96b23">updateSolve()</a></code>, so callers can visualize or inspect each step one node at a time. By default, reported solve time accumulates the elapsed time of each search-step call, excluding timer delays and UI repaint work. Batch callers can disable this diagnostic timing and measure a complete solve externally with <code><a class="el" href="#a2c23f7640bc5f2cbfa3361af287b249d">setStepTimingEnabled(boolean)</a></code>.</p>
 <p>Typical usage: create a solver, set algorithm and maze, then call <code><a class="el" href="#a961567555b5f713d5adc9e2858a96b23">updateSolve()</a></code> repeatedly until <code><a class="el" href="#a0590fb4ea205f4809089b96aebe7e8ce">isFinished()</a></code> returns true. Example: </p><pre><code class="JavaDocCode"><br/>
 MazeSolver solver = new MazeSolver();<br/>
 solver.setMaze(maze);<br/>
@@ -330,8 +332,8 @@ if (solver.isSolved()) {<br/>
 </table>
 </div><div class="memdoc">
 
-<p>Gets the total computation time elapsed in the current run. </p>
-<dl class="section return"><dt>Returns</dt><dd>elapsed computation time in nanoseconds, excluding timer and UI delays </dd></dl>
+<p>Gets the total computation time elapsed in the current run when per-step timing is enabled. </p>
+<dl class="section return"><dt>Returns</dt><dd>elapsed computation time in nanoseconds, or zero when per-step timing is disabled </dd></dl>
 
 </div>
 </div>
@@ -513,6 +515,40 @@ if (solver.isSolved()) {<br/>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">maze</td><td>maze object to solve; start/goal are validated when solving begins </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a2c23f7640bc5f2cbfa3361af287b249d" name="a2c23f7640bc5f2cbfa3361af287b249d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c23f7640bc5f2cbfa3361af287b249d">&#9670;&#160;</a></span>setStepTimingEnabled()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void maze.search.MazeSolver.setStepTimingEnabled </td>
+          <td>(</td>
+          <td class="paramtype">boolean</td>          <td class="paramname"><span class="paramname"><em>enabled</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enables or disables the per-step timing used by interactive displays. </p>
+<p>Timing is enabled by default. Batch callers that measure the complete solve externally can disable it to avoid two clock reads for every search step.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">enabled</td><td>whether each search step should update <code><a class="el" href="#ad4bded563001c9aaf48023a2da260a75">getSolveTimeNs()</a></code> </td></tr>
   </table>
   </dd>
 </dl>

@@ -7,5 +7,5 @@ var searchData=
   ['uniform_4',['UNIFORM',['../enumexperiments_1_1_test_suite_1_1_cost_mode.html#ac87f647aa3ca78100cd48590a6744421',1,'experiments::TestSuite::CostMode']]],
   ['uninformedsearch_2ejava_5',['UninformedSearch.java',['../_uninformed_search_8java.html',1,'']]],
   ['updatesolve_6',['updateSolve',['../classmaze_1_1search_1_1_maze_solver.html#a961567555b5f713d5adc9e2858a96b23',1,'maze::search::MazeSolver']]],
-  ['use_7',['How to Use',['../index.html#autotoc_md6',1,'']]]
+  ['use_7',['How to Use',['../index.html#autotoc_md7',1,'']]]
 ];

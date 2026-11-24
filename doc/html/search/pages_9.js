@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['included_20maze_20files_0',['Included Maze Files',['../index.html#autotoc_md9',1,'']]]
+  ['how_20to_20use_0',['How to Use',['../index.html#autotoc_md7',1,'']]]
 ];

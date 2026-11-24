@@ -58,8 +58,10 @@ public final class ExperimentRunner {
     private static final double PREFETCH_HEADROOM_FRACTION = 0.90;
     /** Reserve additional headroom for temporary generation and solver objects. */
     private static final double MEMORY_SAFETY_FACTOR = 1.20;
-    /** CPU load at which adaptive mode removes one worker from the next batch. */
+    /** CPU load at which adaptive mode removes one worker at suite startup. */
     private static final double CPU_LOAD_LIMIT = 0.80;
+    /** Adaptive mode reserves more logical processors than fixed mode for the OS and Swing EDT. */
+    private static final int ADAPTIVE_PROCESSOR_RESERVE = 2;
     private static final SecureRandom SEED_SOURCE = new SecureRandom();
     private static final OperatingSystemMXBean OS_BEAN =
             ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
@@ -132,7 +134,6 @@ public final class ExperimentRunner {
     private static final class SuiteGeneratedMapResult {
         private final SuiteMapWork work;
         private final Maze.GeneratedExperimentMap map;
-
         private SuiteGeneratedMapResult(
                 SuiteMapWork work, Maze.GeneratedExperimentMap map) {
             this.work = work;
@@ -446,16 +447,8 @@ public final class ExperimentRunner {
                             return null;
                         }
                         awaitIfPaused(token);
-                        int activeMaps = activeMapWorkerCount.incrementAndGet();
-                        updatePeak(peakMapWorkerCount, activeMaps);
-                        try {
-                            Maze.GeneratedExperimentMap map = createMap(work.testCase, work.seed);
-                            return new SuiteGeneratedMapResult(work, map);
-                        } catch (OutOfMemoryError error) {
-                            throw memoryFailure(work.testCase, work.iteration, error);
-                        } finally {
-                            activeMapWorkerCount.decrementAndGet();
-                        }
+                        return new SuiteGeneratedMapResult(work,
+                                createTrackedMap(work.testCase, work.seed, work.iteration));
                     }, TaskPriority.MAP);
                 }
                 if (submittedMaps == 0 && !workQueue.isEmpty()) {
@@ -473,16 +466,9 @@ public final class ExperimentRunner {
                     submittedMaps++;
                     mapTasksInFlight++;
                     reservedBytes += work.reservationBytes;
-                    mapCompletions.submit(() -> {
-                        int activeMaps = activeMapWorkerCount.incrementAndGet();
-                        updatePeak(peakMapWorkerCount, activeMaps);
-                        try {
-                            Maze.GeneratedExperimentMap map = createMap(work.testCase, work.seed);
-                            return new SuiteGeneratedMapResult(work, map);
-                        } finally {
-                            activeMapWorkerCount.decrementAndGet();
-                        }
-                    }, TaskPriority.MAP);
+                    mapCompletions.submit(() -> new SuiteGeneratedMapResult(work,
+                            createTrackedMap(work.testCase, work.seed, work.iteration)),
+                            TaskPriority.MAP);
                 }
 
                 /*
@@ -563,7 +549,7 @@ public final class ExperimentRunner {
                                 try {
                                     return new SolverCompletion(
                                             generated.work,
-                                            timedSolve(
+                                            solve(
                                                     suite.getName(), generated.work.testCase,
                                                     generated.work.iteration, generated.map,
                                                     algorithm, solveProgress));
@@ -669,13 +655,6 @@ public final class ExperimentRunner {
         }
     }
 
-    private static ExperimentResult timedSolve(
-            String suiteName, TestSuite.TestCase testCase, int iteration,
-            Maze.GeneratedExperimentMap map, MazeSolver.Algorithm algorithm,
-            SolveProgressListener solveProgress) {
-        return solve(suiteName, testCase, iteration, map, algorithm, solveProgress);
-    }
-
     private static SolverCompletion awaitSolver(
             Future<SolverCompletion> future, TestSuite.TestCase testCase, int iteration) {
         try {
@@ -721,16 +700,8 @@ public final class ExperimentRunner {
     private static List<ExperimentResult> runMap(
             String suiteName, TestSuite.TestCase testCase, int iteration, long testCaseSeed,
             SolveProgressListener progressListener, Runnable mapGenerated) {
-        Maze.GeneratedExperimentMap generated;
-        int activeMaps = activeMapWorkerCount.incrementAndGet();
-        updatePeak(peakMapWorkerCount, activeMaps);
-        try {
-            generated = createMap(testCase, testCaseSeed);
-        } catch (OutOfMemoryError error) {
-            throw memoryFailure(testCase, iteration, error);
-        } finally {
-            activeMapWorkerCount.decrementAndGet();
-        }
+        Maze.GeneratedExperimentMap generated =
+                createTrackedMap(testCase, testCaseSeed, iteration);
         if (mapGenerated != null) {
             mapGenerated.run();
         }
@@ -746,6 +717,19 @@ public final class ExperimentRunner {
             }
         }
         return results;
+    }
+
+    private static Maze.GeneratedExperimentMap createTrackedMap(
+            TestSuite.TestCase testCase, long seed, int iteration) {
+        int activeMaps = activeMapWorkerCount.incrementAndGet();
+        updatePeak(peakMapWorkerCount, activeMaps);
+        try {
+            return createMap(testCase, seed);
+        } catch (OutOfMemoryError error) {
+            throw memoryFailure(testCase, iteration, error);
+        } finally {
+            activeMapWorkerCount.decrementAndGet();
+        }
     }
 
     private static void shutdownExecutor(ExecutorService executor, Thread cpuMonitor) {
@@ -871,9 +855,9 @@ public final class ExperimentRunner {
     }
 
     /**
-     * Gets the configured worker capacity for the currently running suite.
+     * Gets the fixed parallel worker capacity supported by this JVM.
      *
-     * @return worker capacity, one for sequential mode, or zero while idle
+     * @return logical processors minus one, with a minimum of one worker
      */
     public static int getParallelWorkerCount() {
         int processors = Runtime.getRuntime().availableProcessors();
@@ -883,14 +867,17 @@ public final class ExperimentRunner {
     /**
      * Selects workers conservatively from available heap and system CPU load.
      *
-     * @return adaptive worker count for the next map
+     * @return adaptive worker count selected for a new suite
      */
     public static int getAdaptiveWorkerCount() {
         return getAdaptiveWorkerCount(getParallelWorkerCount());
     }
 
     private static int getAdaptiveWorkerCount(int maximumWorkers) {
-        int workers = maximumWorkers;
+        int processors = Runtime.getRuntime().availableProcessors();
+        int reserve = processors >= 4 ? ADAPTIVE_PROCESSOR_RESERVE : 1;
+        int adaptiveMaximum = Math.max(1, processors - reserve);
+        int workers = Math.min(maximumWorkers, adaptiveMaximum);
         long headroom = getHeapHeadroomBytes();
         workers = Math.min(workers, (int) Math.max(1, headroom / SOLVER_OVERHEAD_BYTES));
         double cpuLoad = lastAdaptiveCpuLoad >= 0.0

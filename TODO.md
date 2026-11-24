@@ -12,6 +12,19 @@ complete. Feature and architecture documentation is maintained in
 These items are optional follow-up improvements and are not blockers for the
 current route-planning agent implementation.
 
+### Maintenance pass (0.8.1)
+
+- [x] Document the 1,296-condition benchmark matrix, Windows JDK discovery,
+      automatic heap sizing, adaptive startup limits, and visible-view refreshes.
+- [x] Remove unused scheduler helpers, completion fields, table editors, and
+      redundant UCS state; share map-worker diagnostics across execution paths.
+- [ ] Review removal of old generated experiment exports, packaged binaries,
+      build output, and the previous release PDF before deleting retained files.
+- [x] Correct stale title-image and fixture-location instructions and distinguish
+      per-result search time from end-to-end CLI timing.
+
+### Feature and benchmark backlog
+
 - [x] Reduce large-suite experiment memory usage by regenerating generated maps
       from persisted seeds, paging result rows, reporting active conditions, and
       surfacing heap exhaustion.
@@ -53,8 +66,8 @@ current route-planning agent implementation.
       without oversubscribing the processor/UI reservation.
 - [x] Ensure adaptive batch executors and CPU-monitor threads are cleaned up
       when map generation or solver execution fails.
-- [x] Preserve the last measured instantaneous solves-per-second value after
-      a suite completes instead of replacing it with zero.
+- [ ] Preserve the last measured instantaneous solves-per-second value after
+      a suite completes; the current footer sampling resets it to zero.
 - [x] Add an opt-in results-table follow mode that keeps the view on the
       dynamically growing final page during a suite run.
 - [x] Add an alternative live solve-log view that follows each completed

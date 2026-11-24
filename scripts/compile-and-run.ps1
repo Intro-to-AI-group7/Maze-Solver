@@ -4,28 +4,63 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $classes = Join-Path $root "build\classes"
 $requiredJavaMajor = 21
-$jpackageCommand = Get-Command jpackage -ErrorAction SilentlyContinue
-$javacCommand = Get-Command javac -ErrorAction Stop
-if ($null -ne $jpackageCommand) {
-    $javaBin = Split-Path -Parent $jpackageCommand.Source
-    $javac = Join-Path $javaBin "javac.exe"
-    $java = Join-Path $javaBin "java.exe"
-} else {
-    $javaBin = Split-Path -Parent $javacCommand.Source
-    $javac = $javacCommand.Source
-    $java = Join-Path $javaBin "java.exe"
+
+$candidateBins = [System.Collections.Generic.List[string]]::new()
+
+foreach ($commandName in @("javac", "jpackage", "java")) {
+    $command = Get-Command $commandName -ErrorAction SilentlyContinue
+    if ($null -ne $command) {
+        $candidateBins.Add((Split-Path -Parent $command.Source))
+    }
 }
-if (-not (Test-Path -LiteralPath $javac) -or -not (Test-Path -LiteralPath $java)) {
-    throw "Could not find matching javac and java executables in $javaBin."
+
+if (-not [string]::IsNullOrWhiteSpace($env:JAVA_HOME)) {
+    $candidateBins.Add((Join-Path $env:JAVA_HOME "bin"))
 }
-$versionOutput = (& $env:ComSpec /c "`"$java`" -version 2>&1" | Out-String)
-if ($versionOutput -notmatch 'version "(\d+)') {
-    throw "Could not determine the Java runtime version for $java."
+
+$commonBinPatterns = @(
+    "C:\Program Files\Microsoft\jdk-*\bin",
+    "C:\Program Files\Java\*\bin",
+    "C:\Program Files\Eclipse Adoptium\*\bin",
+    "C:\Program Files (x86)\Java\*\bin"
+)
+foreach ($pattern in $commonBinPatterns) {
+    Get-Item -Path $pattern -ErrorAction SilentlyContinue |
+        Sort-Object FullName -Descending |
+        ForEach-Object { $candidateBins.Add($_.FullName) }
 }
-$javaMajor = [int]$Matches[1]
-if ($javaMajor -lt $requiredJavaMajor) {
-    throw "JDK $requiredJavaMajor or newer is required; found JDK $javaMajor at $javaBin."
+
+$javaBin = $null
+$javac = $null
+$java = $null
+$javaMajor = $null
+
+foreach ($candidateBin in $candidateBins | Select-Object -Unique) {
+    $candidateJava = Join-Path $candidateBin "java.exe"
+    $candidateJavac = Join-Path $candidateBin "javac.exe"
+    if (-not (Test-Path -LiteralPath $candidateJava) -or
+        -not (Test-Path -LiteralPath $candidateJavac)) {
+        continue
+    }
+
+    $versionOutput = (& $env:ComSpec /c "`"$candidateJava`" -version 2>&1" | Out-String)
+    if ($versionOutput -match 'version "(\d+)') {
+        $candidateMajor = [int]$Matches[1]
+        if ($candidateMajor -ge $requiredJavaMajor) {
+            $javaBin = $candidateBin
+            $javac = $candidateJavac
+            $java = $candidateJava
+            $javaMajor = $candidateMajor
+            break
+        }
+    }
 }
+
+if ($null -eq $java) {
+    throw "JDK $requiredJavaMajor or newer is required, but no matching java.exe and javac.exe could be found. Set JAVA_HOME or add the JDK bin directory to PATH."
+}
+
+Write-Host "Using JDK $javaMajor at $javaBin"
 
 New-Item -ItemType Directory -Force -Path $classes | Out-Null
 $sources = @(

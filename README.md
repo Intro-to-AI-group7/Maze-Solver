@@ -2,7 +2,7 @@
 
 Maze-Solver 0.8.1 is a Java Swing desktop app for loading, visualizing, and
 solving grid mazes using DFS, BFS, Uniform Cost Search, Greedy Best-First
-Search, and weighted A*. Maze files support optional per-direction movement
+Search, and A* with directional movement costs. Maze files support optional per-direction movement
 costs while preserving the original unweighted format.
 
 It is designed for both interactive exploration and large-map performance testing, with a paint-based renderer that supports very large mazes efficiently.
@@ -31,7 +31,7 @@ Maze-Solver has six main responsibilities:
 
 1. Load human-readable `.msmap` maze files from disk.
 2. Validate and visualize the maze graph.
-3. Run DFS, BFS, UCS, Greedy Best-First Search, or weighted A* incrementally or instantly.
+3. Run DFS, BFS, UCS, Greedy Best-First Search, or A* incrementally or instantly.
 4. Configure reproducible multi-algorithm experiment suites and export results.
 5. Review exact experiment maps in the animated renderer.
 6. Show traversal progress and final path with clear visual semantics.
@@ -53,10 +53,14 @@ Maze-Solver has six main responsibilities:
 - Optional grid overlay for viewing directional movement costs. Equal opposite
   costs share one edge label; asymmetric costs show separate directional labels.
 - Default startup solve settings: A* algorithm and 200 ms step delay.
-- Application Settings can configure the maximum JVM heap for the next launch.
+- Application Settings can configure the maximum JVM heap for the next launch
+  (1–64 GB, or 0 for automatic sizing). Saving offers an immediate restart.
   Java cannot increase the heap limit of an already-running process; the
-  launcher reads the saved setting and starts Java with the corresponding
-  `-Xmx` option.
+  Windows repository launcher reads the saved setting and starts Java with the
+  corresponding `-Xmx` option. Automatic sizing uses 70% of available physical
+  memory, capped at 75% of total physical memory and clamped to 1–64 GB.
+  Direct `java` launches and packaged launchers use JVM defaults unless an
+  explicit heap option is supplied; they do not read the preferences file.
 - Configurable test-suite workflow from the title screen.
 - Seeded experiment generation with adjustable map size, interior obstacle
   density, reachability, endpoint placement, and movement-cost policies.
@@ -166,10 +170,10 @@ directory. A saved suite contains `applicationVersion=0.8.1` and
 the stable suite schema version. Older schema-version-1 suites remain
 readable.
 
-Before measured runs begin, the experiment runner performs a short JVM
-warm-up using each selected algorithm. Warm-up solves are excluded from the
-results, progress count, and timing metrics so class loading and JIT
-compilation are less likely to skew the first measured iteration.
+Before measured runs begin, the experiment runner performs three warm-up rounds
+using each selected algorithm on a small seeded map. Warm-up solves are excluded
+from results, progress counts, and per-result search timing. CLI suite elapsed
+time includes warm-up, generation, scheduling, and result handling.
 
 Experiment result runtimes measure one complete solver run from the start of
 the search through result collection. They exclude map generation and suite
@@ -183,26 +187,23 @@ Experiment suites run sequentially by default. Select **Fixed parallel** or
 **Adaptive parallel** in the test-suite editor to run independent algorithms
 for each generated map concurrently. Sequential mode remains available for
 compatibility checks and comparisons. Each generated map is shared by the
-selected algorithms for that iteration, and results remain ordered by test
-condition, iteration, and algorithm.
+selected algorithms for that iteration. Returned results and CSV exports are
+ordered by test condition, iteration, and algorithm; the live UI displays
+results in completion order.
 
 Parallel execution is most useful for larger maps or suites with several
 selected algorithms. Small suites may show little improvement because there is
 not enough work to keep all workers busy.
-Select **Sequential** to retain the original execution path for comparison and
-compatibility testing. Parallel execution improves throughput primarily for
-larger maps; small maps may show little memory or elapsed-time difference
-because they do not create enough work to saturate the workers.
 
 Experiment results retain only measurements, configuration metadata, and the
 effective map seed. Generated maps are recreated from that seed only when a
 result is reviewed, which avoids retaining large serialized maps for every
 algorithm run. The results table is paged with selectable page sizes of 10,
-25, 50, or 100 rows. The footer shows live JVM memory utilization, supports
-direct page-number entry, and supports jumps of 1, 10, or 100 pages in either
-direction. The progress status identifies the most recently completed test
-condition, and heap exhaustion reports the active condition so large suites
-can be split into smaller batches.
+25, 50, or 100 rows. Paging supports direct page-number entry and jumps of
+1, 10, or 100 pages in either direction. The footer shows active mapping and
+solving workers, interval peaks, elapsed time, and solve throughput. The map
+progress bar shows heap usage and scheduler reservations. The progress status
+identifies the most recently completed condition.
 Enable **Follow latest results** in the results footer to keep the table on
 the dynamically growing final page while a suite runs. Using any paging
 control pauses following so earlier result pages can be inspected; enable it
@@ -218,10 +219,14 @@ map-generation pane. The map pane records map readiness, solver dispatch, and
 map completion events, along with the number of generated maps currently
 loaded in memory waiting for solver work. That loaded-map count is distinct
 from maps still being generated and is also shown on the map progress bar.
+Table and solver-log refreshes run only while their respective view is visible.
+Completed solve history is retained up to the 500-entry limit in either view;
+map-log events are recorded only while the live log is selected.
 During a run, **Pause** cooperatively stops new map generation and solver work
-at task boundaries; **Resume** continues the same run. **Cancel** stops the
-run and clears retained maps, scheduler state, and completion queues so large
-generated maps can be reclaimed promptly.
+at task boundaries; **Resume** continues the same run. **Cancel** requests
+cooperative shutdown and clears coordinator references and queued work.
+An already-running map generation or solve can finish before its worker stops;
+pause and cancellation do not interrupt individual search steps.
 While solves are active, the log places live worker lines above the completed
 history and updates their nodes explored, current path cost, and elapsed time
 in place. Progress notifications are throttled so the diagnostic view does
@@ -241,14 +246,33 @@ speed. If sampling misses a valid pair, the generator performs a deterministic
 distance-offset search before rejecting the layout. This keeps results
 reproducible while avoiding failures caused only by random endpoint sampling.
 
-The test-suite results tab includes a **Review** button for each result. It
-reimports the exact map snapshot used by that result and opens the animated
-MazeRenderer with the result's algorithm selected. **Export Maps** creates a
+The results table includes a **Review** button for each result. It reconstructs
+the map from the run's configuration and effective seed, or imports its embedded
+saved map, and opens MazeRenderer with the result's algorithm selected.
+**Export Maps** uses the current configuration table and creates a
 `<suite-name>-maps` folder under the selected directory and writes one
 complete saveable map file for each unique map. Repeated iterations are grouped
 in the filename, such as `iterations-1-3`, while distinct maps retain their
 iteration numbers. Seed-generated maps are converted into the same format used
 by imported maps, making them portable for later inspection or reuse.
+For exports that must match a run, save and reload the suite before running or
+exporting maps, and keep its configuration unchanged. Saving materializes
+automatic seeds; otherwise a separate export resolves fresh automatic seeds.
+
+### Included benchmark matrix
+
+`test/resources/suites/full-factorial-maze-benchmark.mstests` contains 1,296
+conditions, with five algorithms and ten iterations each (64,800 solves).
+Factors cover square sizes of 100, 500, and 1,000 cells per side; blocked
+percentages from 30 through 80 in steps of 10; uniform costs or random maxima
+of 5, 10, 25, 50, or 100; symmetric/asymmetric costs; and corner, random, or
+approximate-distance endpoints. Reachability is fixed to guaranteed solvable.
+Each condition has one manual seed reused across iterations.
+
+`scripts/generate-full-factorial-suite.ps1` regenerates both the suite and its
+companion CSV matrix. The generated suite defaults to sequential execution;
+select another mode in the UI or pass the CLI `--mode` option when comparing
+throughput. This is a large benchmark, separate from the regression suite.
 
 ## How to Use
 
@@ -260,7 +284,7 @@ After loading or generating a maze:
 - Load Map: replace the current session maze with another file.
 - Save Map: export the currently loaded maze to a text file.
 - Generate Map: create and load a new random maze without leaving the solver window.
-- Algorithm: choose DFS, BFS, Uniform Cost Search, Greedy Best-First Search, or weighted A*.
+- Algorithm: choose DFS, BFS, Uniform Cost Search, Greedy Best-First Search, or A*.
 - Step Delay (ms): set timer delay for step-by-step mode (1..5000).
 - Instant: solve to completion immediately (async worker).
 - Show Weights: overlay movement costs on grid edges. Labels appear when zoom is
@@ -406,7 +430,7 @@ Validation rules enforced by import:
 
 ## Included Maze Files
 
-Located in src:
+Located in `test/resources/maps/`:
 
 - `*.msmap`: human-readable individual maze map files.
 - test_100x100.msmap: medium map for standard performance checks.
@@ -428,7 +452,7 @@ The solver supports:
 - Greedy Best-First Search: priority search ordered only by the Manhattan
   heuristic `h(n)`. It can explore fewer nodes, but it is not guaranteed to
   return a minimum-cost path.
-- A*: weighted informed search using cumulative directional movement costs and
+- A*: informed search using cumulative directional movement costs and
   the Manhattan-distance heuristic. Since valid movement costs are at least
   `1`, the heuristic remains an admissible lower bound and A* returns a
   minimum-cost path when one exists.
@@ -459,6 +483,9 @@ The Manhattan heuristic is admissible because every enabled move costs at
 least `1`. It is also consistent for this four-directional maze: moving to an
 adjacent cell changes Manhattan distance by at most `1`, while the transition
 cost is at least `1`.
+
+Here A* uses `g(n) + h(n)` on a weighted graph. It does not multiply the
+heuristic by an additional weighting factor.
 
 ## Rendering and Performance
 
@@ -596,18 +623,7 @@ java -jar MazeSolver.jar
 
 If your file has a different name, replace `MazeSolver.jar` with the actual filename.
 
-For builds distributed with external assets, keep this layout:
-
-```text
-release-folder/
-├─ MazeSolver.jar
-└─ images/
-   └─ TitleImage.jpg
-```
-
-If the app starts but the title image does not appear, ensure the `images`
-folder is present next to the JAR. The title screen images can be loaded from
-`images/TitleImage.jpg`.
+The title screen is painted in Swing and needs no external image assets.
 
 ## Troubleshooting
 
@@ -653,6 +669,10 @@ Convenience scripts are available under `scripts\`:
 .\scripts\build-executable.ps1
 ```
 
+The PowerShell launcher discovers JDK 21 or newer from PATH, `JAVA_HOME`, or
+common Windows installation directories. It selects matching `java` and
+`javac` binaries. Packaging still requires `jpackage` on PATH and the .NET 8 SDK.
+
 The first script compiles the application and regression tests, runs the
 regression suite, and launches the Swing application. The second creates a
 self-extracting single-file Windows executable:
@@ -672,7 +692,11 @@ the executable with the optional debug flag:
 `ExperimentRunner` keeps the UI-independent execution path separate from Swing
 and preserves deterministic result ordering. Sequential mode executes one map
 and its algorithms directly. Fixed parallel mode uses the processor-aware
-worker cap; adaptive mode adjusts that cap from CPU load and heap headroom.
+worker cap (logical processors minus one, with a minimum of one). Adaptive
+mode selects its worker count once at suite startup using CPU load and heap
+headroom. It reserves two processors on systems with at least four processors,
+otherwise one, and can reduce the selected count further under high CPU load.
+It does not resize the executor during a run.
 
 Parallel execution uses one priority executor. Map-generation tasks are
 prioritized while the memory frontier is open, but ready maps and queued solver
@@ -693,6 +717,11 @@ overhead with a safety factor. They are a scheduling guard, not a heap
 measurement. Diagnostics therefore expose both reservation state and JVM heap
 state. On hybrid CPUs, `Runtime.availableProcessors()` reflects processors
 exposed to the JVM; process affinity can be used for controlled comparisons.
+
+The coordinator reserves a map plus one active solver estimate with a 20%
+safety allowance, against 90% of available heap headroom. Observed heap growth
+is subtracted from outstanding reservations to avoid counting it twice.
+These estimates do not guarantee that every workload fits the heap.
 
 Debug mode opens a terminal window while the application runs.
 Building it requires JDK 21 or newer, `jpackage`, and the .NET 8 SDK for the
@@ -732,6 +761,12 @@ Optional cleanup of compiled artifacts:
 Remove-Item -Recurse -Force build
 ```
 
+`build/`, `dist/`, and `doc/latex/` are disposable generated output. Regenerate
+packages after source changes before distributing them. Keep fixtures under
+`test/resources/`; save ad hoc benchmark output under `build/results/` so it
+does not enter version control. Generated HTML and the current release PDF
+remain under `doc/`.
+
 Validate JavaDoc without generating the Doxygen/PDF artifacts:
 
 ```powershell
@@ -747,8 +782,9 @@ release PDF with the documentation script:
 ```
 
 The script checks for Doxygen and XeLaTeX. If either is missing, it asks before
-installing it through an available package manager. It generates the HTML
-reference, builds the PDF, and removes only the generated `doc\latex` folder.
+installing it through an available package manager. It replaces the generated
+`doc\html` directory so deleted classes leave no stale pages, builds the PDF,
+and removes the temporary `doc\latex` folder.
 The remaining documentation outputs are `doc\html`,
 `doc\Maze-Solver-docs_V0.8.1.pdf`, and `doc\Doxyfile`.
 

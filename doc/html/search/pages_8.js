@@ -1,4 +1,9 @@
 var searchData=
 [
-  ['how_20to_20use_0',['How to Use',['../index.html#autotoc_md6',1,'']]]
+  ['features_0',['Features',['../index.html#autotoc_md3',1,'']]],
+  ['file_20format_1',['Maze File Format',['../index.html#autotoc_md8',1,'']]],
+  ['files_2',['Included Maze Files',['../index.html#autotoc_md10',1,'']]],
+  ['format_3',['Maze File Format',['../index.html#autotoc_md8',1,'']]],
+  ['format_4',['Weighted map format',['../index.html#autotoc_md9',1,'']]],
+  ['from_20release_20jar_5',['Launch From Release JAR',['../index.html#autotoc_md15',1,'']]]
 ];

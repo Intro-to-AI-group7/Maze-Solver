@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['quick_20start_0',['Quick Start',['../index.html#autotoc_md5',1,'']]]
+  ['performance_0',['Rendering and Performance',['../index.html#autotoc_md12',1,'']]],
+  ['project_20structure_1',['Project Structure',['../index.html#autotoc_md13',1,'']]]
 ];

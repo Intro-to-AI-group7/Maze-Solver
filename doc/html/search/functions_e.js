@@ -36,8 +36,9 @@ var searchData=
   ['setstart_33',['setStart',['../classmaze_1_1map_1_1_maze.html#a5924ad49bb5e421537ee1009d91f32dc',1,'maze::map::Maze']]],
   ['setstartcolumn_34',['setStartColumn',['../classexperiments_1_1_test_suite_1_1_test_case.html#aeb39940aa9a986d00dc0ba3e095a7d78',1,'experiments::TestSuite::TestCase']]],
   ['setstartrow_35',['setStartRow',['../classexperiments_1_1_test_suite_1_1_test_case.html#a47c9280dff6de97ead4736f0c2d55764',1,'experiments::TestSuite::TestCase']]],
-  ['settargetmanhattandistance_36',['setTargetManhattanDistance',['../classexperiments_1_1_test_suite_1_1_test_case.html#a3f99ff82a8c73b3e81b1c462a482c02e',1,'experiments::TestSuite::TestCase']]],
-  ['showwindow_37',['showWindow',['../classui_1_1_test_suite_window.html#a23903c3daa8dc0e36854486c295ea808',1,'ui.TestSuiteWindow.showWindow()'],['../classui_1_1_test_suite_window.html#a17c311c2b9756836b95f3eb922872987',1,'ui.TestSuiteWindow.showWindow(Runnable onBack)']]],
-  ['shutdownapplication_38',['shutdownApplication',['../classui_1_1_maze_renderer.html#adea7dee14a893ec39fce582c4c38bd33',1,'ui::MazeRenderer']]],
-  ['step_39',['step',['../interfacemaze_1_1search_1_1_search_strategy.html#a4b1e2185e94df09eaa5693533ba775ca',1,'maze::search::SearchStrategy']]]
+  ['setsteptimingenabled_36',['setStepTimingEnabled',['../classmaze_1_1search_1_1_maze_solver.html#a2c23f7640bc5f2cbfa3361af287b249d',1,'maze::search::MazeSolver']]],
+  ['settargetmanhattandistance_37',['setTargetManhattanDistance',['../classexperiments_1_1_test_suite_1_1_test_case.html#a3f99ff82a8c73b3e81b1c462a482c02e',1,'experiments::TestSuite::TestCase']]],
+  ['showwindow_38',['showWindow',['../classui_1_1_test_suite_window.html#a23903c3daa8dc0e36854486c295ea808',1,'ui.TestSuiteWindow.showWindow()'],['../classui_1_1_test_suite_window.html#a17c311c2b9756836b95f3eb922872987',1,'ui.TestSuiteWindow.showWindow(Runnable onBack)']]],
+  ['shutdownapplication_39',['shutdownApplication',['../classui_1_1_maze_renderer.html#adea7dee14a893ec39fce582c4c38bd33',1,'ui::MazeRenderer']]],
+  ['step_40',['step',['../interfacemaze_1_1search_1_1_search_strategy.html#a4b1e2185e94df09eaa5693533ba775ca',1,'maze::search::SearchStrategy']]]
 ];

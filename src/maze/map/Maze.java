@@ -484,16 +484,6 @@ public class Maze {
             open[testCase.getGoalRow()][testCase.getGoalColumn()] = true;
         }
 
-        if (endpointMode == TestSuite.EndpointMode.FIXED) {
-            int startRow = testCase.getStartRow();
-            int startColumn = testCase.getStartColumn();
-            int goalRow = testCase.getGoalRow();
-            int goalColumn = testCase.getGoalColumn();
-            candidates.removeIf(coordinate ->
-                    (coordinate[0] == startRow && coordinate[1] == startColumn)
-                    || (coordinate[0] == goalRow && coordinate[1] == goalColumn));
-        }
-
         for (int row = 1; row < length - 1; row++) {
             for (int col = 1; col < width - 1; col++) {
                 if (!open[row][col]) {

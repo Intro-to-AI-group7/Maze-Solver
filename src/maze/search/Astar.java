@@ -4,7 +4,7 @@ import java.util.PriorityQueue;
 import maze.map.Maze;
 
 /**
- * Incremental weighted A* strategy using Manhattan distance as its heuristic.
+ * Incremental A* strategy using directional costs and Manhattan distance.
  */
 final class Astar implements SearchStrategy {
     private final PriorityQueue<Entry> frontier = new PriorityQueue<>();

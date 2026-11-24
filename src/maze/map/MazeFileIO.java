@@ -258,9 +258,6 @@ public final class MazeFileIO {
                 throw new IllegalArgumentException("Weight at (" + row + "," + col + ") in "
                         + direction + " points to no traversable neighbor.");
             }
-            if (hasNeighbor && cost == Maze.DISABLED_MOVEMENT_COST) {
-                continue;
-            }
         }
     }
 }

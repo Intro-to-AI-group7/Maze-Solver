@@ -33,6 +33,7 @@ public final class RegressionTests {
         testWeightedMapRoundTrip();
         testAllAlgorithmsOnGeneratedMap();
         testSolverStepTimingCanBeDisabled();
+        testMinimumCostSearchChoosesCheaperDetour();
         testGeneratedMapConfigurationValidation();
         testReproducibleExperimentRuns();
         testSequentialAndParallelExperimentRunsMatch();
@@ -96,6 +97,30 @@ public final class RegressionTests {
         }
         require(untimedSolver.getSolveTimeNs() == 0,
                 "Disabled solver timing recorded per-step time.");
+    }
+
+    private static void testMinimumCostSearchChoosesCheaperDetour() {
+        Maze maze = new Maze(2, 3);
+        for (int row = 0; row < 2; row++) {
+            for (int column = 0; column < 3; column++) {
+                maze.createCell(row, column, 0);
+            }
+        }
+        maze.setStart(0, 0);
+        maze.setGoal(0, 2);
+        maze.getNode(0, 0).setMoveCost(Maze.Dir.EAST, 9);
+        maze.getNode(0, 1).setMoveCost(Maze.Dir.EAST, 9);
+
+        MazeSolver bfs = solve(maze, MazeSolver.Algorithm.BFS);
+        require(bfs.getPathCost() == 18 && bfs.getFinalPath().size() == 3,
+                "Weighted fixture must distinguish fewest moves from cheapest route.");
+        for (MazeSolver.Algorithm algorithm : EnumSet.of(
+                MazeSolver.Algorithm.UCS, MazeSolver.Algorithm.A_STAR)) {
+            MazeSolver solver = solve(maze, algorithm);
+            require(solver.isSolved() && solver.getPathCost() == 4
+                            && solver.getFinalPath().size() == 5,
+                    algorithm + " did not choose the cheaper weighted detour.");
+        }
     }
 
     private static void testGeneratedMapConfigurationValidation() {

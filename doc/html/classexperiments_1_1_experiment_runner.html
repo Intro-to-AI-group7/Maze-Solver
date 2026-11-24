@@ -142,7 +142,7 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a1f77355006f0d7d73c3da77db0bd2f2f" id="r_a1f77355006f0d7d73c3da77db0bd2f2f"><td class="memItemLeft">static List&lt; <a class="el" href="classexperiments_1_1_experiment_result.html">ExperimentResult</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a1f77355006f0d7d73c3da77db0bd2f2f">run</a> (<a class="el" href="classexperiments_1_1_test_suite.html">TestSuite</a> suite, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_progress_listener.html">ProgressListener</a> listener, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_cancellation_token.html">CancellationToken</a> cancellation, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_solve_progress_listener.html">SolveProgressListener</a> solveProgress, <a class="el" href="interfaceexperiments_1_1_experiment_runner_1_1_map_progress_listener.html">MapProgressListener</a> mapProgress)</td></tr>
 <tr class="memdesc:a1f77355006f0d7d73c3da77db0bd2f2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs a suite with solver and generated-map progress diagnostics.  <br /></td></tr>
 <tr class="memitem:acd422499d9c4713f03632c805ffdb400" id="r_acd422499d9c4713f03632c805ffdb400"><td class="memItemLeft">static int&#160;</td><td class="memItemRight"><a class="el" href="#acd422499d9c4713f03632c805ffdb400">getParallelWorkerCount</a> ()</td></tr>
-<tr class="memdesc:acd422499d9c4713f03632c805ffdb400"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the configured worker capacity for the currently running suite.  <br /></td></tr>
+<tr class="memdesc:acd422499d9c4713f03632c805ffdb400"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the fixed parallel worker capacity supported by this JVM.  <br /></td></tr>
 <tr class="memitem:abfc93d2c28a68577b0903a14d6ca1963" id="r_abfc93d2c28a68577b0903a14d6ca1963"><td class="memItemLeft">static int&#160;</td><td class="memItemRight"><a class="el" href="#abfc93d2c28a68577b0903a14d6ca1963">getAdaptiveWorkerCount</a> ()</td></tr>
 <tr class="memdesc:abfc93d2c28a68577b0903a14d6ca1963"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects workers conservatively from available heap and system CPU load.  <br /></td></tr>
 <tr class="memitem:a86070d1974042578a8f544f5a591083c" id="r_a86070d1974042578a8f544f5a591083c"><td class="memItemLeft">static int&#160;</td><td class="memItemRight"><a class="el" href="#a86070d1974042578a8f544f5a591083c">getActiveWorkerCount</a> ()</td></tr>
@@ -167,7 +167,7 @@ Static Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Executes configured experiment rows without Swing or rendering overhead. </p>
-<p>One map is generated per row iteration and reused by every selected algorithm. Solver timing therefore excludes map generation, result construction, callbacks, and console output. Parallel execution uses bounded admission so queued solver work cannot retain an unbounded number of generated maps. </p>
+<p>One map is generated per row iteration and reused by every selected algorithm. Solver timing therefore excludes map generation, result construction, callbacks, and console output. Each result uses one external monotonic timing interval around the complete solve; per-step solver timing is disabled for batch execution. Parallel execution uses bounded admission so queued solver work cannot retain an unbounded number of generated maps. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a376ce229dd1602d343a8e077e4286f16" name="a376ce229dd1602d343a8e077e4286f16"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a376ce229dd1602d343a8e077e4286f16">&#9670;&#160;</a></span>exportMaps()</h2>
@@ -355,7 +355,7 @@ Static Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Selects workers conservatively from available heap and system CPU load. </p>
-<dl class="section return"><dt>Returns</dt><dd>adaptive worker count for the next map </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>adaptive worker count selected for a new suite </dd></dl>
 
 </div>
 </div>
@@ -438,8 +438,8 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Gets the configured worker capacity for the currently running suite. </p>
-<dl class="section return"><dt>Returns</dt><dd>worker capacity, one for sequential mode, or zero while idle </dd></dl>
+<p>Gets the fixed parallel worker capacity supported by this JVM. </p>
+<dl class="section return"><dt>Returns</dt><dd>logical processors minus one, with a minimum of one worker </dd></dl>
 
 </div>
 </div>

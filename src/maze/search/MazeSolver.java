@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * Incremental maze solver that supports DFS, BFS, Uniform Cost Search,
- * Greedy Best-First Search, and weighted A*.
+ * Greedy Best-First Search, and A* on weighted graphs.
  *
  * <p>The solver keeps internal state between calls to {@link #updateSolve()},
  * so callers can visualize or inspect each step one node at a time.

@@ -84,6 +84,7 @@ public final class TestSuiteWindow {
     private volatile double currentSolvesPerSecond;
     private final Object executionControlLock = new Object();
     private volatile boolean paused;
+    private boolean liveSolveLogVisible;
 
     private TestSuiteWindow(Runnable onBack) {
         this.onBack = onBack;
@@ -601,7 +602,8 @@ public final class TestSuiteWindow {
     }
 
     private void appendMapLog(MapProgressUpdate progress) {
-        if (progress.message == null || progress.message.isEmpty()) {
+        if (!liveSolveLogVisible
+                || progress.message == null || progress.message.isEmpty()) {
             return;
         }
         mapGenerationLog.addLast(progress.message + String.format(
@@ -904,8 +906,12 @@ public final class TestSuiteWindow {
     }
 
     private void setResultsView(String view) {
-        if ("Live solve log".equals(view)) {
+        liveSolveLogVisible = "Live solve log".equals(view);
+        if (liveSolveLogVisible) {
+            refreshSolveLog();
             setStatusText("Live solve log follows completed solves.");
+        } else {
+            setStatusText("Table view follows completed solves.");
         }
     }
 
@@ -921,10 +927,20 @@ public final class TestSuiteWindow {
         }
         activeSolveProgress.remove(progressKey(
                 result.getConfigurationId(), result.getIteration(), result.getAlgorithm()));
-        requestSolveLogRefresh();
+        if (liveSolveLogVisible) {
+            requestSolveLogRefresh();
+        }
     }
 
     private void updateLiveSolveProgress(ExperimentRunner.SolveProgress progress) {
+        if (!liveSolveLogVisible) {
+            if (progress.isFinished()) {
+                activeSolveProgress.remove(progressKey(
+                        progress.getConfigurationId(), progress.getIteration(),
+                        progress.getAlgorithm()));
+            }
+            return;
+        }
         String key = progressKey(
                 progress.getConfigurationId(), progress.getIteration(), progress.getAlgorithm());
         if (progress.isFinished()) {
@@ -944,11 +960,11 @@ public final class TestSuiteWindow {
     }
 
     private void refreshPendingViews() {
-        if (resultPageRefreshPending) {
+        if (resultPageRefreshPending && !liveSolveLogVisible) {
             resultPageRefreshPending = false;
             refreshResultPage();
         }
-        if (solveLogRefreshPending) {
+        if (solveLogRefreshPending && liveSolveLogVisible) {
             solveLogRefreshPending = false;
             refreshSolveLog();
         }

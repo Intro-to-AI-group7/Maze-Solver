@@ -12,9 +12,9 @@ var searchData=
   ['testsuiteio_2ejava_9',['TestSuiteIO.java',['../_test_suite_i_o_8java.html',1,'']]],
   ['testsuitewindow_10',['TestSuiteWindow',['../classui_1_1_test_suite_window.html',1,'ui']]],
   ['testsuitewindow_2ejava_11',['TestSuiteWindow.java',['../_test_suite_window_8java.html',1,'']]],
-  ['to_20use_12',['How to Use',['../index.html#autotoc_md6',1,'']]],
+  ['to_20use_12',['How to Use',['../index.html#autotoc_md7',1,'']]],
   ['tostring_13',['toString',['../enumexperiments_1_1_test_suite_1_1_execution_mode.html#a872ccb58bcfe265a8d8b056153b0d894',1,'experiments::TestSuite::ExecutionMode']]],
   ['traversalmode_14',['TraversalMode',['../enummaze_1_1search_1_1_uninformed_search_1_1_traversal_mode.html',1,'maze::search::UninformedSearch']]],
   ['traversed_15',['TRAVERSED',['../enumui_1_1_maze_renderer_1_1_weight_display_state.html#ac0e78eda96ddcadcd7fa892a1301677b',1,'ui::MazeRenderer::WeightDisplayState']]],
-  ['troubleshooting_16',['Troubleshooting',['../index.html#autotoc_md15',1,'']]]
+  ['troubleshooting_16',['Troubleshooting',['../index.html#autotoc_md16',1,'']]]
 ];

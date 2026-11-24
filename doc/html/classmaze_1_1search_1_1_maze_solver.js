@@ -13,5 +13,6 @@ var classmaze_1_1search_1_1_maze_solver =
     [ "resetSearch", "classmaze_1_1search_1_1_maze_solver.html#ad3f428fc46f8f06b8f46c8d531222afe", null ],
     [ "setAlg", "classmaze_1_1search_1_1_maze_solver.html#a1b0cc5901f7713b6be5f22b1ad7e4d98", null ],
     [ "setMaze", "classmaze_1_1search_1_1_maze_solver.html#a480d573f9454efbfc82884815d03219d", null ],
+    [ "setStepTimingEnabled", "classmaze_1_1search_1_1_maze_solver.html#a2c23f7640bc5f2cbfa3361af287b249d", null ],
     [ "updateSolve", "classmaze_1_1search_1_1_maze_solver.html#a961567555b5f713d5adc9e2858a96b23", null ]
 ];
